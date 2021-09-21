@@ -17,8 +17,8 @@
             "polyfills": "apps/mobile/src/polyfills.ts",
             "tsConfig": "apps/mobile/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
-            "assets": ["apps/mobile/src/favicon.ico", "apps/mobile/src/assets"],
-            "styles": ["apps/mobile/src/styles.scss"],
+            "assets": ["apps/mobile/src/favicon.ico","apps/mobile/src/assets",{"glob":"**/*","input":"node_modules/@taiga-ui/icons/src","output":"assets/taiga-ui/icons"}],
+            "styles": ["apps/mobile/src/styles.scss","node_modules/@taiga-ui/core/styles/taiga-ui-global.less","node_modules/@taiga-ui/core/styles/taiga-ui-theme.less"],
             "scripts": []
           },
           "configurations": {
