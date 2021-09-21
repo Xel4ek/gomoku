@@ -1,6 +1,7 @@
-/* You can add global styles to this file, and also import other style files */
-//@import '~susy/sass/susy';
-//@import '~compass-mixins/lib/compass/reset';
+@font-face {
+  font-family: 'Grechen Fuemen';
+  src: url('/assets/fonts/GrechenFuemen-Regular.ttf') format('ttf');
+}
 
 .stars,
 .twinkling,
@@ -17,21 +18,18 @@
 
 .stars {
   z-index: 0;
-  background: #000 url('https://image.ibb.co/mjnygo/stars.png') repeat top
-    center;
+  background: #000 url('/assets/imgs/stars.png') repeat top center;
 }
 
 .twinkling {
   z-index: 1;
-  background: transparent url('https://image.ibb.co/ir1DE8/twinkling.png')
-    repeat top center;
+  background: transparent url('assets/imgs/twinkling.png') repeat top center;
   animation: move-twink-back 200s linear infinite;
 }
 
 .clouds {
   z-index: 2;
-  background: transparent url('https://image.ibb.co/bT4N7T/clouds.png') repeat
-    top center;
+  background: transparent url('/assets/imgs/clouds.png') repeat top center;
   animation: move-clouds-back 200s linear infinite;
 }
 
@@ -60,18 +58,22 @@ body {
   padding: 0;
 }
 
+body {
+  background-color: var(--tui-base-01);
+}
 .title {
   font-size: 4rem;
   font-weight: 500;
   font-style: italic;
   text-align: center;
   text-shadow: 2px 2px 2px rgb(0 0 0 / 50%);
+  font-family: 'Grechen Fuemen', cursive;
   background: linear-gradient(
-    176deg,
-    #a20d0d,
-    #ba1313 44%,
-    #3cb52e 57%,
-    #ccefb1
+    13deg,
+    #470b49,
+    #831717 44%,
+    #5f0d6e 57%,
+    #2e042d
   );
   padding: 2rem 0;
   -webkit-background-clip: text;

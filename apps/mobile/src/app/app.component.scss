@@ -2,3 +2,8 @@
   height: 100%;
   z-index: 10;
 }
+::ng-deep :root {
+  --tui-primary: #520c70;
+  --tui-primary-active: #4b0c54;
+  --tui-primary-hover: #4f047a;
+}

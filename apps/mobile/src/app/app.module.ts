@@ -3,8 +3,10 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {
   TUI_SANITIZER,
   TuiDialogModule,
+  TuiModeModule,
   TuiNotificationsModule,
   TuiRootModule,
+  TuiThemeNightModule,
 } from '@taiga-ui/core';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
@@ -24,6 +26,8 @@ import { WelcomeModule } from './core/components/welcome/welcome.module';
     TuiNotificationsModule,
     AppRoutingModule,
     WelcomeModule,
+    TuiThemeNightModule,
+    TuiModeModule,
   ],
   providers: [
     { provide: TUI_SANITIZER, useClass: NgDompurifySanitizer },
