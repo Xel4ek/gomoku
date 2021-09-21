@@ -1,0 +1,19 @@
+.settings {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  height: 100%;
+  .btn-block {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .player {
+    display: flex;
+    flex-direction: column;
+  }
+  .enemy {
+    align-items: flex-end;
+  }
+}

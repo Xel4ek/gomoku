@@ -7,5 +7,6 @@ import { RouterModule } from '@angular/router';
 @NgModule({
   declarations: [WelcomeComponent],
   imports: [CommonModule, TuiButtonModule, RouterModule],
+  exports: [WelcomeComponent],
 })
 export class WelcomeModule {}

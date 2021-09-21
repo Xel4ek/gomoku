@@ -15,6 +15,9 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 import { WelcomeModule } from './core/components/welcome/welcome.module';
+import { SettingsModule } from './core/components/settings/settings.module';
+import { GameModule } from './core/components/game/game.module';
+import { AboutModule } from './core/components/about/about.module';
 
 @NgModule({
   declarations: [AppComponent],
@@ -26,6 +29,9 @@ import { WelcomeModule } from './core/components/welcome/welcome.module';
     TuiNotificationsModule,
     AppRoutingModule,
     WelcomeModule,
+    SettingsModule,
+    GameModule,
+    AboutModule,
     TuiThemeNightModule,
     TuiModeModule,
   ],
