@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'gomoku-root',
+    selector: 'gomoku-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
