@@ -26,7 +26,10 @@
     "@taiga-ui/icons": "2.17.0",
     "@taiga-ui/kit": "2.17.0",
     "@tinkoff/ng-dompurify": "3.0.0",
+    "@types/hammerjs": "^2.0.40",
     "dompurify": "2.2.9",
+    "hammerjs": "^2.0.8",
+    "pts": "^0.10.6",
     "rxjs": "~6.6.0",
     "tslib": "^2.0.0",
     "zone.js": "~0.11.4"
