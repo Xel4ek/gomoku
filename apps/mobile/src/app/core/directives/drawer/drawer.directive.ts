@@ -1,35 +1,12 @@
-import {
-  AfterViewInit,
-  Directive,
-  ElementRef,
-  HostBinding,
-  HostListener,
-} from '@angular/core';
-import {
-  CanvasSpace,
-  Create,
-  Group,
-  IPlayer,
-  Num,
-  Pt,
-  PtLike,
-  Rectangle,
-} from 'pts';
+import { AfterViewInit, Directive, ElementRef } from '@angular/core';
+import { CanvasSpace, Create, Group, Line, Pt, Rectangle } from 'pts';
 
 @Directive({
   selector: '[gomokuDrawer]',
 })
 export class DrawerDirective implements AfterViewInit {
-  constructor(private readonly elementRef: ElementRef<HTMLCanvasElement>) {
-    // elementRef.nativeElement.
-  }
-  // @HostListener('tap', ['$event'])
-  // draw(event: HammerInput) {
-  //   if (!this.ctx) return;
-  //   const { x, y } = event.center;
-  //   this.ctx.fillStyle = 'red';
-  //   this.ctx.fillRect(x - this.corner.x, y - this.corner.y, 10, 10);
-  // }
+  constructor(private readonly elementRef: ElementRef<HTMLCanvasElement>) {}
+
   ngAfterViewInit(): void {
     const space = new CanvasSpace(this.elementRef.nativeElement);
     space.setup({ bgcolor: 'rgba(255,255,255,0)' });
@@ -46,20 +23,17 @@ export class DrawerDirective implements AfterViewInit {
       animate: () => {
         if (!pts) {
           pts = Create.gridPts(space.innerBound, 15, 15);
-          pts.map((p, index) => {
-            p.id = index.toString();
-            if (index % 15 === 14) {
-              lines.push(Group.fromArray([p, pts[index - 14]]));
-            }
-            if (index < 15) {
-              lines.push(Group.fromArray([p, pts[index + 14 * 15]]));
-            }
-          });
-          // const b = space.innerBound;
-          // lines.push(
-          //   Create.distributeLinear([b.p1, new Pt([b.p1.x, b.q1.y])], 15)
-          // );
-          // lines.push(Create.distributeLinear([b.p1, b.q], 15));
+          pts.map((p, index) => (p.id = index.toString()));
+          const b = space.innerBound;
+          const size = 29;
+          const left = Line.subpoints([b.p1, new Pt([b.p1.x, b.q1.y])], size);
+          const right = Line.subpoints([new Pt([b.q1.x, b.p1.y]), b.q1], size);
+          const top = Line.subpoints([b.p1, new Pt([b.q1.x, b.p1.y])], size);
+          const bottom = Line.subpoints([new Pt([b.p1.x, b.q1.y]), b.q1], size);
+          for (let i = 0; i < size; i += 2) {
+            lines.push(Group.fromArray([left[i], right[i]]));
+            lines.push(Group.fromArray([top[i], bottom[i]]));
+          }
         }
 
         const t = space.pointer;
@@ -67,7 +41,7 @@ export class DrawerDirective implements AfterViewInit {
           (a, b) => a.$subtract(t).magnitudeSq() - b.$subtract(t).magnitudeSq()
         );
         // form.fillOnly('#123').points(pts, 2, 'circle');
-        form.strokeOnly('#fff').lines(lines);
+        form.strokeOnly('rgba(255,255,255,0.5)').lines(lines);
         if (Rectangle.withinBound(space.innerBound, t)) {
           form
             .dash()
@@ -79,16 +53,13 @@ export class DrawerDirective implements AfterViewInit {
         }
         form.fillOnly(playerColor()).points(player, 12, 'circle');
         form.fillOnly(enemyColor()).points(enemy, 12, 'circle');
-        // form.strokeOnly('#f05', 2).line([pts[0], space.pointer]);
       },
       action: (type, x, y, evt) => {
-        // const touchPoints = space.touchesToPoints(evt as TouchEvent);
-        // types can be: "up", "down", "move", and "out
         if (
           (type === 'drop' || type === 'up') &&
           Rectangle.withinBound(space.innerBound, space.pointer)
         ) {
-          console.log(space.pointer);
+          // console.log(space.pointer);
           if (!busy.includes(pts.p1.id)) {
             busy.push(pts.p1.id);
             if (playerTurn) {
@@ -98,8 +69,6 @@ export class DrawerDirective implements AfterViewInit {
             }
             playerTurn = !playerTurn;
           }
-          // console.log(pts, type);
-          // touched
         }
       },
     });
