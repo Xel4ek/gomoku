@@ -14,7 +14,8 @@ describe('Board', () => {
 
   it('should generate actions', () => {
     board.move(board.nextWhiteMove, 1, 1)
-    expect(board.generateActions(3).length).toBeGreaterThan(0);
+    board.generateActions(3);
+    expect(board.possibleActions.length).toBeGreaterThan(0);
   });
 
   it('should change move to black', () => {
@@ -22,4 +23,8 @@ describe('Board', () => {
     expect(board.nextWhiteMove).toBeFalsy();
   });
 
+  it('should generate board after 25 moves', () => {
+    board.generateRandomMoves(25);
+    expect(board.matrix.every(row => row.every(value => typeof [-1, 0 ,1].indexOf(value) != 'undefined'))).toBeTruthy();
+  });
 });
