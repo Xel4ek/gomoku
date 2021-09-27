@@ -2,6 +2,9 @@ import { TestBed } from '@angular/core/testing';
 
 import { AiService } from './ai.service';
 import { Board } from "../board";
+import { max } from "rxjs/operators";
+import { of } from "rxjs";
+import { Action } from "../action";
 
 describe('AiService', () => {
   let service: AiService;
@@ -30,9 +33,10 @@ describe('AiService', () => {
     board.generateRandomMoves(25);
     service.depth = 2;
     service.getNextAction(board).subscribe(x => {
-        console.log(x);
-        expect(board.matrix[x.row][x.col]).toEqual(0);
-        expect(x.score > 0);
+        const bestAction = of(...board.possibleActions)
+          .pipe(max((a, b) => a.score < b.score ? -1 : 1))
+        bestAction.subscribe(console.log);
+        expect(x).toEqual(bestAction);
       }
     );
   });
