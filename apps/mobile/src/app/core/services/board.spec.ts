@@ -4,12 +4,31 @@ describe('Board', () => {
   let board: Board;
 
   beforeEach(() => {
-    board = new Board(9);
+    board = new Board(19);
   });
 
   it('should be random', () => {
     board.generateRandomMatrix();
-    expect(board.matrix.every(row => row.every(value => typeof [-1, 0 ,1].indexOf(value) != 'undefined'))).toBeTruthy();
+    expect(board.matrix.every(value => [-1, 0, 1].includes(value))).toBeTruthy();
+  });
+
+  it('should set masks', () => {
+    console.log(board.maskH.toString(2));
+    console.log(board.maskV.toString(2));
+
+  });
+
+  it('should move', () => {
+    const oldBoard = board.maxPlayer;
+    board.move(true, 5, 0);
+    console.log(oldBoard.toString(2));
+    console.log(board.maxPlayer.toString(2));
+    expect(board.maxPlayer).not.toEqual(oldBoard);
+  });
+
+  it('should should throw Cell occupied Error', () => {
+    board.move(true, 1, 1);
+    expect(() => board.move(false, 1, 1)).toThrowError('Cell occupied');
   });
 
   it('should generate actions', () => {
@@ -24,7 +43,16 @@ describe('Board', () => {
   });
 
   it('should generate board after 25 moves', () => {
+    const moves = 25;
+    board.generateRandomMoves(moves);
+    console.log(board.toMatrix());
+    expect(board.matrix.filter(value => [1, -1].includes(value)).length).toEqual(moves);
+  });
+
+  it('should return matrix', () => {
     board.generateRandomMoves(25);
-    expect(board.matrix.every(row => row.every(value => typeof [-1, 0 ,1].indexOf(value) != 'undefined'))).toBeTruthy();
+    console.log(board.toMatrix());
+    expect(typeof board.toMatrix()).toBe('String');
+
   });
 });
