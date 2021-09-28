@@ -9,7 +9,9 @@
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
-          "outputs": ["{options.outputPath}"],
+          "outputs": [
+            "{options.outputPath}"
+          ],
           "options": {
             "outputPath": "dist/apps/mobile",
             "index": "apps/mobile/src/index.html",
@@ -17,9 +19,22 @@
             "polyfills": "apps/mobile/src/polyfills.ts",
             "tsConfig": "apps/mobile/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
-            "assets": ["apps/mobile/src/favicon.ico","apps/mobile/src/assets",{"glob":"**/*","input":"node_modules/@taiga-ui/icons/src","output":"assets/taiga-ui/icons"}],
-            "styles": ["apps/mobile/src/styles.scss","node_modules/@taiga-ui/core/styles/taiga-ui-global.less","node_modules/@taiga-ui/core/styles/taiga-ui-theme.less"],
-            "scripts": []
+            "assets": [
+              "apps/mobile/src/favicon.ico",
+              "apps/mobile/src/assets",
+              {
+                "glob": "**/*",
+                "input": "node_modules/@taiga-ui/icons/src",
+                "output": "assets/taiga-ui/icons"
+              }
+            ],
+            "styles": [
+              "apps/mobile/src/styles.scss",
+              "node_modules/@taiga-ui/core/styles/taiga-ui-global.less",
+              "node_modules/@taiga-ui/core/styles/taiga-ui-theme.less"
+            ],
+            "scripts": [],
+            "webWorkerTsConfig": "apps/mobile/tsconfig.worker.json"
           },
           "configurations": {
             "production": {
@@ -83,10 +98,13 @@
         },
         "test": {
           "builder": "@nrwl/jest:jest",
-          "outputs": ["coverage/apps/mobile"],
+          "outputs": [
+            "coverage/apps/mobile"
+          ],
           "options": {
             "jestConfig": "apps/mobile/jest.config.js",
-            "passWithNoTests": true
+            "passWithNoTests": true,
+            "webWorkerTsConfig": "apps/mobile/tsconfig.worker.json"
           }
         }
       }
@@ -111,9 +129,13 @@
         },
         "lint": {
           "builder": "@nrwl/linter:eslint",
-          "outputs": ["{options.outputFile}"],
+          "outputs": [
+            "{options.outputFile}"
+          ],
           "options": {
-            "lintFilePatterns": ["apps/mobile-e2e/**/*.{js,ts}"]
+            "lintFilePatterns": [
+              "apps/mobile-e2e/**/*.{js,ts}"
+            ]
           }
         }
       }
