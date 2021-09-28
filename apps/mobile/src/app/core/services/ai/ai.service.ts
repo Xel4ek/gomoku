@@ -9,16 +9,15 @@ import { of } from "rxjs";
 })
 export class AiService {
   depth = 3;
-  offset = 3;
 
   getNextAction(board: Board) {
-    this.minimax(board, this.depth, board.nextWhiteMove, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, this.offset);
+    this.minimax(board, this.depth, board.nextWhiteMove, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY);
     return of(...board.possibleActions)
       .pipe(max((a, b) => a.score < b.score ? -1 : 1));
   }
 
-  minimax(board: Board, depth: number, maximizing: boolean, alpha: number, beta: number, offset: number): number {
-    board.generateActions(offset);
+  minimax(board: Board, depth: number, maximizing: boolean, alpha: number, beta: number): number {
+    board.generateActions();
     if (depth === 0 || board.win || board.possibleActions.length === 0) {
       return board.score;
     }
@@ -28,7 +27,7 @@ export class AiService {
         // console.log(`${depth}: ${board.nextWhiteMove} ${action.row} - ${action.col}`);
         const board_new = board.clone();
         board_new.move(maximizing, action.col, action.row);
-        action.score = this.minimax(board_new, depth - 1, !maximizing, alpha, beta, offset);
+        action.score = this.minimax(board_new, depth - 1, !maximizing, alpha, beta);
         const oldMax = maxEval;
         maxEval = Math.max(maxEval, action.score);
         // console.log('max: ', oldMax, action.score, ' -> ', maxEval);
@@ -45,7 +44,7 @@ export class AiService {
         // console.log(`${depth}: ${board.nextWhiteMove} ${action.row} - ${action.col}`);
         const board_new = board.clone();
         board_new.move(maximizing, action.col, action.row);
-        action.score = this.minimax(board_new, depth - 1, !maximizing, alpha, beta, offset);
+        action.score = this.minimax(board_new, depth - 1, !maximizing, alpha, beta);
         const oldMin = minEval;
         minEval = Math.min(minEval, action.score);
         // console.log('max: ', oldMin, action.score, ' -> ', minEval);

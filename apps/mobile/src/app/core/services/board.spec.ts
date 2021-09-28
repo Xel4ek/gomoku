@@ -12,12 +12,6 @@ describe('Board', () => {
     expect(board.matrix.every(value => [-1, 0, 1].includes(value))).toBeTruthy();
   });
 
-  it('should set masks', () => {
-    console.log(board.maskH.toString(2));
-    console.log(board.maskV.toString(2));
-
-  });
-
   it('should move', () => {
     const oldBoard = board.maxPlayer;
     board.move(true, 5, 0);

@@ -1,5 +1,6 @@
 import { Action } from "./action";
 import { BigInteger } from "@angular/compiler/src/i18n/big_integer";
+import { tryCatch } from "rxjs/internal-compatibility";
 
 export class InvalidMoveError extends Error {
 }
@@ -21,17 +22,6 @@ export class Board {
   nextWhiteMove: boolean;
   score = 0;
   possibleActions: Action[] = [];
-  scores = {
-    min: 0,
-    twoOpen: 25,
-    threeOpen: 50,
-    fourOpen: 100,
-    max: 100
-  };
-  maskH: bigint;
-  maskV: bigint;
-  maskDL: bigint;
-  maskDR: bigint;
 
   constructor(size: number, nextWhiteMove = true, matrix?: number[]) {
     this.size = size;
@@ -42,13 +32,6 @@ export class Board {
     }
     this.nextWhiteMove = nextWhiteMove;
     this.win = false;
-    this.maskH = BigInt('0b' + Array(this.winCount).fill(1).join(''));
-    const arr = Array(this.winCount).fill(Array(this.size - 1).fill(0).join('') + '1').join('')
-    this.maskV = BigInt('0b' + arr);
-    const arrDL = Array(this.winCount).fill(Array(this.size).fill(0).join('') + '1').join('');
-    this.maskDL = BigInt('0b' + arrDL)
-    const arrDR = Array(this.winCount).fill('1').map(((value, index) => Array(this.size - 1 - index).fill(0).join('') + value + Array(index).fill(0).join(''))).join('')
-    this.maskDR = BigInt('0b' + arrDR);
   }
 
   clone() {
@@ -63,7 +46,7 @@ export class Board {
       matrix.push(this.matrix
         .slice(row * this.size, (row + 1) * this.size)
         .map(value => [0, 1].includes(value) ? ' ' + value : value)
-        .join(', '));
+        .join(' '));
     }
     return matrix.join('\n');
   }
@@ -73,28 +56,20 @@ export class Board {
   }
 
   generateRandomMoves(moves: number) {
-    const arr = [];
-    while (arr.length < moves * 2) {
-      const item = Math.floor(Math.random() * this.size * this.size);
-      if (arr.indexOf(item) === -1) {
-        arr.push(item);
+    Array(moves).fill(0).map(() => {
+        for (; ;) {
+          try {
+            this.move(
+              this.nextWhiteMove,
+              Math.floor(Math.random() * this.size),
+              Math.floor(Math.random() * this.size)
+            );
+            break;
+          } catch (e) {
+          }
+        }
       }
-    }
-    arr.map(((value, index) => {
-      const mask = BigInt(1) << BigInt(value);
-      if (index % 2 === 0) {
-        this.maxPlayer |= mask;
-      } else {
-        this.minPlayer |= mask;
-      }
-    }));
-    for (moves; moves >= 0; moves--) {
-      this.move(
-        this.nextWhiteMove,
-        Math.floor(Math.random() * this.size),
-        Math.floor(Math.random() * this.size)
-      );
-    }
+    );
   }
 
   private checkMove(mask: bigint) {
@@ -102,7 +77,6 @@ export class Board {
       throw new InvalidMoveError(`Cell occupied`);
     }
   }
-
 
   move(isWhite: boolean, col: number, row: number) {
     if (col >= this.size || row >= this.size || col < 0 || row < 0) {
@@ -130,16 +104,16 @@ export class Board {
     this.updateScore(row, col);
   }
 
-  generateActions(offset: number) {
+  generateActions() {
     this.possibleActions = [];
     if (this.minRow === Number.POSITIVE_INFINITY) {
       this.possibleActions.push(new Action(Math.floor(this.size / 2), Math.floor(this.size / 2)));
     } else {
-      for (let col = Math.max(this.minCol - offset, 0);
-           col <= Math.min(this.maxCol + offset, this.size - 1);
+      for (let col = Math.max(this.minCol - this.winCount, 0);
+           col <= Math.min(this.maxCol + this.winCount, this.size - 1);
            col++) {
-        for (let row = Math.max(this.minRow - offset, 0);
-             row <= Math.min(this.maxRow + offset, this.size - 1);
+        for (let row = Math.max(this.minRow - this.winCount, 0);
+             row <= Math.min(this.maxRow + this.winCount, this.size - 1);
              row++) {
           if (this.matrix[row * this.size + col] === 0) {
             this.possibleActions.push(new Action(row, col));
@@ -150,22 +124,19 @@ export class Board {
   }
 
   private evalHorizontal(row: number, col: number): number {
-    const mask = BigInt(1) << BigInt(this.winCount);
-
-
-    return Math.random() * this.scores.max * (this.nextWhiteMove ? 1 : -1);
+    return Math.random() * 100 * (this.nextWhiteMove ? 1 : -1);
   }
 
   private evalVertical(row: number, col: number): number {
-    return Math.random() * this.scores.max * (this.nextWhiteMove ? 1 : -1);
+    return Math.random() * 100 * (this.nextWhiteMove ? 1 : -1);
   }
 
   private evalDiagonalL(row: number, col: number): number {
-    return Math.random() * this.scores.max * (this.nextWhiteMove ? 1 : -1);
+    return Math.random() * 100 * (this.nextWhiteMove ? 1 : -1);
   }
 
   private evalDiagonalR(row: number, col: number): number {
-    return Math.random() * this.scores.max * (this.nextWhiteMove ? 1 : -1);
+    return Math.random() * 100 * (this.nextWhiteMove ? 1 : -1);
   }
 
   private updateScore(row: number, col: number) {
