@@ -1,3 +1,6 @@
+import { BigInteger } from "@angular/compiler/src/i18n/big_integer";
+import { of } from "rxjs";
+
 export class BitBoard {
   winCount = 5;
   size: number;
@@ -15,6 +18,9 @@ export class BitBoard {
       rotate45r: BigInt(0),
     },
   };
+  masks = {
+    win: BigInt("0b11111"),
+  }
   nextWhiteMove: boolean;
   win: boolean;
 
@@ -22,6 +28,7 @@ export class BitBoard {
     this.size = size;
     this.nextWhiteMove = nextWhiteMove;
     this.win = false;
+    this.setMasks();
   }
 
   printBitBoard(board: BigInt) {
@@ -34,4 +41,24 @@ export class BitBoard {
     return matrix.join('\n');
   }
 
+  private setMasks() {
+    const mask = BigInt("0b" + Array(this.winCount).fill("1").join(''));
+  }
+
+  checkMask(mask: bigint) {
+    for (let row = 0; row < this.size; row++) {
+      for (let col = 0; col <= this.size - this.winCount; col++) {
+        if ((mask & this.boards.max.orig) === mask
+          || (mask & this.boards.max.rotate45l) === mask
+          || (mask & this.boards.max.rotate45r) === mask
+          || (mask & this.boards.max.rotate90) === mask) {
+          console.log(`${row} ${col} WIN`)
+          return {row: row, col: col};
+        }
+        mask <<= BigInt(1);
+      }
+      mask <<= BigInt(this.winCount - 1);
+    }
+    return {};
+  }
 }

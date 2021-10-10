@@ -46,4 +46,10 @@ describe('BitBoard', () => {
     // bitboard = (bitboard + BigInt(8) * ((bitboard&BigInt(7)^BigInt(7)))) & BigInt(63);
     console.log(board.printBitBoard(sq));
   });
+
+  it('should checkWin', () => {
+    const win = BigInt("0b1111100011011000")
+    board.boards.max.orig |= win;
+    expect(board.checkMask(board.masks.win)).toEqual({row: 1, col: 3});
+  });
 });
