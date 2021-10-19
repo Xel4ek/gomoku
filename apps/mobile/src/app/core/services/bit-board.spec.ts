@@ -9,14 +9,14 @@ describe('BitBoard', () => {
     board = new BitBoard(8);
     board.boards.max.orig = BigInt(
       "0b" +
-      "000000000" +
-      "000000100" +
-      "000000100" +
-      "001111100" +
-      "010000100" +
-      "010000100" +
-      "001111100" +
-      "000000000"
+      "0000000000" +
+      "0000000100" +
+      "0000000100" +
+      "0001111100" +
+      "0010000100" +
+      "0010000100" +
+      "0001111100" +
+      "0000000000"
     );
 
   });
@@ -63,14 +63,14 @@ describe('BitBoard', () => {
   it('should checkWin', () => {
     const win = BigInt("0b1111100011011000");
     board.boards.max.orig |= win;
-    expect(board.checkMask(board.masks.five, true)).toEqual({ row: 1, col: 3 });
+    // expect(board.checkMask(board.combinations.five, true)).toEqual({ row: 1, col: 3 });
     console.log(board.printBitBoard(board.boards.max.orig));
     console.log(board.printBitBoard(board.boards.max.rotate90));
   });
 
   it('should rotate90 board', () => {
     console.log(board.printBitBoard(board.boards.max.orig));
-    board.checkMask(board.masks.five, true);
+    // board.checkMask(board.combinations.five, true);
     console.log(board.printBitBoard(board.boards.max.rotate90));
   });
 
@@ -87,9 +87,27 @@ describe('BitBoard', () => {
 
   it('should count lines', () => {
     board.player = "max";
-    board.boards.min.orig = BigInt("0b01110")
+    board.boards.min.orig = BigInt("0b01110");
     console.log(board.printBitBoard(board.boards.max.orig));
     console.log(board.detectLines());
   });
 
+  it('should set masks', () => {
+    board.comboMasks.map(value => console.log(board.printBitBoard(value)));
+  });
+
+  it('should create empty board', () => {
+    const mask = BigInt("0b" +
+      Array(board.size * (board.size + 1))
+        .fill("1")
+        .map(((value, index) => {
+          if (index % (board.size) === 0) {
+            return "0";
+          }
+          return value;
+        }))
+        .join('')
+    )
+    expect(board.boards.empty & mask).toBe(mask);
+  });
 });

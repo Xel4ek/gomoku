@@ -1,13 +1,19 @@
-import { BigInteger } from "@angular/compiler/src/i18n/big_integer";
-import { of } from "rxjs";
 import { InvalidMoveError } from "./board";
 
 interface Direction {
   [prop: string]: number,
+
   hor: number,
   vert: number,
   diagSW: number,
   diagSE: number,
+}
+
+interface Combo {
+  name: string,
+  maskP: bigint,
+  maskO: bigint,
+  size: number,
 }
 
 export class BitBoard {
@@ -15,6 +21,7 @@ export class BitBoard {
   size: number;
   shift: Direction;
   boards = {
+    empty: BigInt(0),
     max: {
       orig: BigInt(0),
       rotate90: BigInt(0),
@@ -28,18 +35,77 @@ export class BitBoard {
       rotate45r: BigInt(0),
     },
   };
-  masks = {
-    five: BigInt("0b11111"),
-    four1: BigInt("0b1111"),
-    four2: BigInt("0b11011"),
-    Four3: BigInt("0b11101"),
-    three1: BigInt("0b111"),
-    three2: BigInt("0b1101"),
-    three3: BigInt("0b1011"),
-    three4: BigInt("0b10101"),
-    three5: BigInt("0b11001"),
-    three6: BigInt("0b10011"),
-  };
+  combinations: Combo[] = [
+    {
+      name: "Open Five",
+      maskP: BigInt("0b11111"),
+      maskO: BigInt("0"),
+      size: 5,
+    },
+    {
+      name: "Open Four",
+      maskP: BigInt("0b11110"),
+      maskO: BigInt("0b100001"),
+      size: 6,
+    },
+    {
+      name: "Closed Four 1",
+      maskP: BigInt("0b1111"),
+      maskO: BigInt("0b011110"),
+      size: 4,
+    },
+    {
+      name: "Closed Four 2",
+      maskP: BigInt("0b11011"),
+      maskO: BigInt("0b100"),
+      size: 5,
+    },
+    {
+      name: "Closed Four 3",
+      maskP: BigInt("0b11101"),
+      maskO: BigInt("0b10"),
+      size: 5,
+    },
+    {
+      name: "Closed Four 4",
+      maskP: BigInt("0b10111"),
+      maskO: BigInt("0b1000"),
+      size: 5,
+    },
+    {
+      name: "Open Three 1",
+      maskP: BigInt("0b1110"),
+      maskO: BigInt("0b10001"),
+      size: 5,
+    },
+    {
+      name: "Open Three 2",
+      maskP: BigInt("0b1011"),
+      maskO: BigInt("0b100"),
+      size: 4,
+    },
+    {
+      name: "Open Three 3",
+      maskP: BigInt("0b1101"),
+      maskO: BigInt("0b10"),
+      size: 4,
+    },
+    {
+      name: "Closed Three 1",
+      maskP: BigInt("0b1110"),
+      maskO: BigInt("0b1"),
+      size: 4,
+    },
+  ];
+  comboMasks: bigint[] = [];
+// {
+//     three1: BigInt("0b111"),
+//     three2: BigInt("0b1101"),
+//     three3: BigInt("0b1011"),
+//     three4: BigInt("0b10101"),
+//     three5: BigInt("0b11001"),
+//     three6: BigInt("0b10011"),
+//   };
   player: "max" | "min";
   win: boolean;
 
@@ -54,7 +120,18 @@ export class BitBoard {
       vert: -(this.size + 1),
       diagSW: -(this.size + 1) - 1,
       diagSE: -(this.size + 1) + 1,
-    }
+    };
+    this.boards.empty = BigInt("0b" +
+      Array(this.size * (this.size + 1))
+        .fill("1")
+        .map(((value, index) => {
+          if (index % (this.size) === 0) {
+            return "0";
+          }
+          return value;
+        }))
+        .join('')
+    );
   }
 
   isPowerOfTwo(i: bigint) {
@@ -96,7 +173,17 @@ export class BitBoard {
   }
 
   private setMasks() {
-    const mask = BigInt("0b" + Array(this.winCount).fill("1").join(''));
+    this.combinations.forEach(value => {
+      let mask = value.maskP;
+      for (let row = 0; row < this.size; row++) {
+        for (let col = 0; col <= (this.size - value.size); col++) {
+          this.comboMasks.push(mask);
+          mask <<= 1n;
+        }
+        //TODO: increase shift for separating bit
+        mask <<= BigInt(value.size);
+      }
+    });
   }
 
   checkMask(mask: bigint, stop: boolean): { dir: string; row: number; col: number }[] {
@@ -104,7 +191,7 @@ export class BitBoard {
     const position: { dir: string, row: number, col: number }[] = [];
     for (let row = 0; row < this.size; row++) {
       for (let col = 0; col <= this.size - this.winCount; col++) {
-        for (let [k, v] of Object.entries(this.boards[this.player])) {
+        for (const [k, v] of Object.entries(this.boards[this.player])) {
           if ((mask & v) === mask) {
             position.push({ dir: k, row: row, col: col });
           }
