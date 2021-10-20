@@ -1,6 +1,4 @@
 import { BitBoard } from './bit-board';
-import { Board } from "./board";
-import { BigInteger } from "@angular/compiler/src/i18n/big_integer";
 
 describe('BitBoard', () => {
   let board: BitBoard;

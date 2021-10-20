@@ -1,11 +1,21 @@
 import { Action } from "./action";
 import { BigInteger } from "@angular/compiler/src/i18n/big_integer";
-import { tryCatch } from "rxjs/internal-compatibility";
 
 export class InvalidMoveError extends Error {
 }
 
-export class Board {
+export interface IBoard {
+  size: number;
+  possibleActions: Action[];
+  win: boolean,
+  score: number,
+
+  clone(): IBoard;
+  generateActions(): void;
+  move(col: number, row: number): void;
+}
+
+export class Board implements IBoard {
   winCount = 5;
   size: number;
   matrix: number[];
@@ -60,12 +70,12 @@ export class Board {
         for (; ;) {
           try {
             this.move(
-              this.nextWhiteMove,
               Math.floor(Math.random() * this.size),
               Math.floor(Math.random() * this.size)
             );
             break;
           } catch (e) {
+            return e
           }
         }
       }
@@ -78,7 +88,8 @@ export class Board {
     }
   }
 
-  move(isWhite: boolean, col: number, row: number) {
+  move(col: number, row: number) {
+    const isWhite = this.nextWhiteMove;
     if (col >= this.size || row >= this.size || col < 0 || row < 0) {
       throw new InvalidMoveError(`Cell out of board`);
     }

@@ -1,12 +1,14 @@
-import { InvalidMoveError } from "./board";
+import { IBoard, InvalidMoveError } from "./board";
+import { GameBoard } from "./ai/ai.service";
+import { Action } from "./action";
 
 interface Direction {
-  [prop: string]: number,
+  [prop: string]: bigint,
 
-  hor: number,
-  vert: number,
-  diagSW: number,
-  diagSE: number,
+  hor: bigint,
+  vert: bigint,
+  diagSW: bigint,
+  diagSE: bigint,
 }
 
 interface Combo {
@@ -16,7 +18,8 @@ interface Combo {
   size: number,
 }
 
-export class BitBoard {
+export class BitBoard implements IBoard {
+  score: number;
   winCount = 5;
   size: number;
   shift: Direction;
@@ -108,29 +111,60 @@ export class BitBoard {
 //   };
   player: "max" | "min";
   win: boolean;
+  public possibleActions: Action[];
+  gameBoard?: GameBoard;
 
-  constructor(size: number) {
-    this.size = size;
+  constructor(size?: number, gameBoard?: GameBoard) {
+    this.possibleActions = [];
+    this.score = 0;
+    this.size = size ?? 19;
+    if (gameBoard) {
+      this.gameBoard = gameBoard;
+      this.boards.max.orig = gameBoard.player;
+      this.boards.min.orig = gameBoard.opp;
+    } else {
+      this.boards.empty = BigInt("0b" +
+        Array(this.size * (this.size + 1))
+          .fill("1")
+          .map(((value, index) => {
+            if (index % (this.size) === 0) {
+              return "0";
+            }
+            return value;
+          }))
+          .join('')
+      );
+    }
     this.win = false;
-    //TODO: remove
     this.player = "max";
+    //TODO: remove
     this.setMasks();
     this.shift = {
-      hor: 1,
-      vert: -(this.size + 1),
-      diagSW: -(this.size + 1) - 1,
-      diagSE: -(this.size + 1) + 1,
+      hor: 1n,
+      vert: -(BigInt(this.size) + 1n),
+      diagSW: -(BigInt(this.size) + 1n) - 1n,
+      diagSE: -(BigInt(this.size) + 1n) + 1n,
     };
-    this.boards.empty = BigInt("0b" +
-      Array(this.size * (this.size + 1))
-        .fill("1")
-        .map(((value, index) => {
-          if (index % (this.size) === 0) {
-            return "0";
+  }
+
+  clone(): IBoard {
+    return new BitBoard(this.size, this.gameBoard);
+  }
+
+  generateRandomMoves(moves: number) {
+    Array(moves).fill(0).map(() => {
+        for (; ;) {
+          try {
+            this.move(
+              Math.floor(Math.random() * this.size),
+              Math.floor(Math.random() * this.size)
+            );
+            break;
+          } catch (e) {
+            return e
           }
-          return value;
-        }))
-        .join('')
+        }
+      }
     );
   }
 
@@ -148,14 +182,14 @@ export class BitBoard {
 
   detectLines() {
     const len: Direction = {
-      hor: 0,
-      vert: 0,
-      diagSW: 0,
-      diagSE: 0,
+      hor: 0n,
+      vert: 0n,
+      diagSW: 0n,
+      diagSE: 0n,
     };
     Object.keys(len).forEach(dir => {
       let bits = this.boards[this.player].orig;
-      while ((bits = bits & (bits >> BigInt(this.shift[dir]))) != BigInt(0)) {
+      while ((bits = bits & (bits >> this.shift[dir])) != 0n) {
         len[dir]++;
       }
     });
@@ -206,7 +240,9 @@ export class BitBoard {
     return position;
   }
 
-  move(isMax: boolean, col: number, row: number) {
+  move(col: number, row: number) {
+    //TODO: refactor this
+    const isMax = this.player === "max";
     if (col >= this.size || row >= this.size || col < 0 || row < 0) {
       throw new InvalidMoveError(`Cell out of board`);
     }
@@ -238,7 +274,28 @@ export class BitBoard {
 
   //TODO: implement update score
   private updateScore(row: number, col: number) {
-    throw { name: "NotImplementedError" };
+    return Math.random() * 100000;
+  }
+
+  generateActions(dilation: number = 1) {
+    const board = this.boards.max.orig | this.boards.min.orig;
+    let moves = board;
+    for (let i = dilation; i > 0; i--) {
+      moves = moves
+        | (moves >> this.shift.hor)
+        | (moves >> this.shift.vert)
+        | (moves >> this.shift.diagSW)
+        | (moves >> this.shift.diagSE);
+    }
+    moves ^= board;
+    let i = 0;
+    while (moves) {
+      if (moves & 1n) {
+        this.possibleActions.push(new Action(i % this.size, Math.floor(i / this.size)));
+      }
+      moves >>= 1n;
+      i++;
+    }
   }
 
   // getBoradEval() {
