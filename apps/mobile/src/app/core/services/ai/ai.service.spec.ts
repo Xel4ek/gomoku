@@ -15,6 +15,7 @@ describe('AiService', () => {
       timestamp: Date.now(),
       player: 0n,
       opp: 0n,
+      size: 9,
     }
     TestBed.configureTestingModule({});
     service = TestBed.inject(AiService);

@@ -140,6 +140,7 @@ export class BitBoard implements IBoard {
     this.player = "max";
     //TODO: remove
     this.setMasks();
+    this.rotateCombos(this.combinations);
     this.shift = {
       hor: 1n,
       vert: -(BigInt(this.size) + 1n),
@@ -148,12 +149,93 @@ export class BitBoard implements IBoard {
     };
   }
 
+  rotateCombos(combos: Combo[]) {
+    combos.forEach((value, index) => {
+      this.combinations.push(this.rotateSE(value));
+      this.combinations.push(this.rotateSW(value));
+      this.combinations.push(this.rotateVertical(value));
+    });
+  }
+
+  rotateVertical(combo: Combo) {
+    const comboNew = {
+      name: combo.name,
+      maskP: 0n,
+      maskO: 0n,
+      size: combo.size,
+    };
+    for (let i = combo.size; i > 0; i--) {
+      const bitMask = 1 << i;
+      const bitP = combo.maskP & BigInt(bitMask);
+      if (bitP) {
+        comboNew.maskP |= (bitP << BigInt((this.size * i)));
+      }
+      const bitO = combo.maskO & BigInt(bitMask);
+      if (bitO) {
+        comboNew.maskO |= (bitP << BigInt((this.size * i)));
+      }
+    }
+    return comboNew;
+  }
+
+  rotateSW(combo: Combo) {
+    const comboNew = {
+      name: combo.name,
+      maskP: 0n,
+      maskO: 0n,
+      size: combo.size,
+    };
+    for (let i = combo.size; i > 0; i--) {
+      const bitMask = 1 << i;
+      const bitP = combo.maskP & BigInt(bitMask);
+      if (bitP) {
+        comboNew.maskP |= (bitP << BigInt((this.size + 1) * (combo.size - i)));
+      }
+      const bitO = combo.maskO & BigInt(bitMask);
+      if (bitO) {
+        comboNew.maskO |= (bitP << BigInt((this.size + 1) * (combo.size - i)));
+      }
+    }
+    return comboNew;
+  }
+
+  rotateSE(combo: Combo) {
+    const comboNew = {
+      name: combo.name,
+      maskP: 0n,
+      maskO: 0n,
+      size: combo.size,
+    };
+    for (let i = combo.size; i > 0; i--) {
+      const bitMask = 1 << i;
+      const bitP = combo.maskP & BigInt(bitMask);
+      if (bitP) {
+        comboNew.maskP |= (bitP << BigInt((this.size + 1) * i));
+      }
+      const bitO = combo.maskO & BigInt(bitMask);
+      if (bitO) {
+        comboNew.maskO |= (bitP << BigInt((this.size + 1) * i));
+      }
+    }
+    return comboNew;
+  }
+
   clone(): IBoard {
     return new BitBoard(this.size, this.gameBoard);
   }
 
-  flipDiagonal(board: bigint) {
+  rotateRight(x: bigint, i: bigint) {
+    return (x - i) % BigInt(this.size);
+  }
 
+  flipDiagonal(x: bigint) {
+    const k1 = BigInt(0xAAAAAAAAAAAAAAAAAAAAAAAAAAAA);
+    const k2 = BigInt(0xCCCCCCCCCCCCCCCCCCCCCCCCCCCC);
+    const k4 = BigInt(0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0);
+    x ^= k1 & (x ^ this.rotateRight(x, BigInt(this.size)));
+    x ^= k2 & (x ^ this.rotateRight(x, BigInt(this.size * 2)));
+    x ^= k4 & (x ^ this.rotateRight(x, BigInt(this.size * 4)));
+    return x;
   }
 
   generateRandomMoves(moves: number) {
@@ -166,7 +248,7 @@ export class BitBoard implements IBoard {
             );
             break;
           } catch (e) {
-            return e
+            return e;
           }
         }
       }
@@ -201,7 +283,7 @@ export class BitBoard implements IBoard {
     return len;
   }
 
-  printBitBoard(board: BigInt) {
+  printBitBoard(board: bigint) {
     const matrix = [];
     const str = board.toString(2).split('').reverse();
     for (let row = 0; row < this.size; row++) {

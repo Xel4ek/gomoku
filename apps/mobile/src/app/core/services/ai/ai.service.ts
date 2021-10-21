@@ -16,6 +16,7 @@ export interface GameBoard {
   timestamp: number,
   player: bigint,
   opp: bigint,
+  size: number,
   stat?: AiStatistics,
 }
 
@@ -32,7 +33,7 @@ export class AiService {
   }
 
   postMessage(ai: AI, gameBoard: GameBoard) {
-    const board = new BitBoard(10, gameBoard);
+    const board = new BitBoard(gameBoard.size, gameBoard);
     this.getNextAction(board);
     gameBoard.id += 1;
     gameBoard.timestamp = Date.now();
