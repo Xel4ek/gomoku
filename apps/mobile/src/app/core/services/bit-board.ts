@@ -24,7 +24,7 @@ export class BitBoard implements IBoard {
   size: number;
   shift: Direction;
   boards = {
-    empty: BigInt(0),
+    empty: 0n,
     max: {
       orig: BigInt(0),
       rotate90: BigInt(0),
@@ -118,6 +118,7 @@ export class BitBoard implements IBoard {
     this.possibleActions = [];
     this.score = 0;
     this.size = size ?? 19;
+    this.boards.empty = BigInt("0b" + ("0" + "1".repeat(this.size)).repeat(this.size));
     if (gameBoard) {
       this.gameBoard = gameBoard;
       this.boards.max.orig = gameBoard.player;
@@ -149,6 +150,10 @@ export class BitBoard implements IBoard {
 
   clone(): IBoard {
     return new BitBoard(this.size, this.gameBoard);
+  }
+
+  flipDiagonal(board: bigint) {
+
   }
 
   generateRandomMoves(moves: number) {
