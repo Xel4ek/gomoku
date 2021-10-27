@@ -4,7 +4,7 @@ describe('BitBoard', () => {
   let board: BitBoard;
 
   beforeEach(() => {
-    board = new BitBoard(8);
+    board = new BitBoard(9);
     board.boards.max.orig = BigInt(
       "0b" +
       "0000000000" +
@@ -55,21 +55,21 @@ describe('BitBoard', () => {
     const sq = (((bb >> BigInt(3) | (bb << BigInt(3)) & BigInt(63)))) ^ BigInt(56);
     // bitboard = (bitboard + BigInt(8) * (bitboard&BigInt(7))) & BigInt(63);
     // bitboard = (bitboard + BigInt(8) * ((bitboard&BigInt(7)^BigInt(7)))) & BigInt(63);
-    console.log(board.printBitBoard(sq));
+    console.log(BitBoard.printBitBoard(sq, board.size));
   });
 
   it('should checkWin', () => {
     const win = BigInt("0b1111100011011000");
     board.boards.max.orig |= win;
     // expect(board.checkMask(board.combinations.five, true)).toEqual({ row: 1, col: 3 });
-    console.log(board.printBitBoard(board.boards.max.orig));
-    console.log(board.printBitBoard(board.boards.max.rotate90));
+    console.log(BitBoard.printBitBoard(board.boards.max.orig, board.size));
+    console.log(BitBoard.printBitBoard(board.boards.max.rotate90, board.size));
   });
 
   it('should rotate90 board', () => {
-    console.log(board.printBitBoard(board.boards.max.orig));
+    console.log(BitBoard.printBitBoard(board.boards.max.orig, board.size));
     // board.checkMask(board.combinations.five, true);
-    console.log(board.printBitBoard(board.boards.max.rotate90));
+    console.log(BitBoard.printBitBoard(board.boards.max.rotate90, board.size));
   });
 
   it('should count bits', () => {
@@ -86,12 +86,13 @@ describe('BitBoard', () => {
   it('should count lines', () => {
     board.player = "max";
     board.boards.min.orig = BigInt("0b01110");
-    console.log(board.printBitBoard(board.boards.max.orig));
+    console.log(BitBoard.printBitBoard(board.boards.max.orig, board.size));
     console.log(board.detectLines());
   });
 
   it('should set masks', () => {
-    board.comboMasks.map(value => console.log(board.printBitBoard(value)));
+    console.log(board.combinations.forEach(value => value.masksP.forEach(value => console.log(BitBoard.printBitBoard(value, board.size)))));
+    // board.comboMasks.map(value => console.log(BitBoard.printBitBoard(value, board.size)));
   });
 
   it('should create empty board', () => {
