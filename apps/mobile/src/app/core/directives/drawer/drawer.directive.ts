@@ -22,10 +22,10 @@ export class DrawerDirective implements AfterViewInit {
     space.add({
       animate: () => {
         if (!pts) {
-          pts = Create.gridPts(space.innerBound, 15, 15);
+          pts = Create.gridPts(space.innerBound, 19, 19);
           pts.map((p, index) => (p.id = index.toString()));
           const b = space.innerBound;
-          const size = 29;
+          const size = 37;
           const left = Line.subpoints([b.p1, new Pt([b.p1.x, b.q1.y])], size);
           const right = Line.subpoints([new Pt([b.q1.x, b.p1.y]), b.q1], size);
           const top = Line.subpoints([b.p1, new Pt([b.q1.x, b.p1.y])], size);
