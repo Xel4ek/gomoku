@@ -1,30 +1,67 @@
 import { AfterViewInit, Directive, ElementRef } from '@angular/core';
 import { CanvasSpace, Create, Group, Line, Pt, Rectangle } from 'pts';
+import { GameBoard } from "../../services/ai/ai.service";
+import { Subject } from "rxjs";
+import { LocalStorageService } from "../../services/local-storage/local-storage.service";
 
 @Directive({
   selector: '[gomokuDrawer]',
 })
 export class DrawerDirective implements AfterViewInit {
-  constructor(private readonly elementRef: ElementRef<HTMLCanvasElement>) {}
+  private size = 19;
+  space: CanvasSpace;
+  subject: Subject<GameBoard>;
+  gameBoard: GameBoard;
+  player: number[][] = [];
+  enemy: number[][] = [];
+  busy: string[] = [];
+  pts = new Group();
+
+
+  constructor(private readonly elementRef: ElementRef<HTMLCanvasElement>,
+              private readonly localStorageService: LocalStorageService) {
+    this.space = new CanvasSpace(this.elementRef.nativeElement);
+    this.subject = this.localStorageService.subject;
+    this.gameBoard = {
+      id: 0,
+      opp: [],
+      player: [],
+      size: this.size,
+      stat: undefined,
+      timestamp: Date.now(),
+      lastMove: "",
+      isPlayer: true,
+    };
+    this.subject.subscribe(gameBoard => this.onEvent(gameBoard));
+  }
+
+  onEvent(gameBoard: GameBoard) {
+  console.log(this.player);
+    if (!this.gameBoard.isPlayer) {
+      if(!this.busy.includes(this.gameBoard.lastMove)) {
+        this.busy.push(this.gameBoard.lastMove)
+        const pt = this.pts.find(value => value.id === gameBoard.lastMove);
+        if (pt) {
+          this.enemy.push([...pt]);
+        }
+
+      }
+    }
+  }
 
   ngAfterViewInit(): void {
-    const space = new CanvasSpace(this.elementRef.nativeElement);
-    space.setup({ bgcolor: 'rgba(255,255,255,0)' });
-    const form = space.getForm();
-    let pts: Group;
-    const player: number[][] = [];
-    const enemy: number[][] = [];
-    const busy: string[] = [];
+    this.space.setup({ bgcolor: 'rgba(255,255,255,0)' });
+    const form = this.space.getForm();
     const lines: Group[] = [];
     let playerTurn = true;
     const playerColor = (alpha: number = 1) => 'rgba(69,187,0,' + alpha + ')';
     const enemyColor = (alpha: number = 1) => 'rgba(194,6,6,' + alpha + ')';
-    space.add({
+    this.space.add({
       animate: () => {
-        if (!pts) {
-          pts = Create.gridPts(space.innerBound, 19, 19);
-          pts.map((p, index) => (p.id = index.toString()));
-          const b = space.innerBound;
+        if (this.pts.length === 0) {
+          this.pts = Create.gridPts(this.space.innerBound, 19, 19);
+          this.pts.map((p, index) => (p.id = index.toString()));
+          const b = this.space.innerBound;
           const size = 37;
           const left = Line.subpoints([b.p1, new Pt([b.p1.x, b.q1.y])], size);
           const right = Line.subpoints([new Pt([b.q1.x, b.p1.y]), b.q1], size);
@@ -36,43 +73,51 @@ export class DrawerDirective implements AfterViewInit {
           }
         }
 
-        const t = space.pointer;
-        pts.sort(
+        const t = this.space.pointer;
+        this.pts.sort(
           (a, b) => a.$subtract(t).magnitudeSq() - b.$subtract(t).magnitudeSq()
         );
-        // form.fillOnly('#123').points(pts, 2, 'circle');
+        // form.fillOnly('#123').points(this.pts, 2, 'circle');
         form.strokeOnly('rgba(255,255,255,0.5)').lines(lines);
-        if (Rectangle.withinBound(space.innerBound, t)) {
+        if (Rectangle.withinBound(this.space.innerBound, t)) {
           form
             .dash()
             .strokeOnly(playerTurn ? playerColor() : enemyColor(), 2)
-            .point(pts[0], 10, 'circle');
+            .point(this.pts[0], 10, 'circle');
           form
             .fillOnly(playerTurn ? playerColor(0.3) : enemyColor(0.3))
-            .point(pts.p1, 10, 'circle');
+            .point(this.pts.p1, 10, 'circle');
         }
-        form.fillOnly(playerColor()).points(player, 12, 'circle');
-        form.fillOnly(enemyColor()).points(enemy, 12, 'circle');
+        form.fillOnly(playerColor()).points(this.player, 12, 'circle');
+        form.fillOnly(enemyColor()).points(this.enemy, 12, 'circle');
       },
       action: (type, x, y, evt) => {
         if (
           (type === 'drop' || type === 'up') &&
-          Rectangle.withinBound(space.innerBound, space.pointer)
+          Rectangle.withinBound(this.space.innerBound, this.space.pointer)
         ) {
           // console.log(space.pointer);
-          if (!busy.includes(pts.p1.id)) {
-            busy.push(pts.p1.id);
+          if (!this.busy.includes(this.pts.p1.id)) {
+            this.busy.push(this.pts.p1.id);
             if (playerTurn) {
-              player.push([...pts.p1]);
+              this.gameBoard.player.push(this.pts.p1.id);
+              // console.log(this.pts.p1);
+              this.player.push([...this.pts.p1]);
             } else {
-              enemy.push([...pts.p1]);
+              this.gameBoard.opp.push(this.pts.p1.id);
+              this.enemy.push([...this.pts.p1]);
             }
-            playerTurn = !playerTurn;
+            this.gameBoard.id = this.gameBoard.id + 1;
+            this.gameBoard.timestamp = Date.now();
+            this.gameBoard.isPlayer = !this.gameBoard.isPlayer;
+            this.subject.next(this.gameBoard);
+            // BitBoard.fromArray(this.gameBoard.player);
+            // playerTurn = !playerTurn;
           }
         }
       },
     });
 
-    space.bindMouse().bindTouch().play();
+    this.space.bindMouse().bindTouch().play();
   }
 }
