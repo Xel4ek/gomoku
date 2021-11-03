@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { IBoard } from "../board";
 import { ReplaySubject } from "rxjs";
-import { BitBoard } from "../bit-board";
+import { BitBoard, Combo } from "../bit-board";
 
 export enum AI {
   SIMPLE,
@@ -14,10 +14,13 @@ interface AiStatistics {
 export interface GameBoard {
   id: number,
   timestamp: number,
-  player: bigint,
-  opp: bigint,
+  player: string[],
+  opp: string[],
   size: number,
   stat?: AiStatistics,
+  lastMove: string,
+  isPlayer: boolean,
+
 }
 
 
@@ -26,28 +29,17 @@ export interface GameBoard {
 })
 export class AiService {
   depth = 3;
-  private emitter = new ReplaySubject<GameBoard>();
+  winCount = 5;
+  size = 19;
 
-  onMessage() {
-    return this.emitter.asObservable();
-  }
-
-  postMessage(ai: AI, gameBoard: GameBoard) {
-    const board = new BitBoard(gameBoard.size, gameBoard);
-    this.getNextAction(board);
-    gameBoard.id += 1;
-    gameBoard.timestamp = Date.now();
-    gameBoard.opp = board.boards.max.orig;
-    this.emitter.next(gameBoard);
-  }
-
-  getNextAction(board: IBoard): IBoard {
+  getNextAction(board: IBoard): string {
     this.minimax(board, this.depth, true, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY);
     const action = board.possibleActions.reduce(((previousValue, currentValue) => {
       return previousValue.score > currentValue.score ? previousValue : currentValue;
     }));
     board.move(action.col, action.row);
-    return board;
+    console.log(action);
+    return (action.row * this.size + action.col).toString();
   }
 
   minimax(board: IBoard, depth: number, maximizing: boolean, alpha: number, beta: number): number {
@@ -92,4 +84,20 @@ export class AiService {
     }
   }
 
+  private setMasks(combos: Combo[]) {
+    combos.forEach(combo => {
+      let maskP = combo.maskP;
+      let maskO = combo.maskO;
+      for (let row = 0; row < (this.size - combo.rows); row++) {
+        for (let col = 0; col <= (this.size - combo.cols); col++) {
+          combo.masksP.push(maskP);
+          combo.masksO.push(maskO);
+          maskP <<= 1n;
+          maskO <<= 1n;
+        }
+        maskP <<= BigInt(combo.cols + 1);
+        maskO <<= BigInt(combo.cols + 1);
+      }
+    });
+  }
 }

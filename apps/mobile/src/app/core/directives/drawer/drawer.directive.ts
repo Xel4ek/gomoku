@@ -36,7 +36,7 @@ export class DrawerDirective implements AfterViewInit {
   }
 
   onEvent(gameBoard: GameBoard) {
-  console.log(this.player);
+  // console.log(this.player);
     if (!this.gameBoard.isPlayer) {
       if(!this.busy.includes(this.gameBoard.lastMove)) {
         this.busy.push(this.gameBoard.lastMove)
