@@ -6,7 +6,7 @@ import { CanvasSpace, Create, Group, Line, Pt, Rectangle } from 'pts';
 })
 export class DrawerDirective implements AfterViewInit {
   constructor(private readonly elementRef: ElementRef<HTMLCanvasElement>) {}
-
+  private readonly gameSize = 19;
   ngAfterViewInit(): void {
     const space = new CanvasSpace(this.elementRef.nativeElement);
     space.setup({ bgcolor: 'rgba(255,255,255,0)' });
@@ -22,10 +22,10 @@ export class DrawerDirective implements AfterViewInit {
     space.add({
       animate: () => {
         if (!pts) {
-          pts = Create.gridPts(space.innerBound, 19, 19);
+          pts = Create.gridPts(space.innerBound, this.gameSize, this.gameSize);
           pts.map((p, index) => (p.id = index.toString()));
           const b = space.innerBound;
-          const size = 37;
+          const size = (space.innerBound.width / (this.gameSize + 1.25)) * 2;
           const left = Line.subpoints([b.p1, new Pt([b.p1.x, b.q1.y])], size);
           const right = Line.subpoints([new Pt([b.q1.x, b.p1.y]), b.q1], size);
           const top = Line.subpoints([b.p1, new Pt([b.q1.x, b.p1.y])], size);
@@ -42,17 +42,19 @@ export class DrawerDirective implements AfterViewInit {
         );
         // form.fillOnly('#123').points(pts, 2, 'circle');
         form.strokeOnly('rgba(255,255,255,0.5)').lines(lines);
+        const radius =
+          space.innerBound.width / (this.gameSize + 1.25) / 2 - 1.2;
         if (Rectangle.withinBound(space.innerBound, t)) {
           form
             .dash()
             .strokeOnly(playerTurn ? playerColor() : enemyColor(), 2)
-            .point(pts[0], 10, 'circle');
+            .point(pts[0], radius, 'circle');
           form
             .fillOnly(playerTurn ? playerColor(0.3) : enemyColor(0.3))
-            .point(pts.p1, 10, 'circle');
+            .point(pts.p1, radius, 'circle');
         }
-        form.fillOnly(playerColor()).points(player, 12, 'circle');
-        form.fillOnly(enemyColor()).points(enemy, 12, 'circle');
+        form.fillOnly(playerColor()).points(player, radius * 1.1, 'circle');
+        form.fillOnly(enemyColor()).points(enemy, radius * 1.1, 'circle');
       },
       action: (type, x, y, evt) => {
         if (
