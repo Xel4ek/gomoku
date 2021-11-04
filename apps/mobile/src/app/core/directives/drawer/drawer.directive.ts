@@ -59,7 +59,7 @@ export class DrawerDirective implements AfterViewInit {
     this.space.add({
       animate: () => {
         if (this.pts.length === 0) {
-          this.pts = Create.gridPts(this.space.innerBound, 19, 19);
+          this.pts = Create.gridPts(this.space.innerBound, this.gameSize, this.gameSize);
           this.pts.map((p, index) => (p.id = index.toString()));
           const b = this.space.innerBound;
           const size = (this.space.innerBound.width / (this.gameSize + 1.25)) * 2;
