@@ -8,7 +8,6 @@ import { LocalStorageService } from "../../services/local-storage/local-storage.
   selector: '[gomokuDrawer]',
 })
 export class DrawerDirective implements AfterViewInit {
-  private size = 19;
   space: CanvasSpace;
   subject: Subject<GameBoard>;
   gameBoard: GameBoard;
@@ -26,7 +25,7 @@ export class DrawerDirective implements AfterViewInit {
       id: 0,
       opp: [],
       player: [],
-      size: this.size,
+      size: this.gameSize,
       stat: undefined,
       timestamp: Date.now(),
       lastMove: "",
@@ -34,6 +33,7 @@ export class DrawerDirective implements AfterViewInit {
     };
     this.subject.subscribe(gameBoard => this.onEvent(gameBoard));
   }
+  private readonly gameSize = 19;
 
   onEvent(gameBoard: GameBoard) {
   // console.log(this.player);
@@ -62,7 +62,7 @@ export class DrawerDirective implements AfterViewInit {
           this.pts = Create.gridPts(this.space.innerBound, 19, 19);
           this.pts.map((p, index) => (p.id = index.toString()));
           const b = this.space.innerBound;
-          const size = 37;
+          const size = (this.space.innerBound.width / (this.gameSize + 1.25)) * 2;
           const left = Line.subpoints([b.p1, new Pt([b.p1.x, b.q1.y])], size);
           const right = Line.subpoints([new Pt([b.q1.x, b.p1.y]), b.q1], size);
           const top = Line.subpoints([b.p1, new Pt([b.q1.x, b.p1.y])], size);
@@ -79,17 +79,19 @@ export class DrawerDirective implements AfterViewInit {
         );
         // form.fillOnly('#123').points(this.pts, 2, 'circle');
         form.strokeOnly('rgba(255,255,255,0.5)').lines(lines);
+        const radius =
+          this.space.innerBound.width / (this.gameSize + 1.25) / 2 - 1.2;
         if (Rectangle.withinBound(this.space.innerBound, t)) {
           form
             .dash()
             .strokeOnly(playerTurn ? playerColor() : enemyColor(), 2)
-            .point(this.pts[0], 10, 'circle');
+            .point(this.pts[0], radius, 'circle');
           form
             .fillOnly(playerTurn ? playerColor(0.3) : enemyColor(0.3))
-            .point(this.pts.p1, 10, 'circle');
+            .point(this.pts.p1, radius, 'circle');
         }
-        form.fillOnly(playerColor()).points(this.player, 12, 'circle');
-        form.fillOnly(enemyColor()).points(this.enemy, 12, 'circle');
+        form.fillOnly(playerColor()).points(this.player, radius * 1.1, 'circle');
+        form.fillOnly(enemyColor()).points(this.enemy, radius * 1.1, 'circle');
       },
       action: (type, x, y, evt) => {
         if (
@@ -112,7 +114,7 @@ export class DrawerDirective implements AfterViewInit {
             this.gameBoard.isPlayer = !this.gameBoard.isPlayer;
             this.subject.next(this.gameBoard);
             // BitBoard.fromArray(this.gameBoard.player);
-            // playerTurn = !playerTurn;
+            playerTurn = !playerTurn;
           }
         }
       },
