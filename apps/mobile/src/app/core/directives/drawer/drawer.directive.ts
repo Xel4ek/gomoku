@@ -5,6 +5,8 @@ import { Subject } from "rxjs";
 import { LocalStorageService } from "../../services/local-storage/local-storage.service";
 import { takeUntil } from "rxjs/operators";
 
+//TODO: fix grid
+
 @Directive({
   selector: '[gomokuDrawer]',
 })

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BitBoard } from "../bit-board";
+import { BitBoard } from "../board/bit-board";
 
 export enum AI {
   SIMPLE,
@@ -7,6 +7,8 @@ export enum AI {
 
 //TODO: Out of bounds move error
 //TODO: Check score calculation (may be wrong shift to N, NW, NE)
+//TODO: AI ignores first move
+//TODO: place AI to worker
 
 interface AiStatistics {
   [key: string]: unknown;

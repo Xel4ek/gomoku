@@ -1,5 +1,5 @@
-import { GameBoard } from "./ai/ai.service";
-import { Action } from "./action";
+import { GameBoard } from "../ai/ai.service";
+import { Action } from "../ai/action";
 
 export class InvalidMoveError extends Error {
 }
@@ -42,6 +42,10 @@ export interface Combo {
   cols: number,
   rows: number,
 }
+//TODO: move masks to separate class
+
+
+
 
 export class GameBoard1 {
 

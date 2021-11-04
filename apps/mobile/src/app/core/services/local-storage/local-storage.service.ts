@@ -1,16 +1,27 @@
 import { Injectable } from '@angular/core';
 import { Subject } from "rxjs";
 import { AiService, GameBoard } from "../ai/ai.service";
-import { BitBoard } from "../bit-board";
+import { BitBoard } from "../board/bit-board";
 
 @Injectable({
   providedIn: 'root'
 })
 export class LocalStorageService {
   subject = new Subject<GameBoard>();
+  boards: BitBoard[] = [];
 
   constructor(private aiService: AiService) {
     this.subject.subscribe(gameBoard => this.onEvent(gameBoard));
+  }
+
+  saveBoard(board: BitBoard) {
+    return this.boards.push(board);
+  }
+
+  loadBoard(id?: number) {
+    if (!id) {
+      return
+    }
   }
 
   onMessage() {

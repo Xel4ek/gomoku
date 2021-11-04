@@ -11,4 +11,10 @@ import {
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.scss'],
 })
-export class GameComponent {}
+export class GameComponent {
+  constructor() {
+    const worker = new Worker("./assets/ai-worker.worker.js");
+    worker.onmessage = console.log;
+    worker.postMessage("text");
+  }
+}

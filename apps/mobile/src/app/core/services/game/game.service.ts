@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { GameBoard } from "./ai/ai.service";
-import { DrawerDirective } from "../directives/drawer/drawer.directive";
-import { BitBoard } from "./bit-board";
-import { BoardService } from "./board.service";
+import { GameBoard } from "../ai/ai.service";
+import { DrawerDirective } from "../../directives/drawer/drawer.directive";
+import { BitBoard } from "../board/bit-board";
+import { BoardService } from "../board/board.service";
 
 export enum PlayerType {
   HUMAN,
@@ -21,7 +21,7 @@ export class Player {
 
   async next(): Promise<GameBoard> {
     const subscription = this.workerOrService.onMessage();
-    this.workerOrService.message("getNextAction");
+    this.workerOrService.message("getNextActiion");
     return subscription;
   }
 }
@@ -42,6 +42,7 @@ export class GameService {
 
   constructor(private readonly drawerDirective: DrawerDirective,
               private readonly boardService: BoardService) {
+    console.log("Game Service")
   }
 
   initGame(size: number = 19, players: PlayerType[]) {
@@ -49,7 +50,17 @@ export class GameService {
     if (this.worker) {
       //TODO: delete existing worker before init
     }
-    this.worker = new Worker("");
+    if (typeof Worker !== 'undefined') {
+      // Create a new
+      const worker = new Worker(new URL('./game.worker', import.meta.url));
+      worker.onmessage = ({ data }) => {
+        console.log(`page got message: ${data}`);
+      };
+      worker.postMessage('hello');
+    } else {
+      // Web Workers are not supported in this environment.
+      // You should add a fallback so that your program still executes correctly.
+    }
     players.map(player => {
       if (player === PlayerType.HUMAN) {
         this.players.push(new Player(player, this.drawerDirective));
