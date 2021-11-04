@@ -1,5 +1,3 @@
-import { Board } from "./board";
-
 export class Action {
   score = 0;
 

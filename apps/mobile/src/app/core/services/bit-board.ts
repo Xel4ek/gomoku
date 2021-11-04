@@ -19,14 +19,14 @@ export enum Dir {
 }
 
 export enum ComboNames {
-  OPENFIVE,
+  FIVE,
   OPENFOUR,
   CLOSEDFOUR,
   OPENTHREE,
   CLOSEDTHREE,
 }
 
-interface Combo {
+export interface Combo {
   name: string,
   type: ComboNames,
   maskP: bigint,
@@ -39,28 +39,17 @@ interface Combo {
 
 export class BitBoard implements IBoard {
   score: number;
-  winCount = 5;
   size: number;
   shift: Direction;
   boards = {
     empty: 0n,
-    max: {
-      orig: BigInt(0),
-      rotate90: BigInt(0),
-      rotate45l: BigInt(0),
-      rotate45r: BigInt(0),
-    },
-    min: {
-      orig: BigInt(0),
-      rotate90: BigInt(0),
-      rotate45l: BigInt(0),
-      rotate45r: BigInt(0),
-    },
+    max: 0n,
+    min: 0n,
   };
   combinations: Combo[] = [
     {
       name: "Open Five",
-      type: ComboNames.OPENFIVE,
+      type: ComboNames.FIVE,
       maskP: BigInt("0b11111"),
       maskO: BigInt("0"),
       masksP: [],
@@ -149,9 +138,6 @@ export class BitBoard implements IBoard {
       masksO: [], cols: 4,
       rows: 1,
     },
-  ];
-  masks: Combo[] = [];
-  comboMasks: bigint[] = [];
 // {
 //     three1: BigInt("0b111"),
 //     three2: BigInt("0b1101"),
@@ -160,8 +146,8 @@ export class BitBoard implements IBoard {
 //     three5: BigInt("0b11001"),
 //     three6: BigInt("0b10011"),
 //   };
+  ];
   player: "max" | "min";
-  win: boolean;
   public possibleActions: Action[];
   gameBoard?: GameBoard;
 
@@ -191,6 +177,15 @@ export class BitBoard implements IBoard {
     return rotatedMask;
   }
 
+  static fromArray(arr: string[]) {
+    let board = 0n;
+    arr.forEach(value => {
+      const mask = 1n << BigInt(value);
+      board |= mask;
+    });
+    return board;
+  }
+
   constructor(size?: number, gameBoard?: GameBoard) {
     this.possibleActions = [];
     this.score = 0;
@@ -198,8 +193,8 @@ export class BitBoard implements IBoard {
     this.boards.empty = BigInt("0b" + ("0" + "1".repeat(this.size)).repeat(this.size));
     if (gameBoard) {
       this.gameBoard = gameBoard;
-      this.boards.max.orig = gameBoard.player;
-      this.boards.min.orig = gameBoard.opp;
+      this.boards.max = BitBoard.fromArray(gameBoard.player);
+      this.boards.min = BitBoard.fromArray(gameBoard.opp);
     } else {
       this.boards.empty = BigInt("0b" +
         Array(this.size * (this.size + 1))
@@ -213,17 +208,34 @@ export class BitBoard implements IBoard {
           .join('')
       );
     }
-    this.win = false;
     this.player = "max";
     //TODO: remove
     this.rotateCombos(this.combinations);
-    this.setMasks();
+    this.setMasks(this.combinations);
     this.shift = {
       hor: 1n,
       vert: -(BigInt(this.size) + 1n),
       diagSW: -(BigInt(this.size) + 1n) - 1n,
       diagSE: -(BigInt(this.size) + 1n) + 1n,
     };
+  }
+
+
+  private setMasks(combos: Combo[]) {
+    combos.forEach(combo => {
+      let maskP = combo.maskP;
+      let maskO = combo.maskO;
+      for (let row = 0; row < (this.size - combo.rows); row++) {
+        for (let col = 0; col <= (this.size - combo.cols); col++) {
+          combo.masksP.push(maskP);
+          combo.masksO.push(maskO);
+          maskP <<= 1n;
+          maskO <<= 1n;
+        }
+        maskP <<= BigInt(combo.cols + 1);
+        maskO <<= BigInt(combo.cols + 1);
+      }
+    });
   }
 
   rotateCombos(combos: Combo[]) {
@@ -290,61 +302,6 @@ export class BitBoard implements IBoard {
     return c;
   }
 
-  detectLines() {
-    const len: Direction = {
-      hor: 0n,
-      vert: 0n,
-      diagSW: 0n,
-      diagSE: 0n,
-    };
-    Object.keys(len).forEach(dir => {
-      let bits = this.boards[this.player].orig;
-      while ((bits = bits & (bits >> this.shift[dir])) != 0n) {
-        len[dir]++;
-      }
-    });
-    return len;
-  }
-
-  private setMasks() {
-    this.combinations.forEach(combo => {
-      let maskP = combo.maskP;
-      let maskO = combo.maskO;
-      for (let row = 0; row < (this.size - combo.rows); row++) {
-        for (let col = 0; col <= (this.size - combo.cols); col++) {
-          combo.masksP.push(maskP);
-          combo.masksO.push(maskO);
-          this.comboMasks.push(maskP);
-          this.comboMasks.push(maskO),
-            maskP <<= 1n;
-          maskO <<= 1n;
-        }
-        maskP <<= BigInt(combo.cols + 1);
-        maskO <<= BigInt(combo.cols + 1);
-      }
-    });
-  }
-
-  checkMask(mask: bigint, stop: boolean): { dir: string; row: number; col: number }[] {
-    this.rotateBoard();
-    const position: { dir: string, row: number, col: number }[] = [];
-    for (let row = 0; row < this.size; row++) {
-      for (let col = 0; col <= this.size - this.winCount; col++) {
-        for (const [k, v] of Object.entries(this.boards[this.player])) {
-          if ((mask & v) === mask) {
-            position.push({ dir: k, row: row, col: col });
-          }
-          if (stop) {
-            return position;
-          }
-        }
-        mask <<= BigInt(1);
-      }
-      mask <<= BigInt(this.winCount - 1);
-    }
-    return position;
-  }
-
   move(col: number, row: number) {
     //TODO: refactor this
     const isMax = this.player === "max";
@@ -358,32 +315,27 @@ export class BitBoard implements IBoard {
     const moveMask = BigInt(1) << BigInt(idx);
     this.checkMove(moveMask);
     if (isMax) {
-      this.boards.max.orig |= moveMask;
+      this.boards.max |= moveMask;
     } else {
-      this.boards.min.orig |= moveMask;
+      this.boards.min |= moveMask;
     }
     // this.nextWhiteMove = !this.nextWhiteMove;
     this.score = this.updateScore(row, col);
   }
 
-  private rotateBoard() {
-    // sq' = (((sq >> 3) | (sq << 3)) & 63) ^ 56;
-    this.boards[this.player].rotate90 = this.boards[this.player].orig ^ BigInt(this.size * this.size - this.size);
-  }
-
   private checkMove(mask: bigint) {
-    if (this.boards.max.orig & mask || this.boards.min.orig & mask) {
+    if (this.boards.max & mask || this.boards.min & mask) {
       throw new InvalidMoveError(`Cell occupied`);
     }
   }
 
   //TODO: implement update score
-  private updateScore(row: number, col: number) {
+  private updateScore(row: number, col: number, boardP: bigint = this.boards.max, boardO: bigint = this.boards.min) {
     const match: Combo[] = [];
     this.combinations.forEach(combo => {
       combo.masksP.forEach(((value, index) => {
-        if ((value & this.boards.max.orig) === value
-          && (combo.masksO[index] & this.boards.min.orig) === combo.masksO[index]) {
+        if ((value & boardP) === value
+          && (combo.masksO[index] & boardO) === combo.masksO[index]) {
           match.push(combo);
         }
       }));
@@ -397,7 +349,7 @@ export class BitBoard implements IBoard {
       [key: number]: number,
     }
     const count: Scores = {
-      [ComboNames.OPENFIVE]: 0,
+      [ComboNames.FIVE]: 0,
       [ComboNames.OPENFOUR]: 0,
       [ComboNames.CLOSEDFOUR]: 0,
       [ComboNames.OPENTHREE]: 0,
@@ -407,7 +359,7 @@ export class BitBoard implements IBoard {
       count[value.type] += 1;
     });
     let score = 0;
-    if (count[ComboNames.OPENFIVE] > 0) {
+    if (count[ComboNames.FIVE] > 0) {
       score += 100000;
     }
     if (count[ComboNames.OPENFOUR] > 0) {
@@ -420,16 +372,16 @@ export class BitBoard implements IBoard {
       score += 10000;
     }
     if (count[ComboNames.CLOSEDFOUR] > 0) {
-      score += 1000
+      score += 1000;
     }
     if (count[ComboNames.CLOSEDTHREE] > 0) {
-      score += 300 * count[ComboNames.CLOSEDTHREE]
+      score += 300 * count[ComboNames.CLOSEDTHREE];
     }
-    return score
+    return score;
   }
 
   generateActions(dilation: number = 1) {
-    const board = this.boards.max.orig | this.boards.min.orig;
+    const board = this.boards.max | this.boards.min;
     let moves = board;
     for (let i = dilation; i > 0; i--) {
       moves = moves
