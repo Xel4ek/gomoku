@@ -32,13 +32,12 @@ export class BitBoard {
   combinations: Combo[];
 
   static printBitBoard(board: bigint, size: number) {
-    const matrix = [];
     const str = board.toString(2).split('').reverse();
-    for (let row = 0; row < size; row++) {
-      matrix.push(str
-        .slice(row * (size + 1), (row + 1) * (size + 1)).join(''));
+    let lines = Math.floor(str.length / size);
+    while (lines--) {
+      str.splice(lines * (size + 1), 0, '\n')
     }
-    return matrix.join('\n');
+    return str.join('');
   }
 
   static fromArray(arr: string[], size: number) {
@@ -194,8 +193,8 @@ export class BitBoard {
     console.log(BitBoard.printBitBoard(moves, this.size));
     for (let i = dilation; i > 0; i--) {
       moves = moves
-        | moves >> this.shift.S
-        | moves >> this.shift.N
+        | (moves >> this.shift.S & this.boards.empty)
+        | (moves >> this.shift.N & this.boards.empty)
         | (moves >> this.shift.E & this.boards.empty)
         | (moves >> this.shift.NE & this.boards.empty)
         | (moves >> this.shift.SE & this.boards.empty)
