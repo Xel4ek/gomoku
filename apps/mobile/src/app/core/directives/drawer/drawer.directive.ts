@@ -1,15 +1,17 @@
-import { AfterViewInit, Directive, ElementRef } from '@angular/core';
+import { AfterViewInit, Directive, ElementRef, OnDestroy } from '@angular/core';
 import { CanvasSpace, Create, Group, Line, Pt, Rectangle } from 'pts';
 import { GameBoard } from "../../services/ai/ai.service";
 import { Subject } from "rxjs";
 import { LocalStorageService } from "../../services/local-storage/local-storage.service";
+import { takeUntil } from "rxjs/operators";
 
 @Directive({
   selector: '[gomokuDrawer]',
 })
-export class DrawerDirective implements AfterViewInit {
+export class DrawerDirective implements AfterViewInit, OnDestroy {
   space: CanvasSpace;
-  subject: Subject<GameBoard>;
+  subject$: Subject<GameBoard>;
+  destroy$ = new Subject<void>();
   gameBoard: GameBoard;
   player: number[][] = [];
   enemy: number[][] = [];
@@ -20,7 +22,7 @@ export class DrawerDirective implements AfterViewInit {
   constructor(private readonly elementRef: ElementRef<HTMLCanvasElement>,
               private readonly localStorageService: LocalStorageService) {
     this.space = new CanvasSpace(this.elementRef.nativeElement);
-    this.subject = this.localStorageService.subject;
+    this.subject$ = this.localStorageService.subject;
     this.gameBoard = {
       id: 0,
       opp: [],
@@ -31,7 +33,8 @@ export class DrawerDirective implements AfterViewInit {
       lastMove: "",
       isPlayer: true,
     };
-    this.subject.subscribe(gameBoard => this.onEvent(gameBoard));
+    this.subject$.pipe(takeUntil(this.destroy$))
+      .subscribe(gameBoard => this.onEvent(gameBoard));
   }
   private readonly gameSize = 19;
 
@@ -112,14 +115,17 @@ export class DrawerDirective implements AfterViewInit {
             this.gameBoard.id = this.gameBoard.id + 1;
             this.gameBoard.timestamp = Date.now();
             this.gameBoard.isPlayer = !this.gameBoard.isPlayer;
-            this.subject.next(this.gameBoard);
-            // BitBoard.fromArray(this.gameBoard.player);
-            playerTurn = !playerTurn;
+            this.localStorageService.addMessage(this.gameBoard);
+            // playerTurn = !playerTurn;
           }
         }
       },
     });
-
     this.space.bindMouse().bindTouch().play();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

@@ -5,6 +5,9 @@ export enum AI {
   SIMPLE,
 }
 
+//TODO: Out of bounds move error
+//TODO: Check score calculation (may be wrong shift to N, NW, NE)
+
 interface AiStatistics {
   [key: string]: unknown;
 }
@@ -58,7 +61,7 @@ export class AiService {
         // console.log(`${depth}: ${board.nextWhiteMove} ${action.row} - ${action.col}`);
         const board_new = board.clone();
         board_new.move(action.col, action.row);
-        // action.score = this.minimax(board_new, depth - 1, !maximizing, alpha, beta);
+        action.score = this.minimax(board_new, depth - 1, !maximizing, alpha, beta);
         const oldMax = maxEval;
         maxEval = Math.max(maxEval, action.score);
         // console.log('max: ', oldMax, action.score, ' -> ', maxEval);
@@ -75,7 +78,7 @@ export class AiService {
         // console.log(`${depth}: ${board.nextWhiteMove} ${action.row} - ${action.col}`);
         const board_new = board.clone();
         board_new.move(action.col, action.row);
-        // action.score = this.minimax(board_new, depth - 1, !maximizing, alpha, beta);
+        action.score = this.minimax(board_new, depth - 1, !maximizing, alpha, beta);
         const oldMin = minEval;
         minEval = Math.min(minEval, action.score);
         // console.log('max: ', oldMin, action.score, ' -> ', minEval);

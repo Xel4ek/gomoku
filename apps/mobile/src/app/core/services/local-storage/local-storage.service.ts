@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { ReplaySubject, Subject } from "rxjs";
-import { AI, AiService, GameBoard } from "../ai/ai.service";
+import { Subject } from "rxjs";
+import { AiService, GameBoard } from "../ai/ai.service";
 import { BitBoard } from "../bit-board";
 
 @Injectable({
@@ -11,6 +11,14 @@ export class LocalStorageService {
 
   constructor(private aiService: AiService) {
     this.subject.subscribe(gameBoard => this.onEvent(gameBoard));
+  }
+
+  onMessage() {
+    this.subject.asObservable();
+  }
+
+  addMessage(gameBoard: GameBoard) {
+    this.subject.next(gameBoard);
   }
 
   onEvent(gameBoard: GameBoard) {

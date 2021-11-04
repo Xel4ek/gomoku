@@ -43,6 +43,10 @@ export interface Combo {
   rows: number,
 }
 
+export class GameBoard1 {
+
+}
+
 export class BitBoard {
   score: number;
   size: number;
@@ -155,7 +159,6 @@ export class BitBoard {
   ];
   player: "max" | "min";
   public possibleActions: Action[];
-  gameBoard?: GameBoard;
 
   static printBitBoard(board: bigint, size: number) {
     const matrix = [];
@@ -200,7 +203,6 @@ export class BitBoard {
     this.size = size ?? 19;
     this.boards.empty = BigInt("0b" + ("0" + "1".repeat(this.size)).repeat(this.size));
     if (gameBoard) {
-      this.gameBoard = gameBoard;
       this.boards.max = BitBoard.fromArray(gameBoard.player, gameBoard.size);
       this.boards.min = BitBoard.fromArray(gameBoard.opp, gameBoard.size);
     }
@@ -256,7 +258,10 @@ export class BitBoard {
   }
 
   clone(): BitBoard {
-    return new BitBoard(this.size, this.gameBoard);
+    const board = new BitBoard(this.size);
+    board.boards.max = this.boards.max;
+    board.boards.min = this.boards.min;
+    return board;
   }
 
   generateRandomMoves(moves: number) {
