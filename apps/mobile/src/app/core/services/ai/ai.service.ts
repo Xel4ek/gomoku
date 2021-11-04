@@ -5,7 +5,6 @@ export enum AI {
   SIMPLE,
 }
 
-//TODO: Out of bounds move error
 //TODO: Check score calculation (may be wrong shift to N, NW, NE)
 //TODO: AI ignores first move
 //TODO: place AI to worker
@@ -36,13 +35,14 @@ export class AiService {
   size = 19;
 
   getNextAction(board: BitBoard): string {
-    this.minimax(board, this.depth, true, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY);
+    this.minimax(board, this.depth, false, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY);
     console.log(board.possibleActions);
     if (board.possibleActions.length > 0) {
       const action = board.possibleActions.reduce(((previousValue, currentValue) => {
-        return previousValue.score > currentValue.score ? previousValue : currentValue;
+        return previousValue.score < currentValue.score ? previousValue : currentValue;
       }));
-      board.move(action.col, action.row);
+      //TODO: refactor turn
+      board.move(action.col, action.row, "enemy");
       console.log(action);
       return (action.row * this.size + action.col).toString();
     }
@@ -50,48 +50,37 @@ export class AiService {
     // return Math.floor(Math.random() * board.size * board.size).toString();
   }
 
-  minimax(board: BitBoard, depth: number, maximizing: boolean, alpha: number, beta: number): number {
-    board.generateActions();
-    console.log(board.possibleActions)
-    if (depth === 0 || board.checkWin(maximizing) || board.possibleActions.length === 0) {
-      console.log("WIN: " + board.checkWin(maximizing));
-      return board.score;
-    }
-    if (maximizing) {
-      let maxEval = Number.NEGATIVE_INFINITY;
+  eval(isMax: boolean, board: BitBoard, depth: number, alpha: number, beta: number) {
+      let evalScore = isMax ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY;
       for (const action of board.possibleActions) {
         // console.log(`${depth}: ${board.nextWhiteMove} ${action.row} - ${action.col}`);
         const board_new = board.clone();
-        board_new.move(action.col, action.row);
-        action.score = this.minimax(board_new, depth - 1, !maximizing, alpha, beta);
-        const oldMax = maxEval;
-        maxEval = Math.max(maxEval, action.score);
+        board_new.move(action.col, action.row, "player");
+        action.score = this.minimax(board_new, depth - 1, !isMax, alpha, beta);
+        evalScore = isMax ? Math.max(evalScore, action.score) : Math.min(evalScore, action.score);
         // console.log('max: ', oldMax, action.score, ' -> ', maxEval);
-        alpha = Math.max(alpha, action.score);
+        if (isMax) {
+          alpha = Math.max(alpha, action.score);
+        } else {
+          beta = Math.min(beta, action.score);
+        }
         if (beta <= alpha) {
           // console.log('max pruned!')
           break;
         }
       }
-      return maxEval;
-    } else {
-      let minEval = Number.POSITIVE_INFINITY;
-      for (const action of board.possibleActions) {
-        // console.log(`${depth}: ${board.nextWhiteMove} ${action.row} - ${action.col}`);
-        const board_new = board.clone();
-        board_new.move(action.col, action.row);
-        action.score = this.minimax(board_new, depth - 1, !maximizing, alpha, beta);
-        const oldMin = minEval;
-        minEval = Math.min(minEval, action.score);
-        // console.log('max: ', oldMin, action.score, ' -> ', minEval);
-        beta = Math.min(beta, action.score);
-        if (beta <= alpha) {
-          // console.log('min pruned!')
-          break;
-        }
-      }
-      return minEval;
+      return evalScore;
+  }
+
+
+  minimax(board: BitBoard, depth: number, maximizing: boolean, alpha: number, beta: number): number {
+    board.generateActions();
+    console.log(board.possibleActions);
+    if (depth === 0 || board.checkWin(maximizing) || board.possibleActions.length === 0) {
+      console.log("WIN: " + board.checkWin(maximizing));
+      return board.updateScore();
     }
+    return this.eval(maximizing, board, depth, alpha, beta);
   }
 
 }
