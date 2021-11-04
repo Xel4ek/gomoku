@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { AiService, GameBoard } from "./ai/ai.service";
+import { GameBoard } from "./ai/ai.service";
 import { DrawerDirective } from "../directives/drawer/drawer.directive";
-import { LocalStorageService } from "./local-storage/local-storage.service";
 import { BitBoard } from "./bit-board";
+import { BoardService } from "./board.service";
 
 export enum PlayerType {
   HUMAN,
@@ -41,7 +41,7 @@ export class GameService {
   }
 
   constructor(private readonly drawerDirective: DrawerDirective,
-              private readonly localStorageService: LocalStorageService) {
+              private readonly boardService: BoardService) {
   }
 
   initGame(size: number = 19, players: PlayerType[]) {
@@ -61,7 +61,7 @@ export class GameService {
 
   async nextTurn() {
     const gameBoard = await this.players[this._turn % this.players.length].next();
-    this.localStorageService.addMessage(gameBoard);
+    // this.boardService.update(gameBoard);
     const isWin = (new BitBoard(this.size, gameBoard)).checkWin(true);
     if (isWin) {
       this.endGame();
@@ -77,6 +77,7 @@ export class GameService {
 
   startGame() {
     this._turn = 0;
+    this.boardService.create(this.size);
     this.nextTurn();
   }
 }
