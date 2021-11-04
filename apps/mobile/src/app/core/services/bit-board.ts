@@ -1,6 +1,8 @@
-import { IBoard, InvalidMoveError } from "./board";
 import { GameBoard } from "./ai/ai.service";
 import { Action } from "./action";
+
+export class InvalidMoveError extends Error {
+}
 
 interface Direction {
   [prop: string]: bigint,
@@ -37,7 +39,7 @@ export interface Combo {
   rows: number,
 }
 
-export class BitBoard implements IBoard {
+export class BitBoard {
   score: number;
   size: number;
   shift: Direction;
@@ -255,22 +257,8 @@ export class BitBoard implements IBoard {
     });
   }
 
-  clone(): IBoard {
+  clone(): BitBoard {
     return new BitBoard(this.size, this.gameBoard);
-  }
-
-  rotateRight(x: bigint, i: bigint) {
-    return (x - i) % BigInt(this.size);
-  }
-
-  flipDiagonal(x: bigint) {
-    const k1 = BigInt(0xAAAAAAAAAAAAAAAAAAAAAAAAAAAA);
-    const k2 = BigInt(0xCCCCCCCCCCCCCCCCCCCCCCCCCCCC);
-    const k4 = BigInt(0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0);
-    x ^= k1 & (x ^ this.rotateRight(x, BigInt(this.size)));
-    x ^= k2 & (x ^ this.rotateRight(x, BigInt(this.size * 2)));
-    x ^= k4 & (x ^ this.rotateRight(x, BigInt(this.size * 4)));
-    return x;
   }
 
   generateRandomMoves(moves: number) {
@@ -288,10 +276,6 @@ export class BitBoard implements IBoard {
         }
       }
     );
-  }
-
-  isPowerOfTwo(i: bigint) {
-    return i > BigInt(0) && (i & (i - BigInt(1))) === BigInt(0);
   }
 
   countBits(v: bigint) {

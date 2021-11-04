@@ -84,20 +84,4 @@ export class AiService {
     }
   }
 
-  private setMasks(combos: Combo[]) {
-    combos.forEach(combo => {
-      let maskP = combo.maskP;
-      let maskO = combo.maskO;
-      for (let row = 0; row < (this.size - combo.rows); row++) {
-        for (let col = 0; col <= (this.size - combo.cols); col++) {
-          combo.masksP.push(maskP);
-          combo.masksO.push(maskO);
-          maskP <<= 1n;
-          maskO <<= 1n;
-        }
-        maskP <<= BigInt(combo.cols + 1);
-        maskO <<= BigInt(combo.cols + 1);
-      }
-    });
-  }
 }
