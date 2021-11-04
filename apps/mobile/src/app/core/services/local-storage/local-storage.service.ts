@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Subject } from "rxjs";
 import { AiService, GameBoard } from "../ai/ai.service";
 import { BitBoard } from "../board/bit-board";
+import { Combination } from "../board/combination";
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +21,7 @@ export class LocalStorageService {
 
   loadBoard(id?: number) {
     if (!id) {
-      return
+      return;
     }
   }
 
@@ -35,7 +36,8 @@ export class LocalStorageService {
   onEvent(gameBoard: GameBoard) {
     console.log(gameBoard);
     if (gameBoard.isPlayer) {
-      const move = this.aiService.getNextAction(new BitBoard(19, gameBoard));
+      const combos = new Combination(gameBoard.size);
+      const move = this.aiService.getNextAction(new BitBoard(combos.combinations, gameBoard.size, gameBoard));
       gameBoard.lastMove = move;
       gameBoard.opp.push(move);
       // gameBoard.lastMove = Math.floor(Math.random() * gameBoard.size * gameBoard.size).toString();

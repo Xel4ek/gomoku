@@ -4,7 +4,7 @@ describe('BitBoard', () => {
   let board: BitBoard;
 
   beforeEach(() => {
-    board = new BitBoard(9);
+    board = new BitBoard(undefined, 9);
     board.boards.max = BigInt(
       "0b" +
       "0000000000" +

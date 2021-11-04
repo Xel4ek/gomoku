@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BitBoard } from "./bit-board";
+import { Combination } from "./combination";
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +20,8 @@ export class BoardService {
   }
 
   create(size: number) {
-    const board = new BitBoard(size);
+    const combos = new Combination(size);
+    const board = new BitBoard(combos.combinations, size);
     this.currentBoard = this.store.push(board);
     board.move(Math.floor(size / 2), Math.floor(size / 2));
   }
