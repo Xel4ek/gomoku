@@ -146,8 +146,8 @@ export class Combination {
 
   constructor(size: number) {
     this.size = size;
-    this.setMasks();
     this.rotateCombos();
+    this.setMasks();
   }
 
   private setMasks() {
