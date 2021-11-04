@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IBoard } from "../board";
-import { ReplaySubject } from "rxjs";
-import { BitBoard, Combo } from "../bit-board";
+import { BitBoard } from "../bit-board";
 
 export enum AI {
   SIMPLE,
@@ -32,19 +30,26 @@ export class AiService {
   winCount = 5;
   size = 19;
 
-  getNextAction(board: IBoard): string {
+  getNextAction(board: BitBoard): string {
     this.minimax(board, this.depth, true, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY);
-    const action = board.possibleActions.reduce(((previousValue, currentValue) => {
-      return previousValue.score > currentValue.score ? previousValue : currentValue;
-    }));
-    board.move(action.col, action.row);
-    console.log(action);
-    return (action.row * this.size + action.col).toString();
+    console.log(board.possibleActions);
+    if (board.possibleActions.length > 0) {
+      const action = board.possibleActions.reduce(((previousValue, currentValue) => {
+        return previousValue.score > currentValue.score ? previousValue : currentValue;
+      }));
+      board.move(action.col, action.row);
+      console.log(action);
+      return (action.row * this.size + action.col).toString();
+    }
+    return "";
+    // return Math.floor(Math.random() * board.size * board.size).toString();
   }
 
-  minimax(board: IBoard, depth: number, maximizing: boolean, alpha: number, beta: number): number {
+  minimax(board: BitBoard, depth: number, maximizing: boolean, alpha: number, beta: number): number {
     board.generateActions();
-    if (depth === 0 || board.win || board.possibleActions.length === 0) {
+    console.log(board.possibleActions)
+    if (depth === 0 || board.checkWin(maximizing) || board.possibleActions.length === 0) {
+      console.log("WIN: " + board.checkWin(maximizing));
       return board.score;
     }
     if (maximizing) {
@@ -53,7 +58,7 @@ export class AiService {
         // console.log(`${depth}: ${board.nextWhiteMove} ${action.row} - ${action.col}`);
         const board_new = board.clone();
         board_new.move(action.col, action.row);
-        action.score = this.minimax(board_new, depth - 1, !maximizing, alpha, beta);
+        // action.score = this.minimax(board_new, depth - 1, !maximizing, alpha, beta);
         const oldMax = maxEval;
         maxEval = Math.max(maxEval, action.score);
         // console.log('max: ', oldMax, action.score, ' -> ', maxEval);
@@ -70,7 +75,7 @@ export class AiService {
         // console.log(`${depth}: ${board.nextWhiteMove} ${action.row} - ${action.col}`);
         const board_new = board.clone();
         board_new.move(action.col, action.row);
-        action.score = this.minimax(board_new, depth - 1, !maximizing, alpha, beta);
+        // action.score = this.minimax(board_new, depth - 1, !maximizing, alpha, beta);
         const oldMin = minEval;
         minEval = Math.min(minEval, action.score);
         // console.log('max: ', oldMin, action.score, ' -> ', minEval);

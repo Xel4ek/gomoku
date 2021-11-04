@@ -14,10 +14,14 @@ export class LocalStorageService {
   }
 
   onEvent(gameBoard: GameBoard) {
+    console.log(gameBoard);
     if (gameBoard.isPlayer) {
-      gameBoard.lastMove = this.aiService.getNextAction(new BitBoard(19, gameBoard));
+      const move = this.aiService.getNextAction(new BitBoard(19, gameBoard));
+      gameBoard.lastMove = move;
+      gameBoard.opp.push(move);
       // gameBoard.lastMove = Math.floor(Math.random() * gameBoard.size * gameBoard.size).toString();
       gameBoard.isPlayer = !gameBoard.isPlayer;
+      gameBoard.id += 1;
       this.subject.next(gameBoard);
     }
     console.log(gameBoard);

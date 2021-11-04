@@ -7,10 +7,14 @@ export class InvalidMoveError extends Error {
 interface Direction {
   [prop: string]: bigint,
 
-  hor: bigint,
-  vert: bigint,
-  diagSW: bigint,
-  diagSE: bigint,
+  N: bigint,
+  NE: bigint,
+  NW: bigint,
+  W: bigint,
+  E: bigint,
+  S: bigint,
+  SW: bigint,
+  SE: bigint,
 }
 
 export enum Dir {
@@ -158,7 +162,7 @@ export class BitBoard {
     const str = board.toString(2).split('').reverse();
     for (let row = 0; row < size; row++) {
       matrix.push(str
-        .slice(row * size, (row + 1) * size).join(''));
+        .slice(row * (size + 1), (row + 1) * (size + 1)).join(''));
     }
     return matrix.join('\n');
   }
@@ -179,10 +183,12 @@ export class BitBoard {
     return rotatedMask;
   }
 
-  static fromArray(arr: string[]) {
+  static fromArray(arr: string[], size: number) {
     let board = 0n;
     arr.forEach(value => {
-      const mask = 1n << BigInt(value);
+      const row = Math.floor(Number(value) / size)
+      const col = Number(value) % size;
+      const mask = 1n << BigInt(row * (size + 1) + col);
       board |= mask;
     });
     return board;
@@ -195,30 +201,22 @@ export class BitBoard {
     this.boards.empty = BigInt("0b" + ("0" + "1".repeat(this.size)).repeat(this.size));
     if (gameBoard) {
       this.gameBoard = gameBoard;
-      this.boards.max = BitBoard.fromArray(gameBoard.player);
-      this.boards.min = BitBoard.fromArray(gameBoard.opp);
-    } else {
-      this.boards.empty = BigInt("0b" +
-        Array(this.size * (this.size + 1))
-          .fill("1")
-          .map(((value, index) => {
-            if (index % (this.size) === 0) {
-              return "0";
-            }
-            return value;
-          }))
-          .join('')
-      );
+      this.boards.max = BitBoard.fromArray(gameBoard.player, gameBoard.size);
+      this.boards.min = BitBoard.fromArray(gameBoard.opp, gameBoard.size);
     }
     this.player = "max";
     //TODO: remove
     this.rotateCombos(this.combinations);
     this.setMasks(this.combinations);
     this.shift = {
-      hor: 1n,
-      vert: -(BigInt(this.size) + 1n),
-      diagSW: -(BigInt(this.size) + 1n) - 1n,
-      diagSE: -(BigInt(this.size) + 1n) + 1n,
+      E: 1n,
+      N: BigInt(this.size) + 1n,
+      NE: (BigInt(this.size) + 1n) + 1n,
+      NW: (BigInt(this.size) + 1n) - 1n,
+      S: -(BigInt(this.size) + 1n),
+      SE: -(BigInt(this.size) + 1n) + 1n,
+      SW: -(BigInt(this.size) + 1n) - 1n,
+      W: -1n,
     };
   }
 
@@ -295,8 +293,9 @@ export class BitBoard {
     // if (isMax !== this.nextWhiteMove) {
     //   throw new InvalidMoveError(`Wrong player`);
     // }
-    const idx = row * this.size + col;
-    const moveMask = BigInt(1) << BigInt(idx);
+    const shift = BigInt(row * (this.size + 1) + col);
+    console.log(row, col, shift);
+    const moveMask = 1n << shift;
     this.checkMove(moveMask);
     if (isMax) {
       this.boards.max |= moveMask;
@@ -304,7 +303,7 @@ export class BitBoard {
       this.boards.min |= moveMask;
     }
     // this.nextWhiteMove = !this.nextWhiteMove;
-    this.score = this.updateScore(row, col);
+    this.score = this.updateScore();
   }
 
   private checkMove(mask: bigint) {
@@ -314,7 +313,7 @@ export class BitBoard {
   }
 
   //TODO: implement update score
-  private updateScore(row: number, col: number, boardP: bigint = this.boards.max, boardO: bigint = this.boards.min) {
+  private updateScore(boardP: bigint = this.boards.max, boardO: bigint = this.boards.min) {
     const match: Combo[] = [];
     this.combinations.forEach(combo => {
       combo.masksP.forEach(((value, index) => {
@@ -365,24 +364,44 @@ export class BitBoard {
   }
 
   generateActions(dilation: number = 1) {
-    const board = this.boards.max | this.boards.min;
-    let moves = board;
+    const occupied = this.boards.max | this.boards.min;
+    let moves = occupied;
+    console.log(BitBoard.printBitBoard(moves, this.size));
     for (let i = dilation; i > 0; i--) {
       moves = moves
-        | (moves >> this.shift.hor)
-        | (moves >> this.shift.vert)
-        | (moves >> this.shift.diagSW)
-        | (moves >> this.shift.diagSE);
+        | moves >> this.shift.S
+        | moves >> this.shift.N
+        | (moves >> this.shift.E & this.boards.empty)
+        | (moves >> this.shift.NE & this.boards.empty)
+        | (moves >> this.shift.SE & this.boards.empty)
+        | (moves >> this.shift.NW & this.boards.empty)
+        | (moves >> this.shift.SW & this.boards.empty)
+        | (moves >> this.shift.W & this.boards.empty);
     }
-    moves ^= board;
+    moves ^= occupied;
+    console.log(BitBoard.printBitBoard(moves, this.size));
     let i = 0;
     while (moves) {
       if (moves & 1n) {
-        this.possibleActions.push(new Action(i % this.size, Math.floor(i / this.size)));
+        this.possibleActions.push(new Action(i % (this.size + 1), Math.floor(i / (this.size + 1))));
       }
       moves >>= 1n;
       i++;
     }
+  }
+
+  checkWin(isMax: boolean): boolean {
+    const winCombos = this.combinations.filter(value => value.type === ComboNames.FIVE);
+    for (let i = 0; i < winCombos.length; i++) {
+      for (let j = 0; j < winCombos[i].masksP.length; j++) {
+        const board = isMax ? this.boards.max : this.boards.min;
+        const mask = winCombos[i].masksP[j];
+        if ((mask & board) === mask) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   // getBoradEval() {
