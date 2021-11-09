@@ -6,22 +6,28 @@ export enum Dir {
 }
 
 export enum ComboNames {
+  DUMMY,
   FIVE,
   OPENFOUR,
   CLOSEDFOUR,
   OPENTHREE,
   CLOSEDTHREE,
+
 }
 
-export interface Combo {
-  name: string,
-  type: ComboNames,
-  maskP: bigint,
-  maskO: bigint,
-  masksP: bigint[],
-  masksO: bigint[],
-  cols: number,
-  rows: number,
+export class Combo {
+  name = "default";
+  type = ComboNames.DUMMY;
+  maskP = 0n;
+  maskO = 0n;
+  masksP: bigint[] = [];
+  masksO: bigint[] = [];
+  cols = 0;
+  rows = 0;
+
+  constructor(init?: Partial<Combo>) {
+    Object.assign(this, init);
+  }
 }
 
 export class Combination {
@@ -29,8 +35,8 @@ export class Combination {
     {
       name: "Open Five",
       type: ComboNames.FIVE,
-      maskP: BigInt("0b11111"),
-      maskO: BigInt("0"),
+      maskP: 0b11111n,
+      maskO: 0n,
       masksP: [],
       masksO: [],
       cols: 5,
@@ -39,8 +45,8 @@ export class Combination {
     {
       name: "Open Four",
       type: ComboNames.OPENFOUR,
-      maskP: BigInt("0b11110"),
-      maskO: BigInt("0b100001"),
+      maskP: 0b11110n,
+      maskO: 0b100001n,
       masksP: [],
       masksO: [], cols: 6,
       rows: 1,
@@ -48,8 +54,8 @@ export class Combination {
     {
       name: "Closed Four 1",
       type: ComboNames.CLOSEDFOUR,
-      maskP: BigInt("0b1111"),
-      maskO: BigInt("0b011110"),
+      maskP: 0b1111n,
+      maskO: 0b011110n,
       masksP: [],
       masksO: [], cols: 4,
       rows: 1,
@@ -57,8 +63,8 @@ export class Combination {
     {
       name: "Closed Four 2",
       type: ComboNames.CLOSEDFOUR,
-      maskP: BigInt("0b11011"),
-      maskO: BigInt("0b100"),
+      maskP: 0b11011n,
+      maskO: 0b100n,
       masksP: [],
       masksO: [], cols: 5,
       rows: 1,
@@ -66,8 +72,8 @@ export class Combination {
     {
       name: "Closed Four 3",
       type: ComboNames.CLOSEDFOUR,
-      maskP: BigInt("0b11101"),
-      maskO: BigInt("0b10"),
+      maskP: 0b11101n,
+      maskO: 0b10n,
       masksP: [],
       masksO: [], cols: 5,
       rows: 1,
@@ -75,8 +81,8 @@ export class Combination {
     {
       name: "Closed Four 4",
       type: ComboNames.CLOSEDFOUR,
-      maskP: BigInt("0b10111"),
-      maskO: BigInt("0b1000"),
+      maskP: 0b10111n,
+      maskO: 0b1000n,
       masksP: [],
       masksO: [], cols: 5,
       rows: 1,
@@ -84,8 +90,8 @@ export class Combination {
     {
       name: "Open Three 1",
       type: ComboNames.OPENTHREE,
-      maskP: BigInt("0b1110"),
-      maskO: BigInt("0b10001"),
+      maskP: 0b1110n,
+      maskO: 0b10001n,
       masksP: [],
       masksO: [], cols: 5,
       rows: 1,
@@ -93,8 +99,8 @@ export class Combination {
     {
       name: "Open Three 2",
       type: ComboNames.OPENTHREE,
-      maskP: BigInt("0b1011"),
-      maskO: BigInt("0b100"),
+      maskP: 0b1011n,
+      maskO: 0b100n,
       masksP: [],
       masksO: [], cols: 4,
       rows: 1,
@@ -102,8 +108,8 @@ export class Combination {
     {
       name: "Open Three 3",
       type: ComboNames.OPENTHREE,
-      maskP: BigInt("0b1101"),
-      maskO: BigInt("0b10"),
+      maskP: 0b1101n,
+      maskO: 0b10n,
       masksP: [],
       masksO: [], cols: 4,
       rows: 1,
@@ -111,19 +117,19 @@ export class Combination {
     {
       name: "Closed Three 1",
       type: ComboNames.CLOSEDTHREE,
-      maskP: BigInt("0b1110"),
-      maskO: BigInt("0b1"),
+      maskP: 0b1110n,
+      maskO: 0b1n,
       masksP: [],
       masksO: [], cols: 4,
       rows: 1,
     },
 // {
-//     three1: BigInt("0b111"),
-//     three2: BigInt("0b1101"),
-//     three3: BigInt("0b1011"),
-//     three4: BigInt("0b10101"),
-//     three5: BigInt("0b11001"),
-//     three6: BigInt("0b10011"),
+//     three1: 0b111n,
+//     three2: 0b1101n,
+//     three3: 0b1011n,
+//     three4: 0b10101n,
+//     three5: 0b11001n,
+//     three6: 0b10011n,
 //   };
   ];
   size = 19;
