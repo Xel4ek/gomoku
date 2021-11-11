@@ -35,7 +35,7 @@ export class AiService {
   size = 19;
 
   getNextAction(board: BitBoard): string {
-    this.minimax(board, this.depth, false, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY);
+    board.score = this.minimax(board, this.depth, false, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY);
     console.log(board.possibleActions);
     if (board.possibleActions.length > 0) {
       const action = board.possibleActions.reduce(((previousValue, currentValue) => {
@@ -51,34 +51,39 @@ export class AiService {
   }
 
   eval(isMax: boolean, board: BitBoard, depth: number, alpha: number, beta: number) {
-      let evalScore = isMax ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY;
-      for (const action of board.possibleActions) {
-        // console.log(`${depth}: ${board.nextWhiteMove} ${action.row} - ${action.col}`);
-        const board_new = board.clone();
-        board_new.move(action.col, action.row, "player");
-        action.score = this.minimax(board_new, depth - 1, !isMax, alpha, beta);
-        evalScore = isMax ? Math.max(evalScore, action.score) : Math.min(evalScore, action.score);
-        // console.log('max: ', oldMax, action.score, ' -> ', maxEval);
-        if (isMax) {
-          alpha = Math.max(alpha, action.score);
-        } else {
-          beta = Math.min(beta, action.score);
-        }
-        if (beta <= alpha) {
-          // console.log('max pruned!')
-          break;
-        }
+    let evalScore = isMax ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY;
+    for (const action of board.possibleActions) {
+      console.log(`${depth}: ${isMax} ${action.row} - ${action.col}, score: ${action.score}`);
+      const newBoard = board.clone();
+      newBoard.move(action.col, action.row, isMax ? "player" : "enemy");
+      action.score = this.minimax(newBoard, depth - 1, !isMax, alpha, beta);
+      evalScore = isMax ? Math.max(evalScore, action.score) : Math.min(evalScore, action.score);
+      // console.log(`${depth}: ${isMax} ${action.row} - ${action.col}, score: ${action.score}`);
+      // console.log('max: ', oldMax, action.score, ' -> ', maxEval);
+      if (isMax) {
+        alpha = Math.max(alpha, action.score);
+      } else {
+        beta = Math.min(beta, action.score);
       }
-      return evalScore;
+      if (beta <= alpha) {
+        console.log(isMax + " pruned!");
+        break;
+      }
+    }
+    return evalScore;
   }
 
 
   minimax(board: BitBoard, depth: number, maximizing: boolean, alpha: number, beta: number): number {
     board.generateActions();
-    console.log(board.possibleActions);
+    // console.log("isMax: " + maximizing, board.possibleActions);
+    // console.log(BitBoard.printBitBoard(board.boards.player, board.size));
     if (depth === 0 || board.checkWin(maximizing) || board.possibleActions.length === 0) {
-      console.log("WIN: " + board.checkWin(maximizing));
-      return board.updateScore();
+      const score = board.updateScore();
+      console.log("Depth 0. Score: " + score, "WIN: " + board.checkWin(maximizing), "Actions :" + board.possibleActions.length);
+      console.log(BitBoard.printBitBoard(board.boards.player, board.size));
+      console.log(BitBoard.printBitBoard(board.boards.enemy, board.size));
+      return score;
     }
     return this.eval(maximizing, board, depth, alpha, beta);
   }

@@ -12,7 +12,15 @@ export enum ComboNames {
   CLOSEDFOUR,
   OPENTHREE,
   CLOSEDTHREE,
+}
 
+export enum BitComparer {
+  NONE,
+  AND,
+  OR,
+  XOR,
+  NOT,
+  ANY,
 }
 
 export class Combo {
@@ -24,6 +32,7 @@ export class Combo {
   masksO: bigint[] = [];
   cols = 0;
   rows = 0;
+  comparer? = BitComparer.NONE;
 
   constructor(init?: Partial<Combo>) {
     Object.assign(this, init);
@@ -50,15 +59,17 @@ export class Combination {
       masksP: [],
       masksO: [], cols: 6,
       rows: 1,
+      comparer: BitComparer.NOT,
     },
     {
       name: "Closed Four 1",
       type: ComboNames.CLOSEDFOUR,
       maskP: 0b1111n,
-      maskO: 0b011110n,
+      maskO: 0b100001n,
       masksP: [],
       masksO: [], cols: 4,
       rows: 1,
+      comparer: BitComparer.ANY,
     },
     {
       name: "Closed Four 2",
@@ -68,6 +79,7 @@ export class Combination {
       masksP: [],
       masksO: [], cols: 5,
       rows: 1,
+      comparer: BitComparer.ANY,
     },
     {
       name: "Closed Four 3",
@@ -77,6 +89,7 @@ export class Combination {
       masksP: [],
       masksO: [], cols: 5,
       rows: 1,
+      comparer: BitComparer.AND,
     },
     {
       name: "Closed Four 4",
@@ -86,6 +99,7 @@ export class Combination {
       masksP: [],
       masksO: [], cols: 5,
       rows: 1,
+      comparer: BitComparer.AND,
     },
     {
       name: "Open Three 1",
@@ -95,6 +109,7 @@ export class Combination {
       masksP: [],
       masksO: [], cols: 5,
       rows: 1,
+      comparer: BitComparer.NOT,
     },
     {
       name: "Open Three 2",
@@ -104,6 +119,7 @@ export class Combination {
       masksP: [],
       masksO: [], cols: 4,
       rows: 1,
+      comparer: BitComparer.NOT,
     },
     {
       name: "Open Three 3",
@@ -113,15 +129,17 @@ export class Combination {
       masksP: [],
       masksO: [], cols: 4,
       rows: 1,
+      comparer: BitComparer.NOT,
     },
     {
       name: "Closed Three 1",
       type: ComboNames.CLOSEDTHREE,
       maskP: 0b1110n,
-      maskO: 0b1n,
+      maskO: 0b10001n,
       masksP: [],
       masksO: [], cols: 4,
       rows: 1,
+      comparer: BitComparer.ANY,
     },
 // {
 //     three1: 0b111n,

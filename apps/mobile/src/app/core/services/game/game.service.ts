@@ -3,6 +3,7 @@ import { GameBoard } from "../ai/ai.service";
 import { DrawerDirective } from "../../directives/drawer/drawer.directive";
 import { BitBoard } from "../board/bit-board";
 import { BoardService } from "../board/board.service";
+import { Combination } from "../board/combination";
 
 export enum PlayerType {
   HUMAN,
@@ -73,7 +74,8 @@ export class GameService {
   async nextTurn() {
     const gameBoard = await this.players[this._turn % this.players.length].next();
     // this.boardService.update(gameBoard);
-    const isWin = (new BitBoard(this.size, gameBoard)).checkWin(true);
+    const combination = new Combination(this.size);
+    const isWin = (new BitBoard(combination.combinations, this.size, gameBoard)).checkWin(true);
     if (isWin) {
       this.endGame();
     } else {

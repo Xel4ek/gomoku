@@ -37,11 +37,13 @@ export class LocalStorageService {
     console.log(gameBoard);
     if (gameBoard.isPlayer) {
       const combos = new Combination(gameBoard.size);
-      const move = this.aiService.getNextAction(new BitBoard(combos.combinations, gameBoard.size, gameBoard));
+      const board = new BitBoard(combos.combinations, gameBoard.size, gameBoard);
+      // console.log(BitBoard.printBitBoard(board.boards.enemy, board.size));
+      const move = this.aiService.getNextAction(board);
       gameBoard.lastMove = move;
       gameBoard.opp.push(move);
       // gameBoard.lastMove = Math.floor(Math.random() * gameBoard.size * gameBoard.size).toString();
-      gameBoard.isPlayer = !gameBoard.isPlayer;
+      gameBoard.isPlayer = false;
       gameBoard.id += 1;
       this.subject.next(gameBoard);
     }

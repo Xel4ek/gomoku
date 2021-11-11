@@ -1,11 +1,14 @@
 import { BitBoard } from './bit-board';
+import { Combination } from "./combination";
 
 describe('BitBoard', () => {
   let board: BitBoard;
 
   beforeEach(() => {
-    board = new BitBoard(undefined, 9);
-    board.boards.max = BigInt(
+    const size = 9;
+    const combination = new Combination(size)
+    board = new BitBoard(combination.combinations, size);
+    board.boards.player = BigInt(
       "0b" +
       "0000000000" +
       "0000000100" +
@@ -60,13 +63,13 @@ describe('BitBoard', () => {
 
   it('should checkWin', () => {
     const win = BigInt("0b1111100011011000");
-    board.boards.max |= win;
+    board.boards.player |= win;
     // expect(board.checkMask(board.combinations.five, true)).toEqual({ row: 1, col: 3 });
-    console.log(BitBoard.printBitBoard(board.boards.max, board.size));
+    console.log(BitBoard.printBitBoard(board.boards.player, board.size));
   });
 
   it('should rotate90 board', () => {
-    console.log(BitBoard.printBitBoard(board.boards.max, board.size));
+    console.log(BitBoard.printBitBoard(board.boards.player, board.size));
     // board.checkMask(board.combinations.five, true);
   });
 
@@ -83,8 +86,8 @@ describe('BitBoard', () => {
 
   it('should count lines', () => {
     board.player = "max";
-    board.boards.min = BigInt("0b01110");
-    console.log(BitBoard.printBitBoard(board.boards.max, board.size));
+    board.boards.enemy = BigInt("0b01110");
+    console.log(BitBoard.printBitBoard(board.boards.player, board.size));
   });
 
   it('should set masks', () => {

@@ -116,7 +116,7 @@ export class DrawerDirective implements AfterViewInit, OnDestroy {
             }
             this.gameBoard.id = this.gameBoard.id + 1;
             this.gameBoard.timestamp = Date.now();
-            this.gameBoard.isPlayer = !this.gameBoard.isPlayer;
+            this.gameBoard.isPlayer = true;
             this.localStorageService.addMessage(this.gameBoard);
             // playerTurn = !playerTurn;
           }
