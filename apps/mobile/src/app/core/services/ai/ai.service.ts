@@ -81,8 +81,8 @@ export class AiService {
     if (depth === 0 || board.checkWin(maximizing) || board.possibleActions.length === 0) {
       const score = board.updateScore();
       console.log("Depth 0. Score: " + score, "WIN: " + board.checkWin(maximizing), "Actions :" + board.possibleActions.length);
-      console.log(BitBoard.printBitBoard(board.boards.player, board.size));
-      console.log(BitBoard.printBitBoard(board.boards.enemy, board.size));
+      // console.log(BitBoard.printBitBoard(board.boards.player, board.size));
+      // console.log(BitBoard.printBitBoard(board.boards.enemy, board.size));
       return score;
     }
     return this.eval(maximizing, board, depth, alpha, beta);

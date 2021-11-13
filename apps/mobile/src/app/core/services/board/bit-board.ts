@@ -145,13 +145,13 @@ export class BitBoard {
     const matchMax: Combo[] = [];
     const matchMin: Combo[] = [];
     this.combinations.forEach(combo => {
-      combo.masksP.forEach(((value, index) => {
-        if ((value & this.boards.player) === value
+      combo.masksLen.forEach(((maskLen, index) => {
+        if (((maskLen & this.boards.player) === combo.masksP[index])
           && BitBoard.comparer(combo, this.boards.enemy, combo.masksO[index])) {
           matchMax.push(combo);
           console.log("PUSHED PLAYER COMBO", combo);
         }
-        if ((value & this.boards.enemy) === value
+        if (((maskLen & this.boards.enemy) === combo.masksP[index])
           && BitBoard.comparer(combo, this.boards.player, combo.masksO[index])) {
           matchMin.push(combo);
           console.log("PUSHED ENEMY COMBO", combo);
@@ -231,9 +231,9 @@ export class BitBoard {
     }
   }
 
-  checkWinErosion(isMax: boolean) {
+  checkWin(isMax: boolean) {
     const len: number[] = [];
-    Object.keys(Dir).forEach(value => {
+    ["E", "S", "SW", "SE"].forEach(value => {
       let length = 0;
       let bits = isMax ? this.boards.player : this.boards.enemy;
       while (bits) {
@@ -242,10 +242,10 @@ export class BitBoard {
       }
       len.push(length);
     });
-    return Math.max(...len);
+    return Math.max(...len) >= 5;
   }
 
-  checkWin(isMax: boolean): boolean {
+  checkWinMask(isMax: boolean): boolean {
     const winCombos = this.combinations.filter(value => value.type === ComboNames.FIVE);
     for (let i = 0; i < winCombos.length; i++) {
       for (let j = 0; j < winCombos[i].masksP.length; j++) {
