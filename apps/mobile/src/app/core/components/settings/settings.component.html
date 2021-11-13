@@ -1,9 +1,54 @@
-<div class="tui-container_adaptive settings">
-  <div class="player">one</div>
-  <div class="player enemy">other</div>
+<form class="tui-container_adaptive settings" [formGroup]="settingsForm">
+  <div class="player">
+    <tui-select formControlName="player" [valueContent]="select">
+      Player
+      <tui-data-list-wrapper
+        *tuiDataList
+        [items]="players"
+        [itemContent]="select"
+      ></tui-data-list-wrapper>
+    </tui-select>
+    <tui-select
+      *ngIf="settingsForm.get('player')?.value?.type === playerType.AI"
+      formControlName="playerDeep"
+    >
+      Deep
+      <tui-data-list-wrapper
+        *tuiDataList
+        [items]="deep"
+      ></tui-data-list-wrapper>
+    </tui-select>
+  </div>
+  <!--  <div class="player">one</div>-->
+  <div class="player enemy">
+    <tui-select formControlName="enemy" [valueContent]="select">
+      Player
+      <tui-data-list-wrapper
+        *tuiDataList
+        [items]="players"
+        [itemContent]="select"
+      ></tui-data-list-wrapper>
+    </tui-select>
+    <tui-select
+      *ngIf="settingsForm.get('enemy')?.value?.type === playerType.AI"
+      formControlName="enemyDeep"
+    >
+      Deep
+      <tui-data-list-wrapper
+        *tuiDataList
+        [items]="deep"
+      ></tui-data-list-wrapper>
+    </tui-select>
+  </div>
+
   <div class="btn-block">
-    <button tuiButton size="xl" [routerLink]="['/game']" appearance="primary">
+    <button tuiButton size="xl" (click)="startGame()" appearance="primary">
       Start Game
     </button>
   </div>
-</div>
+</form>
+<ng-template #select let-player>
+  <div>
+    <span class="card-name"> {{ player.title | titlecase }} </span>
+  </div>
+</ng-template>

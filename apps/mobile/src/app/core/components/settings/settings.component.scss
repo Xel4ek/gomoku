@@ -1,7 +1,7 @@
 .settings {
   position: relative;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   height: 100%;
   .btn-block {
     position: absolute;
@@ -12,8 +12,11 @@
   .player {
     display: flex;
     flex-direction: column;
+    width: 160px;
+    gap: 2rem;
+    margin-top: 2rem;
   }
   .enemy {
-    align-items: flex-end;
+    //align-items: flex-end;
   }
 }

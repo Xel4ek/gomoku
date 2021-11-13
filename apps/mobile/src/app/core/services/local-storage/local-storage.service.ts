@@ -1,18 +1,18 @@
 import { Injectable } from '@angular/core';
-import { Subject } from "rxjs";
-import { AiService, GameBoard } from "../ai/ai.service";
-import { BitBoard } from "../board/bit-board";
-import { Combination } from "../board/combination";
+import { Subject } from 'rxjs';
+import { AiService, GameBoard } from '../ai/ai.service';
+import { BitBoard } from '../board/bit-board';
+import { Combination } from '../board/combination';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class LocalStorageService {
   subject = new Subject<GameBoard>();
   boards: BitBoard[] = [];
 
   constructor(private aiService: AiService) {
-    this.subject.subscribe(gameBoard => this.onEvent(gameBoard));
+    this.subject.subscribe((gameBoard) => this.onEvent(gameBoard));
   }
 
   saveBoard(board: BitBoard) {
@@ -37,7 +37,11 @@ export class LocalStorageService {
     console.log(gameBoard);
     if (gameBoard.isPlayer) {
       const combos = new Combination(gameBoard.size);
-      const board = new BitBoard(combos.combinations, gameBoard.size, gameBoard);
+      const board = new BitBoard(
+        combos.combinations,
+        gameBoard.size,
+        gameBoard
+      );
       // console.log(BitBoard.printBitBoard(board.boards.enemy, board.size));
       const move = this.aiService.getNextAction(board);
       gameBoard.lastMove = move;

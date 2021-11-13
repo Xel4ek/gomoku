@@ -1,15 +1,12 @@
 import { Injectable } from '@angular/core';
-import { GameBoard } from "../ai/ai.service";
-import { DrawerDirective } from "../../directives/drawer/drawer.directive";
-import { BitBoard } from "../board/bit-board";
-import { BoardService } from "../board/board.service";
-import { Combination } from "../board/combination";
+import { GameBoard } from '../ai/ai.service';
+import { BoardService } from '../board/board.service';
+import { FormGroup } from '@angular/forms';
 
 export enum PlayerType {
   HUMAN,
-  AI
+  AI,
 }
-
 
 export class Player {
   type: PlayerType;
@@ -22,32 +19,34 @@ export class Player {
 
   async next(): Promise<GameBoard> {
     const subscription = this.workerOrService.onMessage();
-    this.workerOrService.message("getNextActiion");
+    this.workerOrService.message('getNextActiion');
     return subscription;
   }
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
-
 export class GameService {
   size = 19;
   players: Player[] = [];
   worker?: Worker;
+
+  constructor(
+    // private readonly drawerDirective: DrawerDirective,
+    private readonly boardService: BoardService
+  ) {
+    console.log('Game Service');
+  }
+
   private _turn = 0;
 
   get turn() {
     return Math.ceil(this._turn / this.players.length);
   }
 
-  constructor(private readonly drawerDirective: DrawerDirective,
-              private readonly boardService: BoardService) {
-    console.log("Game Service")
-  }
-
-  initGame(size: number = 19, players: PlayerType[]) {
-    this.size = size;
+  initGame(settings: FormGroup) {
+    this.size = settings.value.size;
     if (this.worker) {
       //TODO: delete existing worker before init
     }
@@ -62,30 +61,38 @@ export class GameService {
       // Web Workers are not supported in this environment.
       // You should add a fallback so that your program still executes correctly.
     }
-    players.map(player => {
-      if (player === PlayerType.HUMAN) {
-        this.players.push(new Player(player, this.drawerDirective));
-      } else {
-        this.players.push(new Player(player, this.worker));
-      }
-    });
+    // players.map((player) => {
+    //   if (player === PlayerType.HUMAN) {
+    //     // this.players.push(new Player(player, this.drawerDirective));
+    //   } else {
+    //     this.players.push(new Player(player, this.worker));
+    //   }
+    // });
   }
 
   async nextTurn() {
-    const gameBoard = await this.players[this._turn % this.players.length].next();
-    // this.boardService.update(gameBoard);
-    const combination = new Combination(this.size);
-    const isWin = (new BitBoard(combination.combinations, this.size, gameBoard)).checkWin(true);
-    if (isWin) {
-      this.endGame();
-    } else {
-      this._turn += 1;
-      await this.nextTurn();
-    }
+    // const gameBoard = await this.players[
+    //   this._turn % this.players.length
+    // ].next();
+    // // this.boardService.update(gameBoard);
+    // const combination = new Combination(this.size);
+    // const isWin = new BitBoard(
+    //   combination.combinations,
+    //   this.size,
+    //   gameBoard
+    // ).checkWin(true);
+    // if (isWin) {
+    //   this.endGame();
+    // } else {
+    //   this._turn += 1;
+    //   await this.nextTurn();
+    // }
   }
 
   endGame() {
-    console.log("Player win: " + this.players[this._turn % this.players.length]);
+    console.log(
+      'Player win: ' + this.players[this._turn % this.players.length]
+    );
   }
 
   startGame() {

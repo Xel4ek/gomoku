@@ -1,10 +1,4 @@
-import {
-  Component,
-  ElementRef,
-  HostListener,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'gomoku-game',
@@ -13,8 +7,8 @@ import {
 })
 export class GameComponent {
   constructor() {
-    const worker = new Worker("./assets/ai-worker.worker.js");
-    worker.onmessage = console.log;
-    worker.postMessage("text");
+    // const worker = new Worker("./assets/ai-worker.worker.js");
+    // worker.onmessage = console.log;
+    // worker.postMessage("text");
   }
 }
