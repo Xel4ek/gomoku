@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { GameService, PlayerType } from '../../services/game/game.service';
-import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -13,7 +12,10 @@ export class GameComponent {
   player?: string;
   enemy?: string;
   players$: Observable<
-    [{ name: string; color: string }, { name: string; color: string }]
+    [
+      { name: string; color: string; turn: boolean },
+      { name: string; color: string }
+    ]
   >;
 
   constructor(private readonly gameService: GameService) {
@@ -23,6 +25,7 @@ export class GameComponent {
           {
             name: PlayerType[data.player.type],
             color: data.player.options.color(),
+            turn: Boolean(data.id % 2),
           },
           {
             name: PlayerType[data.enemy.type],
