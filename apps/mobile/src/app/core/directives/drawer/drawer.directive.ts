@@ -33,9 +33,17 @@ export class DrawerDirective implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
+    const size = Math.min(window.innerWidth * 0.7, window.innerHeight * 0.9);
+    const ctx = this.elementRef.nativeElement.getContext('2d');
+    if (ctx) {
+      ctx.canvas.width = size;
+      ctx.canvas.height = size;
+    }
+    this.space = new CanvasSpace(this.elementRef.nativeElement);
     this.space.setup({ bgcolor: 'rgba(255,255,255,0)' });
     const form = this.space.getForm();
     const lines: Group[] = [];
+    let radius = 0;
     this.space.add({
       animate: () => {
         if (!this.board) {
@@ -48,9 +56,9 @@ export class DrawerDirective implements AfterViewInit, OnDestroy {
             this.board.size
           );
           this.pts.map((p, index) => (p.id = index.toString()));
+          radius = (this.pts.p2.x - this.pts.p1.x) * 0.42;
           const b = this.space.innerBound;
-          const size =
-            (this.space.innerBound.width / this.board.size - 3.25) * 2;
+          const size = this.board.size * 2 - 1;
           const left = Line.subpoints([b.p1, new Pt([b.p1.x, b.q1.y])], size);
           const right = Line.subpoints([new Pt([b.q1.x, b.p1.y]), b.q1], size);
           const top = Line.subpoints([b.p1, new Pt([b.q1.x, b.p1.y])], size);
@@ -65,8 +73,6 @@ export class DrawerDirective implements AfterViewInit, OnDestroy {
           (a, b) => a.$subtract(t).magnitudeSq() - b.$subtract(t).magnitudeSq()
         );
         form.strokeOnly('rgba(255,255,255,0.5)').lines(lines);
-        const radius =
-          this.space.innerBound.width / (this.board.size + 1.25) / 2 - 1.2;
         const current =
           this.board.id % 2 ? this.board.enemy : this.board.player;
         if (

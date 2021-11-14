@@ -18,6 +18,7 @@ export interface Player {
   map: number[];
   options: {
     color: (opacity?: number) => string;
+    deep: number;
   };
 }
 export interface GameBoard {

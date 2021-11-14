@@ -19,7 +19,7 @@ export class SettingsComponent {
     new Player(PlayerType.AI, 'Ai'),
     new Player(PlayerType.HUMAN, 'Human'),
   ];
-  deep = [1, 2, 3];
+  deep = [0, 1, 2, 3];
 
   constructor(
     private readonly formBuilder: FormBuilder,
@@ -28,9 +28,9 @@ export class SettingsComponent {
   ) {
     this.settingsForm = formBuilder.group({
       player: [this.players[1]],
-      playerDeep: [this.deep[0]],
+      playerDeep: [this.deep[1]],
       enemy: [this.players[0]],
-      enemyDeep: [this.deep[0]],
+      enemyDeep: [this.deep[1]],
       size: [19],
     });
   }

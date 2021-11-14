@@ -55,7 +55,8 @@ export class GameService {
         type: settings.get('player')?.value.type,
         map: [],
         options: {
-          color: (alpha: number = 1) => 'rgba(69,187,0,' + alpha + ')',
+          color: (alpha: number = 1) => 'rgba(3, 0,187,' + alpha + ')',
+          deep: settings.get('playerDeep')?.value ?? 0,
         },
       },
       enemy: {
@@ -63,6 +64,7 @@ export class GameService {
         map: [],
         options: {
           color: (alpha: number = 1) => 'rgba(194,6,6,' + alpha + ')',
+          deep: settings.get('enemyDeep')?.value ?? 0,
         },
       },
       size: settings.get('size')?.value ?? 19,
