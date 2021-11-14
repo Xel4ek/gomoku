@@ -54,6 +54,7 @@ export class Combination {
       masksLen: [],
       cols: 5,
       rows: 1,
+      comparer: BitComparer.NONE,
     },
     {
       name: "Open Four",

@@ -63,6 +63,8 @@ export class BitBoard {
     if (combo.comparer === BitComparer.NOT) {
       return (board & mask) === 0n;
     }
+    if (combo.comparer === BitComparer.NONE)
+      return true;
     return false;
   }
 
@@ -145,24 +147,22 @@ export class BitBoard {
   updateScore() {
     const matchMax: Combo[] = [];
     const matchMin: Combo[] = [];
-    this.combinations.forEach((combo) => {
-      combo.masksLen.forEach((maskLen, index) => {
-        if (
-          (maskLen & this.boards.player) === combo.masksP[index] &&
-          BitBoard.comparer(combo, this.boards.enemy, combo.masksO[index])
-        ) {
+    this.combinations.forEach(combo => {
+      combo.masksLen.forEach(((maskLen, index) => {
+        console.log((maskLen & this.boards.player) === combo.masksP[index]);
+        if (((maskLen & this.boards.player) === combo.masksP[index])
+          && BitBoard.comparer(combo, this.boards.enemy, combo.masksO[index])) {
           matchMax.push(combo);
           console.log('PUSHED PLAYER COMBO', combo);
         }
-        if (
-          (maskLen & this.boards.enemy) === combo.masksP[index] &&
-          BitBoard.comparer(combo, this.boards.player, combo.masksO[index])
-        ) {
+        if (((maskLen & this.boards.enemy) === combo.masksO[index])
+          && BitBoard.comparer(combo, this.boards.player, combo.masksO[index])) {
           matchMin.push(combo);
           console.log('PUSHED ENEMY COMBO', combo);
         }
-      });
+      }));
     });
+    console.log(matchMax, matchMin);
     const score = this.calculateScore(matchMax) - this.calculateScore(matchMin);
     if (score > 100000) {
       this.winPlayer = true;
@@ -194,10 +194,9 @@ export class BitBoard {
     if (count[ComboNames.OPENFOUR] > 0) {
       score += 15000;
     }
-    if (
-      count[ComboNames.OPENTHREE] > 1 ||
-      count[ComboNames.CLOSEDFOUR] > 1 ||
-      (count[ComboNames.CLOSEDFOUR] > 0 && count[ComboNames.OPENTHREE] > 1)
+    if (count[ComboNames.OPENTHREE] > 1
+      || count[ComboNames.CLOSEDFOUR] > 1
+      || (count[ComboNames.CLOSEDFOUR] > 0 && count[ComboNames.OPENTHREE] > 1)
     ) {
       score += 10000;
     }
@@ -215,16 +214,15 @@ export class BitBoard {
     let moves = occupied;
     // console.log(BitBoard.printBitBoard(moves, this.size));
     for (let i = dilation; i > 0; i--) {
-      moves =
-        moves |
-        ((moves >> this.shift.S) & this.boards.empty) |
-        ((moves >> this.shift.N) & this.boards.empty) |
-        ((moves >> this.shift.E) & this.boards.empty) |
-        ((moves >> this.shift.NE) & this.boards.empty) |
-        ((moves >> this.shift.SE) & this.boards.empty) |
-        ((moves >> this.shift.NW) & this.boards.empty) |
-        ((moves >> this.shift.SW) & this.boards.empty) |
-        ((moves >> this.shift.W) & this.boards.empty);
+      moves = moves
+        | (moves >> this.shift.S & this.boards.empty)
+        | (moves >> this.shift.N & this.boards.empty)
+        | (moves >> this.shift.E & this.boards.empty)
+        | (moves >> this.shift.NE & this.boards.empty)
+        | (moves >> this.shift.SE & this.boards.empty)
+        | (moves >> this.shift.NW & this.boards.empty)
+        | (moves >> this.shift.SW & this.boards.empty)
+        | (moves >> this.shift.W & this.boards.empty);
     }
     moves ^= occupied;
     // console.log(BitBoard.printBitBoard(moves, this.size));

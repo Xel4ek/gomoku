@@ -1,5 +1,5 @@
 import { BitBoard } from './bit-board';
-import { Combination } from "./combination";
+import { Combination, Dir } from "./combination";
 
 describe('BitBoard', () => {
   let board: BitBoard;
@@ -62,16 +62,20 @@ describe('BitBoard', () => {
   });
 
   it('should checkWin', () => {
-    const win = BigInt("0b1111100011011000");
+    const win = BigInt("0b11111");
+    const win45 = Combination.rotate(win, 5, 5, Dir.SE, 10);
     board.boards.player |= win;
-    // expect(board.checkMask(board.combinations.five, true)).toEqual({ row: 1, col: 3 });
+    expect(board.checkWin(true)).toBeTruthy();
+    board.boards.player |= win45;
+    expect(board.checkWin(true)).toBeTruthy();
     console.log(BitBoard.printBitBoard(board.boards.player, board.size));
   });
 
-  it('should rotate90 board', () => {
+  it('should get score', () => {
+    console.log(board.updateScore());
     console.log(BitBoard.printBitBoard(board.boards.player, board.size));
-    // board.checkMask(board.combinations.five, true);
   });
+
 
   it('should count bits', () => {
     let count = 0;
