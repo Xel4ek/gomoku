@@ -4,7 +4,7 @@
     [ngStyle]="{
       color: players[0].color
     }"
-    [ngClass]="{ active: players[0].turn }"
+    [ngClass]="{ active: !players[0].turn }"
   >
     {{ players[0].name | titlecase }}
   </div>
@@ -14,7 +14,7 @@
     [ngStyle]="{
       color: players[1].color
     }"
-    [ngClass]="{ active: !players[0].turn }"
+    [ngClass]="{ active: players[0].turn }"
   >
     {{ players[1].name | titlecase }}
   </div>

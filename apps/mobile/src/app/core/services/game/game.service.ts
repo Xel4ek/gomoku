@@ -18,14 +18,14 @@ export class Player {
     this.workerOrService = workerOrService;
   }
 
-  async next(): Promise<GameBoard | null> {
-    if (this.workerOrService) {
-      const subscription = this.workerOrService.onMessage();
-      this.workerOrService.message('getNextActiion');
-      return subscription;
-    }
-    return new Promise(() => null);
-  }
+  // async next(): Promise<GameBoard | null> {
+  //   if (this.workerOrService) {
+  //     const subscription = this.workerOrService.onMessage();
+  //     this.workerOrService.message('getNextActiion');
+  //     return subscription;
+  //   }
+  //   return new Promise(() => null);
+  // }
 }
 
 @Injectable({
@@ -35,10 +35,6 @@ export class GameService {
   size = 19;
   worker?: Worker;
   private _sequence$ = new ReplaySubject<GameBoard>();
-
-  constructor(private readonly boardService: BoardService) {
-    console.log('Game Service');
-  }
 
   private _turn = 0;
 
@@ -98,7 +94,7 @@ export class GameService {
 
   startGame() {
     this._turn = 0;
-    this.boardService.create(this.size);
+    // this.boardService.create(this.size);
   }
 
   makeTurn(board: GameBoard) {
