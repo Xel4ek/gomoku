@@ -28,8 +28,10 @@ export class Combo {
   type = ComboNames.DUMMY;
   maskP = 0n;
   maskO = 0n;
+  maskLen = 0n;
   masksP: bigint[] = [];
   masksO: bigint[] = [];
+  masksLen: bigint[] = [];
   cols = 0;
   rows = 0;
   comparer? = BitComparer.NONE;
@@ -46,8 +48,10 @@ export class Combination {
       type: ComboNames.FIVE,
       maskP: 0b11111n,
       maskO: 0n,
+      maskLen: 0b11111n,
       masksP: [],
       masksO: [],
+      masksLen: [],
       cols: 5,
       rows: 1,
     },
@@ -56,8 +60,11 @@ export class Combination {
       type: ComboNames.OPENFOUR,
       maskP: 0b11110n,
       maskO: 0b100001n,
+      maskLen: 0b111111n,
       masksP: [],
-      masksO: [], cols: 6,
+      masksO: [],
+      masksLen: [],
+      cols: 6,
       rows: 1,
       comparer: BitComparer.NOT,
     },
@@ -66,8 +73,11 @@ export class Combination {
       type: ComboNames.CLOSEDFOUR,
       maskP: 0b1111n,
       maskO: 0b100001n,
+      maskLen: 0b111111n,
       masksP: [],
-      masksO: [], cols: 4,
+      masksO: [],
+      masksLen: [],
+      cols: 6,
       rows: 1,
       comparer: BitComparer.ANY,
     },
@@ -76,8 +86,11 @@ export class Combination {
       type: ComboNames.CLOSEDFOUR,
       maskP: 0b11011n,
       maskO: 0b100n,
+      maskLen: 0b11111n,
       masksP: [],
-      masksO: [], cols: 5,
+      masksO: [],
+      masksLen: [],
+      cols: 5,
       rows: 1,
       comparer: BitComparer.ANY,
     },
@@ -86,8 +99,11 @@ export class Combination {
       type: ComboNames.CLOSEDFOUR,
       maskP: 0b11101n,
       maskO: 0b10n,
+      maskLen: 0b11111n,
       masksP: [],
-      masksO: [], cols: 5,
+      masksO: [],
+      masksLen: [],
+      cols: 5,
       rows: 1,
       comparer: BitComparer.AND,
     },
@@ -96,8 +112,11 @@ export class Combination {
       type: ComboNames.CLOSEDFOUR,
       maskP: 0b10111n,
       maskO: 0b1000n,
+      maskLen: 0b11111n,
       masksP: [],
-      masksO: [], cols: 5,
+      masksO: [],
+      masksLen: [],
+      cols: 5,
       rows: 1,
       comparer: BitComparer.AND,
     },
@@ -106,8 +125,11 @@ export class Combination {
       type: ComboNames.OPENTHREE,
       maskP: 0b1110n,
       maskO: 0b10001n,
+      maskLen: 0b11111n,
       masksP: [],
-      masksO: [], cols: 5,
+      masksO: [],
+      masksLen: [],
+      cols: 5,
       rows: 1,
       comparer: BitComparer.NOT,
     },
@@ -116,8 +138,11 @@ export class Combination {
       type: ComboNames.OPENTHREE,
       maskP: 0b1011n,
       maskO: 0b100n,
+      maskLen: 0b111111n,
       masksP: [],
-      masksO: [], cols: 4,
+      masksO: [],
+      masksLen: [],
+      cols: 6,
       rows: 1,
       comparer: BitComparer.NOT,
     },
@@ -126,18 +151,24 @@ export class Combination {
       type: ComboNames.OPENTHREE,
       maskP: 0b1101n,
       maskO: 0b10n,
+      maskLen: 0b111111n,
       masksP: [],
-      masksO: [], cols: 4,
+      masksO: [],
+      masksLen: [],
+      cols: 6,
       rows: 1,
       comparer: BitComparer.NOT,
     },
     {
       name: "Closed Three 1",
       type: ComboNames.CLOSEDTHREE,
-      maskP: 0b1110n,
+      maskP: 0b111n,
       maskO: 0b10001n,
+      maskLen: 0b11111n,
       masksP: [],
-      masksO: [], cols: 4,
+      masksO: [],
+      masksLen: [],
+      cols: 5,
       rows: 1,
       comparer: BitComparer.ANY,
     },
@@ -178,15 +209,19 @@ export class Combination {
     this.combinations.forEach(combo => {
       let maskP = combo.maskP;
       let maskO = combo.maskO;
+      let maskLen = combo.maskLen;
       for (let row = 0; row < (this.size - combo.rows); row++) {
         for (let col = 0; col <= (this.size - combo.cols); col++) {
           combo.masksP.push(maskP);
           combo.masksO.push(maskO);
+          combo.masksLen.push(maskLen);
           maskP <<= 1n;
           maskO <<= 1n;
+          maskLen <<= 1n;
         }
         maskP <<= BigInt(combo.cols + 1);
         maskO <<= BigInt(combo.cols + 1);
+        maskLen <<= BigInt(combo.cols + 1);
       }
     });
   }
@@ -199,8 +234,10 @@ export class Combination {
           type: combo.type,
           maskP: Combination.rotate(combo.maskP, combo.cols, combo.rows, direction, this.size),
           maskO: Combination.rotate(combo.maskO, combo.cols, combo.rows, direction, this.size),
+          maskLen: Combination.rotate(combo.maskLen, combo.cols, combo.rows, direction, this.size),
           masksP: [],
           masksO: [],
+          masksLen: [],
           cols: combo.cols,
           rows: combo.cols,
         });
