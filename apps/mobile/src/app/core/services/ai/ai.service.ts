@@ -1,14 +1,16 @@
 import { Injectable } from '@angular/core';
 import { BitBoard } from '../board/bit-board';
 import { PlayerType } from '../game/game.service';
+import { Observable, of } from "rxjs";
 
 export enum AI {
   SIMPLE,
 }
 
 //TODO: Check score calculation (may be wrong shift to N, NW, NE)
-//TODO: AI ignores first move
 //TODO: place AI to worker
+//TODO: remove forbidden moves
+//TODO: add scoring of capture moves, or may be not (static eval will be enough)
 
 interface AiStatistics {
   [key: string]: unknown;
@@ -42,10 +44,12 @@ export interface GameBoard {
 })
 export class AiService {
   depth = 3;
+  //TODO: add time limit
+  timeLimit = 500 //milliseconds
   winCount = 5;
   size = 19;
 
-  getNextAction(board: BitBoard): string {
+  getNextAction(board: BitBoard): number {
     board.score = this.minimax(
       board,
       this.depth,
@@ -65,10 +69,9 @@ export class AiService {
       //TODO: refactor turn
       board.move(action.col, action.row, 'enemy');
       console.log(action);
-      return (action.row * this.size + action.col).toString();
+      return action.row * this.size + action.col;
     }
-    return '';
-    // return Math.floor(Math.random() * board.size * board.size).toString();
+    return -1;
   }
 
   eval(
