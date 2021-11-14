@@ -1,5 +1,22 @@
-<div class="game">
-  <div class="info">me</div>
+<div class="game" *ngIf="players$ | async as players; else endGame">
+  <div class="info" [ngStyle]="{ color: players[0].color }">
+    {{ players[0].name | titlecase }}
+  </div>
   <canvas gomokuDrawer class="playing-field"></canvas>
-  <div class="info">enemy</div>
+  <div class="info" [ngStyle]="{ color: players[1].color }">
+    {{ players[1].name | titlecase }}
+  </div>
 </div>
+<ng-template #endGame>
+  <div class="btn-block">
+    <button
+      tuiButton
+      type="button"
+      size="xl"
+      appearance="primary"
+      [routerLink]="['/settings']"
+    >
+      Settings
+    </button>
+  </div>
+</ng-template>

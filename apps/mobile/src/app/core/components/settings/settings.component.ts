@@ -27,17 +27,16 @@ export class SettingsComponent {
     private readonly router: Router
   ) {
     this.settingsForm = formBuilder.group({
-      player: [this.players[0]],
+      player: [this.players[1]],
       playerDeep: [this.deep[0]],
-      enemy: [this.players[1]],
+      enemy: [this.players[0]],
       enemyDeep: [this.deep[0]],
       size: [19],
     });
   }
 
   startGame() {
-    this.router.navigate(['/game']).then(() => {
-      this.gameService.initGame(this.settingsForm.value);
-    });
+    this.gameService.initGame(this.settingsForm);
+    this.router.navigate(['/game']);
   }
 }

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { GameBoard } from '../ai/ai.service';
 import { BoardService } from '../board/board.service';
 import { FormGroup } from '@angular/forms';
+import { ReplaySubject } from 'rxjs';
 
 export enum PlayerType {
   HUMAN,
@@ -17,10 +18,13 @@ export class Player {
     this.workerOrService = workerOrService;
   }
 
-  async next(): Promise<GameBoard> {
-    const subscription = this.workerOrService.onMessage();
-    this.workerOrService.message('getNextActiion');
-    return subscription;
+  async next(): Promise<GameBoard | null> {
+    if (this.workerOrService) {
+      const subscription = this.workerOrService.onMessage();
+      this.workerOrService.message('getNextActiion');
+      return subscription;
+    }
+    return new Promise(() => null);
   }
 }
 
@@ -29,24 +33,46 @@ export class Player {
 })
 export class GameService {
   size = 19;
-  players: Player[] = [];
   worker?: Worker;
+  private _sequence$ = new ReplaySubject<GameBoard>();
 
-  constructor(
-    // private readonly drawerDirective: DrawerDirective,
-    private readonly boardService: BoardService
-  ) {
+  constructor(private readonly boardService: BoardService) {
     console.log('Game Service');
   }
 
   private _turn = 0;
 
   get turn() {
-    return Math.ceil(this._turn / this.players.length);
+    return Math.ceil(this._turn / 2);
+  }
+
+  sequence$() {
+    return this._sequence$.asObservable();
   }
 
   initGame(settings: FormGroup) {
-    this.size = settings.value.size;
+    this.size = settings.get('size')?.value ?? 19;
+    this._sequence$.next({
+      id: 0,
+      timestamp: 0,
+      player: {
+        type: settings.get('player')?.value.type,
+        map: [],
+        options: {
+          color: (alpha: number = 1) => 'rgba(69,187,0,' + alpha + ')',
+        },
+      },
+      enemy: {
+        type: settings.get('enemy')?.value.type,
+        map: [],
+        options: {
+          color: (alpha: number = 1) => 'rgba(194,6,6,' + alpha + ')',
+        },
+      },
+      size: settings.get('size')?.value ?? 19,
+      lastMove: '',
+      isPlayer: false,
+    });
     if (this.worker) {
       //TODO: delete existing worker before init
     }
@@ -70,34 +96,13 @@ export class GameService {
     // });
   }
 
-  async nextTurn() {
-    // const gameBoard = await this.players[
-    //   this._turn % this.players.length
-    // ].next();
-    // // this.boardService.update(gameBoard);
-    // const combination = new Combination(this.size);
-    // const isWin = new BitBoard(
-    //   combination.combinations,
-    //   this.size,
-    //   gameBoard
-    // ).checkWin(true);
-    // if (isWin) {
-    //   this.endGame();
-    // } else {
-    //   this._turn += 1;
-    //   await this.nextTurn();
-    // }
-  }
-
-  endGame() {
-    console.log(
-      'Player win: ' + this.players[this._turn % this.players.length]
-    );
-  }
-
   startGame() {
     this._turn = 0;
     this.boardService.create(this.size);
-    this.nextTurn();
+  }
+
+  makeTurn(board: GameBoard) {
+    console.log(board);
+    this._sequence$.next(board);
   }
 }

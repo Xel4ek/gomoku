@@ -45,7 +45,7 @@ export class LocalStorageService {
       // console.log(BitBoard.printBitBoard(board.boards.enemy, board.size));
       const move = this.aiService.getNextAction(board);
       gameBoard.lastMove = move;
-      gameBoard.opp.push(move);
+      // gameBoard.opp.push(move);
       // gameBoard.lastMove = Math.floor(Math.random() * gameBoard.size * gameBoard.size).toString();
       gameBoard.isPlayer = false;
       gameBoard.id += 1;
