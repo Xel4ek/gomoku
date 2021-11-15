@@ -1,22 +1,28 @@
 <div class="game" *ngIf="players$ | async as players; else endGame">
-  <div
-    class="info"
-    [ngStyle]="{
-      color: players[0].color
-    }"
-    [ngClass]="{ active: !players[0].turn }"
-  >
-    {{ players[0].name | titlecase }}
+  <div class="info">
+    <div
+      class="name"
+      [ngStyle]="{
+        color: players[0].color
+      }"
+      [ngClass]="{ active: !players[0].turn }"
+    >
+      {{ players[0].name | titlecase }}
+    </div>
+    <div *ngIf="players[0].captured">Captured: {{ players[0].captured }}</div>
   </div>
   <canvas gomokuDrawer class="playing-field"></canvas>
-  <div
-    class="info"
-    [ngStyle]="{
-      color: players[1].color
-    }"
-    [ngClass]="{ active: players[0].turn }"
-  >
-    {{ players[1].name | titlecase }}
+  <div class="info">
+    <div
+      class="name"
+      [ngStyle]="{
+        color: players[1].color
+      }"
+      [ngClass]="{ active: players[0].turn }"
+    >
+      {{ players[1].name | titlecase }}
+    </div>
+    <div *ngIf="players[1].captured">Captured: {{ players[1].captured }}</div>
   </div>
   <div class="game-message" *ngIf="players[2]">
     <div>

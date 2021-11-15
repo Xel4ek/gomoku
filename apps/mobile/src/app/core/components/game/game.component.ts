@@ -13,8 +13,8 @@ export class GameComponent {
   enemy?: string;
   players$: Observable<
     [
-      { name: string; color: string; turn: boolean },
-      { name: string; color: string },
+      { name: string; color: string; turn: boolean; captured: number },
+      { name: string; color: string; captured: number },
       string | undefined
     ]
   >;
@@ -26,11 +26,13 @@ export class GameComponent {
           {
             name: PlayerType[data.player.type],
             color: data.player.options.color(),
+            captured: data.player.captured,
             turn: Boolean(data.id % 2),
           },
           {
             name: PlayerType[data.enemy.type],
             color: data.enemy.options.color(),
+            captured: data.enemy.captured,
           },
           data.winner ? data.winner.color() : undefined,
         ];

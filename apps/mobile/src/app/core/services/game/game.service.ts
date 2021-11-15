@@ -117,6 +117,7 @@ export class GameService implements OnDestroy {
         type: settings.get('player')?.value.type,
         map: [],
         turn: [],
+        captured: 0,
         options: {
           color: (alpha: number = 1) => 'rgba(3, 0,187,' + alpha + ')',
           deep: settings.get('playerDeep')?.value ?? 0,
@@ -126,6 +127,7 @@ export class GameService implements OnDestroy {
         type: settings.get('enemy')?.value.type,
         map: [],
         turn: [],
+        captured: 0,
         options: {
           color: (alpha: number = 1) => 'rgba(194,6,6,' + alpha + ')',
           deep: settings.get('enemyDeep')?.value ?? 0,
@@ -148,21 +150,14 @@ export class GameService implements OnDestroy {
       ? board.player.turn.push(board.id)
       : board.enemy.turn.push(board.id);
     if (toRemove.length) {
-      if (board.id % 2) {
-        board.enemy.map = board.enemy.map.filter(
-          (_, index) => !toRemove.includes(index)
-        );
-        board.enemy.turn = board.enemy.turn.filter(
-          (_, index) => !toRemove.includes(index)
-        );
-      } else {
-        board.player.map = board.player.map.filter(
-          (_, index) => !toRemove.includes(index)
-        );
-        board.player.turn = board.player.turn.filter(
-          (_, index) => !toRemove.includes(index)
-        );
-      }
+      const key: keyof GameBoard = board.id % 2 ? 'enemy' : 'player';
+      board[key].map = board[key].map.filter(
+        (_, index) => !toRemove.includes(index)
+      );
+      board[key].turn = board[key].turn.filter(
+        (_, index) => !toRemove.includes(index)
+      );
+      board[key].captured += toRemove.length / 2;
     }
     console.log(toRemove);
 

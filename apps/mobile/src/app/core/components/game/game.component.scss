@@ -9,10 +9,15 @@
     height: 100%;
   }
   .info {
-    font-size: 2rem;
-    font-weight: bold;
     width: 113px;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    .name {
+      font-size: 2rem;
+      font-weight: bold;
+    }
   }
   .active {
     text-shadow: 0 0 20px;
