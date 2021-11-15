@@ -24,14 +24,15 @@ export interface Player {
 export interface GameBoard {
   id: number;
   timestamp: number;
-  // player: string[];
-  // opp: string[];
   player: Player;
   enemy: Player;
+  blocked: number[];
   size: number;
   stat?: AiStatistics;
-  lastMove: string;
-  isPlayer: boolean;
+  winner?: {
+    color: (opacity?: number) => string;
+    combination: number[];
+  };
 }
 
 @Injectable({

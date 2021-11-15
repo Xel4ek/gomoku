@@ -8,11 +8,11 @@ import { Combination } from '../board/combination';
   providedIn: 'root',
 })
 export class LocalStorageService {
-  subject = new Subject<GameBoard>();
+  // subject = new Subject<GameBoard>();
   boards: BitBoard[] = [];
 
   constructor(private aiService: AiService) {
-    this.subject.subscribe((gameBoard) => this.onEvent(gameBoard));
+    // this.subject.subscribe((gameBoard) => this.onEvent(gameBoard));
   }
 
   saveBoard(board: BitBoard) {
@@ -26,31 +26,31 @@ export class LocalStorageService {
   }
 
   onMessage() {
-    this.subject.asObservable();
+    // this.subject.asObservable();
   }
 
   addMessage(gameBoard: GameBoard) {
-    this.subject.next(gameBoard);
+    // this.subject.next(gameBoard);
   }
 
-  onEvent(gameBoard: GameBoard) {
-    console.log(gameBoard);
-    if (gameBoard.isPlayer) {
-      const combos = new Combination(gameBoard.size);
-      const board = new BitBoard(
-        combos.combinations,
-        gameBoard.size,
-        gameBoard
-      );
-      // console.log(BitBoard.printBitBoard(board.boards.enemy, board.size));
-      const move = this.aiService.getNextAction(board);
-      gameBoard.lastMove = move;
-      // gameBoard.opp.push(move);
-      // gameBoard.lastMove = Math.floor(Math.random() * gameBoard.size * gameBoard.size).toString();
-      gameBoard.isPlayer = false;
-      gameBoard.id += 1;
-      this.subject.next(gameBoard);
-    }
-    console.log(gameBoard);
-  }
+  // onEvent(gameBoard: GameBoard) {
+  //   console.log(gameBoard);
+  //   if (gameBoard.isPlayer) {
+  //     const combos = new Combination(gameBoard.size);
+  //     const board = new BitBoard(
+  //       combos.combinations,
+  //       gameBoard.size,
+  //       gameBoard
+  //     );
+  //     // console.log(BitBoard.printBitBoard(board.boards.enemy, board.size));
+  //     const move = this.aiService.getNextAction(board);
+  //     // gameBoard.lastMove = move;
+  //     // gameBoard.opp.push(move);
+  //     // gameBoard.lastMove = Math.floor(Math.random() * gameBoard.size * gameBoard.size).toString();
+  //     // gameBoard.isPlayer = false;
+  //     gameBoard.id += 1;
+  //     this.subject.next(gameBoard);
+  //   }
+  //   console.log(gameBoard);
+  // }
 }

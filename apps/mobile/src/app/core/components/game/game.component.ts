@@ -14,7 +14,8 @@ export class GameComponent {
   players$: Observable<
     [
       { name: string; color: string; turn: boolean },
-      { name: string; color: string }
+      { name: string; color: string },
+      string | undefined
     ]
   >;
 
@@ -31,6 +32,7 @@ export class GameComponent {
             name: PlayerType[data.enemy.type],
             color: data.enemy.options.color(),
           },
+          data.winner ? data.winner.color() : undefined,
         ];
       })
     );

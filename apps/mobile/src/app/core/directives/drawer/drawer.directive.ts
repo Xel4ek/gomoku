@@ -1,5 +1,13 @@
 import { AfterViewInit, Directive, ElementRef, OnDestroy } from '@angular/core';
-import { CanvasSpace, Create, Group, Line, Pt, Rectangle } from 'pts';
+import {
+  CanvasSpace,
+  Create,
+  Group,
+  Line,
+  Pt,
+  Rectangle,
+  Typography,
+} from 'pts';
 import { GameBoard } from '../../services/ai/ai.service';
 import { Subject } from 'rxjs';
 import { LocalStorageService } from '../../services/local-storage/local-storage.service';
@@ -77,7 +85,8 @@ export class DrawerDirective implements AfterViewInit, OnDestroy {
           this.board.id % 2 ? this.board.enemy : this.board.player;
         if (
           Rectangle.withinBound(this.space.innerBound, t) &&
-          current.type === PlayerType.HUMAN
+          current.type === PlayerType.HUMAN &&
+          !this.board.winner
         ) {
           form
             .dash()
@@ -94,25 +103,60 @@ export class DrawerDirective implements AfterViewInit, OnDestroy {
           radius * 1.1,
           'circle'
         );
-        form.fillOnly(this.board.enemy.options.color()).points(
+        form.fill(this.board.enemy.options.color()).points(
           this.board.enemy.map.map(
             (id) => this.pts.find((e) => e.id === id.toString()) ?? this.pts.p1
           ),
           radius * 1.1,
           'circle'
         );
+        if (this.board.winner) {
+          form.strokeOnly('rgba(255,255,255,0.7)', 3).points(
+            this.board.winner.combination.map(
+              (id) =>
+                this.pts.find((e) => e.id === id.toString()) ?? this.pts.p1
+            ),
+            radius * 1.1,
+            'circle'
+          );
+        }
+        this.board.player.map.map((id, index) => {
+          form
+            .fillOnly('rgba(255,255,255,0.7)')
+            .font(radius, 'bold')
+            .alignText('center', 'middle')
+            .text(
+              this.pts.find((e) => e.id === id.toString()) ?? this.pts.p1,
+              (index * 2 + 1).toString(),
+              radius * 2
+            );
+        });
+
+        this.board.enemy.map.map((id, index) => {
+          form
+            .fillOnly('rgba(255,255,255,0.7)')
+            .font(radius, 'bold')
+            .alignText('center', 'middle')
+            .text(
+              this.pts.find((e) => e.id === id.toString()) ?? this.pts.p1,
+              ((index + 1) * 2).toString(),
+              radius * 2
+            );
+        });
       },
       action: (type) => {
         if (
           (type === 'drop' || type === 'up') &&
           Rectangle.withinBound(this.space.innerBound, this.space.pointer) &&
-          this.board
+          this.board &&
+          !this.board.winner
         ) {
           const current =
             this.board.id % 2 ? this.board.enemy : this.board.player;
           if (
             !this.board.player.map.includes(+this.pts.p1.id) &&
             !this.board.enemy.map.includes(+this.pts.p1.id) &&
+            !this.board.blocked.includes(+this.pts.p1.id) &&
             current.type === PlayerType.HUMAN
           ) {
             current.map.push(+this.pts.p1.id);

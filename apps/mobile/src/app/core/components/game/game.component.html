@@ -18,6 +18,21 @@
   >
     {{ players[1].name | titlecase }}
   </div>
+  <div class="game-message" *ngIf="players[2]">
+    <div>
+      Congratulation <span [ngStyle]="{ color: players[2] }">champion</span>!
+    </div>
+    <div>
+      <a
+        tuiButton
+        type="button"
+        class="tui-space_right-3 tui-space_bottom-3"
+        [routerLink]="['/settings']"
+      >
+        Play again
+      </a>
+    </div>
+  </div>
 </div>
 <ng-template #endGame>
   <div class="btn-block">
