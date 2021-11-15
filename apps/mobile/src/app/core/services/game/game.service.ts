@@ -84,8 +84,26 @@ export class GameService implements OnDestroy {
     }
     return undefined;
   }
-  private findCaptures(gameBoard: GameBoard): GameBoard {
-    return gameBoard;
+  private findCaptures(
+    [player, enemy]: [number[], number[]],
+    size = 19
+  ): number[] {
+    const toRemove: number[] = [];
+    const pivot = player[player.length - 1];
+    [-1, 1, size + 1, size, size - 1, -size - 1, -size + 1, -size].map(
+      (coif) => {
+        if (
+          enemy.includes(pivot + coif) &&
+          enemy.includes(pivot + 2 * coif) &&
+          player.includes(pivot + 3 * coif)
+        ) {
+          toRemove.push(enemy.indexOf(pivot + coif));
+          toRemove.push(enemy.indexOf(pivot + 2 * coif));
+        }
+      }
+    );
+
+    return toRemove;
   }
   private findFreeThrees(gameBoard: GameBoard): GameBoard {
     return gameBoard;
@@ -98,6 +116,7 @@ export class GameService implements OnDestroy {
       player: {
         type: settings.get('player')?.value.type,
         map: [],
+        turn: [],
         options: {
           color: (alpha: number = 1) => 'rgba(3, 0,187,' + alpha + ')',
           deep: settings.get('playerDeep')?.value ?? 0,
@@ -106,6 +125,7 @@ export class GameService implements OnDestroy {
       enemy: {
         type: settings.get('enemy')?.value.type,
         map: [],
+        turn: [],
         options: {
           color: (alpha: number = 1) => 'rgba(194,6,6,' + alpha + ')',
           deep: settings.get('enemyDeep')?.value ?? 0,
@@ -121,7 +141,31 @@ export class GameService implements OnDestroy {
   }
 
   makeTurn(board: GameBoard) {
-    console.log(board);
+    const player = board.id % 2 ? board.player.map : board.enemy.map;
+    const enemy = board.id % 2 ? board.enemy.map : board.player.map;
+    const toRemove = this.findCaptures([player, enemy]);
+    board.id % 2
+      ? board.player.turn.push(board.id)
+      : board.enemy.turn.push(board.id);
+    if (toRemove.length) {
+      if (board.id % 2) {
+        board.enemy.map = board.enemy.map.filter(
+          (_, index) => !toRemove.includes(index)
+        );
+        board.enemy.turn = board.enemy.turn.filter(
+          (_, index) => !toRemove.includes(index)
+        );
+      } else {
+        board.player.map = board.player.map.filter(
+          (_, index) => !toRemove.includes(index)
+        );
+        board.player.turn = board.player.turn.filter(
+          (_, index) => !toRemove.includes(index)
+        );
+      }
+    }
+    console.log(toRemove);
+
     this._sequence$.next(board);
   }
 

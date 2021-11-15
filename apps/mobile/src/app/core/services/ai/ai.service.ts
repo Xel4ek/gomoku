@@ -16,6 +16,7 @@ interface AiStatistics {
 export interface Player {
   type: PlayerType;
   map: number[];
+  turn: number[];
   options: {
     color: (opacity?: number) => string;
     deep: number;

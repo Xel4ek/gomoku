@@ -1,18 +1,11 @@
 import { AfterViewInit, Directive, ElementRef, OnDestroy } from '@angular/core';
-import {
-  CanvasSpace,
-  Create,
-  Group,
-  Line,
-  Pt,
-  Rectangle,
-  Typography,
-} from 'pts';
+import { CanvasSpace, Create, Group, Line, Pt, Rectangle } from 'pts';
 import { GameBoard } from '../../services/ai/ai.service';
 import { Subject } from 'rxjs';
 import { LocalStorageService } from '../../services/local-storage/local-storage.service';
 import { takeUntil, tap } from 'rxjs/operators';
 import { GameService, PlayerType } from '../../services/game/game.service';
+import { Player } from '../../services/ai/ai.service';
 
 @Directive({
   selector: '[gomokuDrawer]',
@@ -120,28 +113,22 @@ export class DrawerDirective implements AfterViewInit, OnDestroy {
             'circle'
           );
         }
-        this.board.player.map.map((id, index) => {
-          form
-            .fillOnly('rgba(255,255,255,0.7)')
-            .font(radius, 'bold')
-            .alignText('center', 'middle')
-            .text(
-              this.pts.find((e) => e.id === id.toString()) ?? this.pts.p1,
-              (index * 2 + 1).toString(),
-              radius * 2
-            );
-        });
-
-        this.board.enemy.map.map((id, index) => {
-          form
-            .fillOnly('rgba(255,255,255,0.7)')
-            .font(radius, 'bold')
-            .alignText('center', 'middle')
-            .text(
-              this.pts.find((e) => e.id === id.toString()) ?? this.pts.p1,
-              ((index + 1) * 2).toString(),
-              radius * 2
-            );
+        const fields: (keyof GameBoard)[] = ['player', 'enemy'];
+        fields.map((key: keyof GameBoard) => {
+          if (this.board) {
+            const board: Player = this.board[key] as Player;
+            board.map.map((id, index) => {
+              form
+                .fillOnly('rgba(255,255,255,0.7)')
+                .font(radius, 'bold')
+                .alignText('center', 'middle')
+                .text(
+                  this.pts.find((e) => e.id === id.toString()) ?? this.pts.p1,
+                  board.turn[index].toString() ?? '',
+                  radius * 2
+                );
+            });
+          }
         });
       },
       action: (type) => {
