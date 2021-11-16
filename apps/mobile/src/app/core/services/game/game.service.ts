@@ -143,6 +143,7 @@ export class GameService implements OnDestroy {
   }
 
   makeTurn(board: GameBoard) {
+    ++board.id;
     const player = board.id % 2 ? board.player.map : board.enemy.map;
     const enemy = board.id % 2 ? board.enemy.map : board.player.map;
     const toRemove = this.findCaptures([player, enemy]);

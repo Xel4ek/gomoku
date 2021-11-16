@@ -147,7 +147,7 @@ export class DrawerDirective implements AfterViewInit, OnDestroy {
             current.type === PlayerType.HUMAN
           ) {
             current.map.push(+this.pts.p1.id);
-            this.board.id++;
+            // this.board.id++;
             this.board.timestamp = new Date().getTime();
             this.gameService.makeTurn(this.board);
           }

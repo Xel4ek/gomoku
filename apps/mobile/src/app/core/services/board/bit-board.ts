@@ -42,7 +42,7 @@ export class BitBoard {
     return str.join('');
   }
 
-  static fromArray(arr: string[], size: number) {
+  static fromArray(arr: number[], size: number) {
     let board = 0n;
     arr.forEach((value) => {
       const row = Math.floor(Number(value) / size);
@@ -76,8 +76,8 @@ export class BitBoard {
       '0b' + ('0' + '1'.repeat(this.size)).repeat(this.size)
     );
     if (gameBoard) {
-      // this.boards.player = BitBoard.fromArray(gameBoard.player, gameBoard.size);
-      // this.boards.enemy = BitBoard.fromArray(gameBoard.opp, gameBoard.size);
+      this.boards.player = BitBoard.fromArray(gameBoard.player.map, gameBoard.size);
+      this.boards.enemy = BitBoard.fromArray(gameBoard.enemy.map, gameBoard.size);
     }
     this.player = 'max';
     //TODO: remove
@@ -149,7 +149,7 @@ export class BitBoard {
     const matchMin: Combo[] = [];
     this.combinations.forEach(combo => {
       combo.masksLen.forEach(((maskLen, index) => {
-        console.log((maskLen & this.boards.player) === combo.masksP[index]);
+        // console.log((maskLen & this.boards.player) === combo.masksP[index]);
         if (((maskLen & this.boards.player) === combo.masksP[index])
           && BitBoard.comparer(combo, this.boards.enemy, combo.masksO[index])) {
           matchMax.push(combo);

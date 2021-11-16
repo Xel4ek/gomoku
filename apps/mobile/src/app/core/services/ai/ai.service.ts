@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { BitBoard } from '../board/bit-board';
-import { PlayerType } from '../game/game.service';
+import { GameService, PlayerType } from '../game/game.service';
 import { Observable, of } from "rxjs";
+import { filter, tap } from "rxjs/operators";
+import { BoardService } from "../board/board.service";
 
 export enum AI {
   SIMPLE,
@@ -15,6 +17,7 @@ export enum AI {
 interface AiStatistics {
   [key: string]: unknown;
 }
+
 export interface Player {
   type: PlayerType;
   map: number[];
@@ -25,6 +28,7 @@ export interface Player {
     deep: number;
   };
 }
+
 export interface GameBoard {
   id: number;
   timestamp: number;
@@ -42,14 +46,43 @@ export interface GameBoard {
 @Injectable({
   providedIn: 'root',
 })
+// TODO: move this services to worker
+
 export class AiService {
   depth = 3;
   //TODO: add time limit
-  timeLimit = 500 //milliseconds
+  timeLimit = 500; //milliseconds
   winCount = 5;
   size = 19;
 
-  getNextAction(board: BitBoard): number {
+  constructor(private readonly gameService: GameService, private readonly boardService: BoardService) {
+    // const worker = new Worker('');
+    const subscriber = gameService.sequence$()
+      .pipe(
+        filter(data => data.id % 2 ? data.enemy.type === PlayerType.AI : data.player.type === PlayerType.AI),
+        tap(data => {
+          console.log('From sequence ', data);
+          const onmessage = (turn: number) => {
+            console.log('AI moved ', turn);
+            const turnsMap = data.id % 2 ? data.enemy.map : data.player.map;
+            turnsMap.push(turn);
+            this.gameService.makeTurn(data);
+            // worker.onmessage = tu;
+          };
+          this.getNextAction(this.boardService.createFromGameBoard({ ...data }), onmessage);
+          // this.mockAction('', onmessage);
+        }))
+      .subscribe();
+    // TODO: Subscribe to messages
+  }
+
+  mockAction(dummy: string, callback: (turn: number) => void) {
+    callback(Math.trunc(Math.random() * 19 * 19));
+    console.log("AI return number");
+  }
+
+  getNextAction(board: BitBoard, callback: (turn: number) => void): void {
+    console.log(board);
     board.score = this.minimax(
       board,
       this.depth,
@@ -69,9 +102,11 @@ export class AiService {
       //TODO: refactor turn
       board.move(action.col, action.row, 'enemy');
       console.log(action);
-      return action.row * this.size + action.col;
+      callback(action.row * this.size + action.col);
+      return;
     }
-    return -1;
+    callback(-1);
+    return;
   }
 
   eval(

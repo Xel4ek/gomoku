@@ -43,19 +43,19 @@ export class Combo {
 
 export class Combination {
   combinations: Combo[] = [
-    {
-      name: "Open Five",
-      type: ComboNames.FIVE,
-      maskP: 0b11111n,
-      maskO: 0n,
-      maskLen: 0b11111n,
-      masksP: [],
-      masksO: [],
-      masksLen: [],
-      cols: 5,
-      rows: 1,
-      comparer: BitComparer.NONE,
-    },
+    // {
+    //   name: "Open Five",
+    //   type: ComboNames.FIVE,
+    //   maskP: 0b11111n,
+    //   maskO: 0n,
+    //   maskLen: 0b11111n,
+    //   masksP: [],
+    //   masksO: [],
+    //   masksLen: [],
+    //   cols: 5,
+    //   rows: 1,
+    //   comparer: BitComparer.NONE,
+    // },
     {
       name: "Open Four",
       type: ComboNames.OPENFOUR,

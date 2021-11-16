@@ -19,6 +19,7 @@ import { SettingsModule } from './core/components/settings/settings.module';
 import { GameModule } from './core/components/game/game.module';
 import { AboutModule } from './core/components/about/about.module';
 import { BoardService } from './core/services/board/board.service';
+import { AiService } from "./core/services/ai/ai.service";
 
 @NgModule({
   declarations: [AppComponent],
@@ -47,5 +48,5 @@ import { BoardService } from './core/services/board/board.service';
   bootstrap: [AppComponent],
 })
 export class AppModule {
-  constructor(private readonly boardService: BoardService) {}
+  constructor(private readonly aiService: AiService) {}
 }
