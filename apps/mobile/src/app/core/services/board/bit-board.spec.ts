@@ -1,7 +1,6 @@
 import { from } from 'rxjs';
 import { BitBoard } from './bit-board';
 import { Combination, Dir } from "./combination";
-import { map } from "rxjs/operators";
 
 describe('BitBoard', () => {
   let board: BitBoard;

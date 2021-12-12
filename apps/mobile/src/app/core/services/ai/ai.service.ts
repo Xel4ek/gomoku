@@ -1,7 +1,6 @@
 import { Injectable, NgZone } from '@angular/core';
 import { BitBoard } from '../board/bit-board';
 import { GameService, PlayerType } from '../game/game.service';
-import { fromEvent, Observable, of } from "rxjs";
 import { filter, tap } from "rxjs/operators";
 import { BoardService } from "../board/board.service";
 
@@ -163,7 +162,6 @@ export class AiService {
       board.checkWin(maximizing) ||
       board.possibleActions.length === 0
     ) {
-      const score = board.updateScore();
       // console.log(
       //   'Depth 0. Score: ' + score,
       //   'WIN: ' + board.checkWin(maximizing),
@@ -171,7 +169,7 @@ export class AiService {
       // );
       // console.log(BitBoard.printBitBoard(board.boards.player, board.size));
       // console.log(BitBoard.printBitBoard(board.boards.enemy, board.size));
-      return score;
+      return board.updateScore();
     }
     return this.eval(maximizing, board, depth, alpha, beta);
   }

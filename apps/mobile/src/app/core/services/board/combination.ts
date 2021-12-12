@@ -1,5 +1,3 @@
-import { BitBoard } from "./bit-board";
-
 export enum Dir {
   E,
   S,

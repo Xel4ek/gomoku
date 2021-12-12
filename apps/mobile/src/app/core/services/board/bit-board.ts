@@ -1,7 +1,7 @@
 import { GameBoard } from '../ai/ai.service';
 import { Action } from '../ai/action';
-import { BitComparer, Combo, ComboNames, Dir } from './combination';
-import { from, of } from "rxjs";
+import { BitComparer, Combo, ComboNames } from './combination';
+import { from } from "rxjs";
 import { map } from "rxjs/operators";
 
 export class InvalidMoveError extends Error {
