@@ -1,26 +1,31 @@
 import { GameBoard } from '../ai/ai.service';
 import { Action } from '../ai/action';
 import { BitComparer, Combo, ComboNames, Dir } from './combination';
+import { from, of } from "rxjs";
+import { map } from "rxjs/operators";
 
-export class InvalidMoveError extends Error {}
+export class InvalidMoveError extends Error {
+}
 
-interface Direction {
-  [prop: string]: bigint;
+export enum DirectionNew {
+  E = "E",
+  N = "N",
+  NE = "NE",
+  NW = "NW",
+  S = "S",
+  SE = "SE",
+  SW = "SW",
+  W = "W",
+}
 
-  N: bigint;
-  NE: bigint;
-  NW: bigint;
-  W: bigint;
-  E: bigint;
-  S: bigint;
-  SW: bigint;
-  SE: bigint;
+type Shift = {
+  [props in DirectionNew]: bigint
 }
 
 export class BitBoard {
   score: number;
   size: number;
-  shift: Direction;
+  shift: Shift;
   boards = {
     empty: 0n,
     player: 0n,
@@ -32,12 +37,29 @@ export class BitBoard {
   winPlayer = false;
   winEnemy = false;
 
+  static print(board: bigint, size: number) {
+    const prn: string[] = [];
+    from(board.toString(2))
+      .pipe(map((value, index) => {
+        if (index % size === 0) {
+          prn.push(
+            '|' + value + '\n'
+          );
+        }
+        prn.push(value);
+      }));
+    return prn.join('');
+  }
+
   static printBitBoard(board: bigint, size: number) {
     const str = board.toString(2).split('').reverse();
-    let lines = Math.floor(str.length / size);
-    while (lines) {
-      str.splice(lines * (size + 1), 0, '\n');
-      lines--;
+    const lines = Math.floor(str.length / size);
+    for (let i = 1; i <= lines; i++) {
+      if (i === 0) {
+        str.splice(i * (size + 3), 0, '\n ');
+      } else {
+        str.splice(i * (size + 2), 0, '\n ');
+      }
     }
     return str.join('');
   }
@@ -46,24 +68,27 @@ export class BitBoard {
     let board = 0n;
     arr.forEach((value) => {
       const row = Math.floor(Number(value) / size);
-      const col = Number(value) % size;
-      const mask = 1n << BigInt(row * (size + 1) + col);
+      const col = Number(value) % size + 1; //shift for 1st zero bit
+      const mask = 1n << BigInt(row * (size + 1) + col + 1);
       board |= mask;
     });
     return board;
   }
 
-  static comparer(combo: Combo, board: bigint, mask: bigint): boolean {
-    if (combo.comparer === BitComparer.ANY) {
-      return (board & mask) > 0n;
+  static comparer(board: bigint, mask: bigint, emptyBoard: bigint, comparer: BitComparer): boolean {
+    if (comparer === BitComparer.ANY) {
+      return (board & mask) > 0n || (board & emptyBoard) > 0n;
     }
-    if (combo.comparer === BitComparer.AND) {
+    if (comparer === BitComparer.AND) {
       return (board & mask) === mask;
     }
-    if (combo.comparer === BitComparer.NOT) {
-      return (board & mask) === 0n;
+    if (comparer === BitComparer.NOT) {
+      return (board & mask) === 0n && (board & emptyBoard) === 0n;
     }
-    if (combo.comparer === BitComparer.NONE)
+    if (comparer === BitComparer.OR) {
+      return (board & mask) > 0n && board !== mask;
+    }
+    if (comparer === BitComparer.NONE)
       return true;
     return false;
   }
@@ -73,7 +98,7 @@ export class BitBoard {
     this.score = 0;
     this.size = size ?? 19;
     this.boards.empty = BigInt(
-      '0b' + ('0' + '1'.repeat(this.size)).repeat(this.size)
+      '0b' + ('0' + '1'.repeat(this.size)).repeat(this.size) + '0'
     );
     if (gameBoard) {
       this.boards.player = BitBoard.fromArray(gameBoard.player.map, gameBoard.size);
@@ -94,6 +119,21 @@ export class BitBoard {
     this.combinations = combos;
   }
 
+  prnPlayer() {
+    console.log(BitBoard.printBitBoard(this.boards.player, this.size));
+  }
+
+  prnMasksP(type?: ComboNames) {
+    this.combinations.filter(value => {
+      value.type === type;
+    }).map(value => {
+      value.masksP.map(value1 => {
+        console.log(BitBoard.printBitBoard(value1, this.size));
+      });
+    });
+    console.log(BitBoard.printBitBoard(this.boards.player, this.size));
+  }
+
   clone(): BitBoard {
     const board = new BitBoard(this.combinations, this.size);
     board.boards.player = this.boards.player;
@@ -105,7 +145,7 @@ export class BitBoard {
     Array(moves)
       .fill(0)
       .map(() => {
-        for (;;) {
+        for (; ;) {
           try {
             // this.move(
             //   Math.floor(Math.random() * this.size),
@@ -125,6 +165,13 @@ export class BitBoard {
       v &= v - BigInt(1);
     }
     return c;
+  }
+
+  genericMoves(points: number[], turn: 'player' | 'enemy') {
+    from(points).subscribe(point => {
+      const shift = BigInt(point) + 1n + BigInt(Math.floor(point / this.size));
+      this.boards[turn] |= 1n << shift;
+    });
   }
 
   move(col: number, row: number, turn: 'player' | 'enemy') {
@@ -147,27 +194,49 @@ export class BitBoard {
   updateScore() {
     const matchMax: Combo[] = [];
     const matchMin: Combo[] = [];
-    this.combinations.forEach(combo => {
-      combo.masksLen.forEach(((maskLen, index) => {
-        // console.log((maskLen & this.boards.player) === combo.masksP[index]);
-        if (((maskLen & this.boards.player) === combo.masksP[index])
-          && BitBoard.comparer(combo, this.boards.enemy, combo.masksO[index])) {
-          matchMax.push(combo);
-          console.log('PUSHED PLAYER COMBO', combo);
-        }
-        if (((maskLen & this.boards.enemy) === combo.masksO[index])
-          && BitBoard.comparer(combo, this.boards.player, combo.masksO[index])) {
-          matchMin.push(combo);
-          console.log('PUSHED ENEMY COMBO', combo);
-        }
-      }));
-    });
-    console.log(matchMax, matchMin);
+    const matchCombo = this.combinations.find(combo => {
+      return combo.masksP.find(((value, index) => {
+          return value === this.boards.player
+            && BitBoard.comparer(this.boards.enemy, combo.masksO[index], this.boards.empty, combo.comparer);
+        }));
+        // return true;
+      }
+    );
+
+    // combo.masksP.some(v => v === this.boards.player)
+    // && combo)
+    matchCombo ? matchMax.push(matchCombo) : null;
+    // this.combinations.forEach(combo => {
+    //   TODO: check for enemy masks
+    //   TODO: find vs. map implementation
+    // combo.masksP.map(((value, index) => {
+    //   console.log(BitBoard.printBitBoard(value, this.size));
+    //   if ((value & this.boards.player) === value
+    //     && BitBoard.comparer(combo, this.boards.enemy, combo.masksO[index])
+    //   ) {
+    //     console.log(combo)
+    // matchMax.push(combo);
+    // }
+    // }));
+    // combo.masksLen.forEach(((maskLen, index) => {
+    //   if (((maskLen & this.boards.player) === combo.masksP[index])
+    //     && BitBoard.comparer(combo, this.boards.enemy, combo.masksO[index])) {
+    //     matchMax.push(combo);
+    //     console.log('PUSHED PLAYER COMBO', combo);
+    // }
+    // if (((maskLen & this.boards.enemy) === combo.masksO[index])
+    //   && BitBoard.comparer(combo, this.boards.player, combo.masksO[index])) {
+    //   matchMin.push(combo);
+    //   console.log('PUSHED ENEMY COMBO', combo);
+    // }
+    // }));
+    // });
+    // console.log(matchMax, matchMin);
     const score = this.calculateScore(matchMax) - this.calculateScore(matchMin);
-    if (score > 100000) {
+    if (score >= 100000) {
       this.winPlayer = true;
     }
-    if (score < -100000) {
+    if (score <= -100000) {
       this.winEnemy = true;
     }
     return score;
@@ -240,7 +309,7 @@ export class BitBoard {
 
   checkWin(isMax: boolean) {
     const len: number[] = [];
-    ['E', 'S', 'SW', 'SE'].forEach((value) => {
+    [DirectionNew.E, DirectionNew.S, DirectionNew.SE, DirectionNew.SW].forEach((value) => {
       let length = 0;
       let bits = isMax ? this.boards.player : this.boards.enemy;
       while (bits) {

@@ -1,12 +1,14 @@
+import { from } from 'rxjs';
 import { BitBoard } from './bit-board';
 import { Combination, Dir } from "./combination";
+import { map } from "rxjs/operators";
 
 describe('BitBoard', () => {
   let board: BitBoard;
+  const size = 8;
+  const combination = new Combination(size);
 
   beforeEach(() => {
-    const size = 9;
-    const combination = new Combination(size)
     board = new BitBoard(combination.combinations, size);
     board.boards.player = BigInt(
       "0b" +
@@ -19,7 +21,6 @@ describe('BitBoard', () => {
       "0001111100" +
       "0000000000"
     );
-
   });
 
   it('should print bitboard', () => {
@@ -44,7 +45,7 @@ describe('BitBoard', () => {
     //   "10000000" +
     //   "10000000"
     // );
-    let bb = BigInt(
+    const bb = BigInt(
       "0b" +
       "00000001" +
       "00000001" +
@@ -53,8 +54,9 @@ describe('BitBoard', () => {
       "00000001" +
       "00000001" +
       "00000001" +
-      "00000001"
+      "000000010"
     );
+    console.log(BitBoard.printBitBoard(bb, 7));
     const sq = (((bb >> BigInt(3) | (bb << BigInt(3)) & BigInt(63)))) ^ BigInt(56);
     // bitboard = (bitboard + BigInt(8) * (bitboard&BigInt(7))) & BigInt(63);
     // bitboard = (bitboard + BigInt(8) * ((bitboard&BigInt(7)^BigInt(7)))) & BigInt(63);
@@ -110,8 +112,31 @@ describe('BitBoard', () => {
           return value;
         }))
         .join('')
-    )
+    );
     expect(board.boards.empty & mask).toBe(mask);
+  });
+
+  it('should find Five in row', () => {
+    const mask = BigInt('0b11111');
+    const shifts = [BigInt(size + 2), 2n, 1n];
+    const boards: bigint[] = [];
+    const score: number[] = [];
+    from(combination.combinations)
+      .subscribe(combo => {
+        from(shifts).subscribe(shift => {
+          board.boards.player = combo.maskP << shift;
+          boards.push(board.boards.player);
+          score.push(board.updateScore());
+        });
+      });
+    const fails = score.map((v, i) => v === 0 ? i : null).filter(x => typeof x === "number");
+    for (const fail of fails) {
+      if (typeof fail === "number") {
+        console.log(BitBoard.printBitBoard(boards[fail], size));
+      }
+    }
+    score.find(((value, index) => value === 0));
+    expect(score.every(value => value > 0)).toBeTruthy();
   });
 
 });
