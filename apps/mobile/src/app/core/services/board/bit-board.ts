@@ -69,7 +69,7 @@ export class BitBoard {
     arr.forEach((value) => {
       const row = Math.floor(Number(value) / size);
       const col = Number(value) % size + 1; //shift for 1st zero bit
-      const mask = 1n << BigInt(row * (size + 1) + col + 1);
+      const mask = 1n << BigInt(row * (size + 1) + col);
       board |= mask;
     });
     return board;
@@ -194,18 +194,22 @@ export class BitBoard {
   updateScore() {
     const matchMax: Combo[] = [];
     const matchMin: Combo[] = [];
-    const matchCombo = this.combinations.find(combo => {
-      return combo.masksP.find(((value, index) => {
-          return value === this.boards.player
+    const maxCombo = this.combinations.find(combo => {
+      return combo.masksP.find((value, index) => {
+          return (value & this.boards.player) === value
             && BitBoard.comparer(this.boards.enemy, combo.masksO[index], this.boards.empty, combo.comparer);
-        }));
-        // return true;
+        });
       }
     );
-
-    // combo.masksP.some(v => v === this.boards.player)
-    // && combo)
-    matchCombo ? matchMax.push(matchCombo) : null;
+    maxCombo ? matchMax.push(maxCombo) : null;
+    const minCombo = this.combinations.find(combo => {
+        return combo.masksP.find(((value, index) => {
+          return (value & this.boards.enemy) === value
+            && BitBoard.comparer(this.boards.player, combo.masksO[index], this.boards.empty, combo.comparer);
+        }));
+      }
+    );
+    minCombo ? matchMin.push(minCombo) : null;
     // this.combinations.forEach(combo => {
     //   TODO: check for enemy masks
     //   TODO: find vs. map implementation
@@ -231,7 +235,7 @@ export class BitBoard {
     // }
     // }));
     // });
-    // console.log(matchMax, matchMin);
+    console.log(matchMax, matchMin);
     const score = this.calculateScore(matchMax) - this.calculateScore(matchMin);
     if (score >= 100000) {
       this.winPlayer = true;
