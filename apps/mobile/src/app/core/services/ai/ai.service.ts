@@ -1,6 +1,7 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { BitBoard } from '../board/bit-board';
 import { GameService, PlayerType } from '../game/game.service';
+import { Observable, of } from "rxjs";
 import { filter, tap } from "rxjs/operators";
 import { BoardService } from "../board/board.service";
 
@@ -54,29 +55,21 @@ export class AiService {
   winCount = 5;
   size = 19;
 
-  constructor(
-    private readonly gameService: GameService,
-    private readonly boardService: BoardService,
-    private readonly zone: NgZone
-  ) {
-
+  constructor(private readonly gameService: GameService, private readonly boardService: BoardService) {
     // const worker = new Worker('');
     const subscriber = gameService.sequence$()
       .pipe(
         filter(data => data.id % 2 ? data.enemy.type === PlayerType.AI : data.player.type === PlayerType.AI),
         tap(data => {
-          console.log('From sequence ', data);
-          const start = new Date().getTime();
+          console.debug('From sequence ', data);
           const onmessage = (turn: number) => {
-            console.log('AI moved ', turn, (new Date().getTime() - start) / 1000);
+            console.debug('AI moved ', turn);
             const turnsMap = data.id % 2 ? data.enemy.map : data.player.map;
             turnsMap.push(turn);
             this.gameService.makeTurn(data);
             // worker.onmessage = tu;
           };
-          this.zone.runOutsideAngular(() => {
-            this.getNextAction(this.boardService.createFromGameBoard({ ...data }), onmessage);
-          });
+          this.getNextAction(this.boardService.createFromGameBoard({ ...data }), onmessage);
           // this.mockAction('', onmessage);
         }))
       .subscribe();
@@ -85,11 +78,11 @@ export class AiService {
 
   mockAction(dummy: string, callback: (turn: number) => void) {
     callback(Math.trunc(Math.random() * 19 * 19));
-    console.log("AI return number");
+    console.debug("AI return number");
   }
 
   getNextAction(board: BitBoard, callback: (turn: number) => void): void {
-    // console.log(board);
+    console.debug(board);
     board.score = this.minimax(
       board,
       this.depth,
@@ -97,7 +90,7 @@ export class AiService {
       Number.NEGATIVE_INFINITY,
       Number.POSITIVE_INFINITY
     );
-    // console.log(board.possibleActions);
+    console.debug(board.possibleActions);
     if (board.possibleActions.length > 0) {
       const action = board.possibleActions.reduce(
         (previousValue, currentValue) => {
@@ -108,7 +101,7 @@ export class AiService {
       );
       //TODO: refactor turn
       board.move(action.col, action.row, 'enemy');
-      // console.log(action);
+      console.debug(action);
       callback(action.row * this.size + action.col);
       return;
     }
@@ -125,22 +118,24 @@ export class AiService {
   ) {
     let evalScore = isMax ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY;
     for (const action of board.possibleActions) {
-      // console.log(`${depth}: ${isMax} ${action.row} - ${action.col}, score: ${action.score}`);
+      console.debug(
+        `${depth}: ${isMax} ${action.row} - ${action.col}, score: ${action.score}`
+      );
       const newBoard = board.clone();
       newBoard.move(action.col, action.row, isMax ? 'player' : 'enemy');
       action.score = this.minimax(newBoard, depth - 1, !isMax, alpha, beta);
       evalScore = isMax
         ? Math.max(evalScore, action.score)
         : Math.min(evalScore, action.score);
-      // console.log(`${depth}: ${isMax} ${action.row} - ${action.col}, score: ${action.score}`);
-      // console.log('max: ', oldMax, action.score, ' -> ', maxEval);
+      // console.debug(`${depth}: ${isMax} ${action.row} - ${action.col}, score: ${action.score}`);
+      // console.debug('max: ', oldMax, action.score, ' -> ', maxEval);
       if (isMax) {
         alpha = Math.max(alpha, action.score);
       } else {
         beta = Math.min(beta, action.score);
       }
       if (beta <= alpha) {
-        // console.log(isMax + ' pruned!');
+        console.debug(isMax + ' pruned!');
         break;
       }
     }
@@ -155,21 +150,22 @@ export class AiService {
     beta: number
   ): number {
     board.generateActions();
-    // console.log("isMax: " + maximizing, board.possibleActions);
-    // console.log(BitBoard.printBitBoard(board.boards.player, board.size));
+    console.debug("isMax: " + maximizing, board.possibleActions);
+    console.debug(BitBoard.printBitBoard(board.boards.player, board.size));
     if (
       depth === 0 ||
       board.checkWin(maximizing) ||
       board.possibleActions.length === 0
     ) {
-      // console.log(
-      //   'Depth 0. Score: ' + score,
-      //   'WIN: ' + board.checkWin(maximizing),
-      //   'Actions :' + board.possibleActions.length
-      // );
-      // console.log(BitBoard.printBitBoard(board.boards.player, board.size));
-      // console.log(BitBoard.printBitBoard(board.boards.enemy, board.size));
-      return board.updateScore();
+      const score = board.updateScore();
+      console.debug(
+        'Depth 0. Score: ' + score,
+        'WIN: ' + board.checkWin(maximizing),
+        'Actions :' + board.possibleActions.length
+      );
+      console.debug(BitBoard.printBitBoard(board.boards.player, board.size));
+      console.debug(BitBoard.printBitBoard(board.boards.enemy, board.size));
+      return score;
     }
     return this.eval(maximizing, board, depth, alpha, beta);
   }

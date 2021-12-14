@@ -50,6 +50,7 @@ export class BoardService implements OnDestroy {
   }
 
   createFromGameBoard(gameBoard: GameBoard) {
+    //TODO; move combination to gameService
     const combos = new Combination(gameBoard.size);
     return new BitBoard(combos.combinations, undefined, gameBoard);
   }
