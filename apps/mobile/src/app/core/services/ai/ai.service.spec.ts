@@ -6,10 +6,17 @@ import { BitBoard } from "../board/bit-board";
 describe('AiService', () => {
   let service: AiService;
   let board: BitBoard;
+  let size: number;
+  const jestConsole = console;
 
   beforeEach(() => {
+    global.console = require('console');
     TestBed.configureTestingModule({});
     service = TestBed.inject(AiService);
+  });
+
+  afterEach(() => {
+    global.console = jestConsole;
   });
 
   it('should be created', () => {
