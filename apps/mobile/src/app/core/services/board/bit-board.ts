@@ -31,6 +31,10 @@ export class BitBoard {
     player: 0n,
     enemy: 0n,
   };
+  minCombos: Combo[] = [];
+  maxCombos: Combo[] = [];
+  minScore = 0;
+  maxScore = 0;
   player: 'max' | 'min';
   public possibleActions: Action[];
   combinations: Combo[];
@@ -75,18 +79,18 @@ export class BitBoard {
     return board;
   }
 
-  static comparer(board: bigint, mask: bigint, emptyBoard: bigint, comparer: BitComparer): boolean {
+  static checkEmpty(board: bigint, mask: bigint, emptyBoard: bigint, comparer: BitComparer): boolean {
     if (comparer === BitComparer.ANY) {
       return (board & mask) > 0n || (board & emptyBoard) > 0n;
     }
-    if (comparer === BitComparer.AND) {
-      return (board & mask) === mask;
+    if (comparer === BitComparer.FILLED) {
+      return (emptyBoard & mask) === 0n;
     }
-    if (comparer === BitComparer.NOT) {
-      return (board & mask) === 0n && (board & emptyBoard) === 0n;
+    if (comparer === BitComparer.EMPTY) {
+      return (emptyBoard & mask) === mask;
     }
     if (comparer === BitComparer.OR) {
-      return (board & mask) > 0n && board !== mask;
+      return ((board & mask) > 0n && (board & mask) !== mask);
     }
     if (comparer === BitComparer.NONE)
       return true;
@@ -120,7 +124,7 @@ export class BitBoard {
   }
 
   prnPlayer() {
-    console.debug(BitBoard.printBitBoard(this.boards.player, this.size));
+    //console.debug(BitBoard.printBitBoard(this.boards.player, this.size));
   }
 
   prnMasksP(type?: ComboNames) {
@@ -128,10 +132,10 @@ export class BitBoard {
       value.type === type;
     }).map(value => {
       value.masksP.map(value1 => {
-        console.debug(BitBoard.printBitBoard(value1, this.size));
+        //console.debug(BitBoard.printBitBoard(value1, this.size));
       });
     });
-    console.debug(BitBoard.printBitBoard(this.boards.player, this.size));
+    //console.debug(BitBoard.printBitBoard(this.boards.player, this.size));
   }
 
   clone(): BitBoard {
@@ -191,25 +195,41 @@ export class BitBoard {
   }
 
   //TODO: implement update score
+
+  findCombo(playerIn: bigint, enemyIn: bigint) {
+    let player = playerIn;
+    let enemy = enemyIn;
+    let empty = this.boards.empty;
+    const selected: Combo[] = [];
+    while (player) {
+      this.combinations.forEach(combo => {
+        if ((player & combo.maskP) === combo.maskP) {
+          switch (combo.comparer) {
+            case BitComparer.FILLED: {
+              if ((enemy & combo.maskEmpty) === combo.maskEmpty || (empty & combo.maskEmpty) === 0n) {
+                selected.push(combo);
+              }
+              break;
+            }
+            case BitComparer.EMPTY: {
+              if ((enemy & combo.maskEmpty) === 0n) {
+                selected.push(combo);
+              }
+              break;
+            }
+          }
+        }
+      })
+      player >>= 1n;
+      enemy >>= 1n;
+      empty >>= 1n;
+    }
+    return selected;
+  }
+
   updateScore() {
-    const matchMax: Combo[] = [];
-    const matchMin: Combo[] = [];
-    const maxCombo = this.combinations.find(combo => {
-      return combo.masksP.find((value, index) => {
-          return (combo.masksLen[index] & this.boards.player) === value
-            && BitBoard.comparer(this.boards.enemy, combo.masksO[index], this.boards.empty, combo.comparer);
-        });
-      }
-    );
-    maxCombo ? matchMax.push(maxCombo) : null;
-    const minCombo = this.combinations.find(combo => {
-        return combo.masksP.find(((value, index) => {
-          return (combo.masksLen[index] & this.boards.enemy) === value
-            && BitBoard.comparer(this.boards.player, combo.masksO[index], this.boards.empty, combo.comparer);
-        }));
-      }
-    );
-    minCombo ? matchMin.push(minCombo) : null;
+    this.maxCombos = this.findCombo(this.boards.player, this.boards.enemy);
+    this.minCombos = this.findCombo(this.boards.enemy, this.boards.player);
     // this.combinations.forEach(combo => {
     //   TODO: check for enemy masks
     //   TODO: find vs. map implementation
@@ -235,8 +255,10 @@ export class BitBoard {
     // }
     // }));
     // });
-    console.debug(matchMax, matchMin);
-    const score = this.calculateScore(matchMax) - this.calculateScore(matchMin);
+    //console.debug(matchMax, matchMin);
+    this.minScore = this.calculateScore(this.minCombos);
+    this.maxScore = this.calculateScore(this.maxCombos);
+    const score = this.maxScore - this.minScore;
     if (score >= 100000) {
       this.winPlayer = true;
     }
