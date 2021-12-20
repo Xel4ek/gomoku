@@ -123,7 +123,7 @@ describe('BitBoard', () => {
     from(combination.combinations)
       .subscribe(combo => {
         from(shifts).subscribe(shift => {
-          board.boards.player = combo.maskP << shift;
+          board.boards.player = combo.maskPlayer << shift;
           boards.push(board.boards.player);
           score.push(board.updateScore());
         });
