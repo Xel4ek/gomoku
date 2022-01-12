@@ -204,12 +204,16 @@ export class BitBoard {
     // const selected1: Combo[] = [];
     while (player) {
       selected.push(...this.combinations.filter(combo => {
-          return (player & combo.maskPlayer) === combo.maskPlayer
+          if ((player & combo.maskPlayer) === combo.maskPlayer
             && ((player | enemy) & combo.maskEmpty) === 0n
-            && (
-              (enemy & combo.maskEnemy) === combo.maskEnemy
-              || (empty & combo.maskBorder) === combo.maskBorder
-            )
+            && ((enemy & combo.maskEnemy) === combo.maskEnemy
+              || (empty & combo.maskBorder) === combo.maskBorder)) {
+            player >>= combo.maskLen;
+            enemy >>= combo.maskLen;
+            empty >>= combo.maskLen;
+            return true;
+          }
+          return false;
         })
       );
       player >>= 1n;
@@ -219,12 +223,14 @@ export class BitBoard {
     return selected;
   }
 
-  updateScore() {
+  updateScore(maximising: boolean) {
     this.maxCombos = this.findCombo(this.boards.player, this.boards.enemy);
     this.minCombos = this.findCombo(this.boards.enemy, this.boards.player);
     this.minScore = this.calculateScore(this.minCombos);
     this.maxScore = this.calculateScore(this.maxCombos);
-    const score = this.maxScore - this.minScore;
+    // return maximising ? this.maxScore : this.minScore;
+    const score = 1.1 * this.maxScore - this.minScore;
+    // console.log("updateScore: " + score + ", " + maximising, this.maxCombos, this.minCombos, this.boards.player, this.boards.enemy)
     return score;
   }
 
@@ -247,15 +253,18 @@ export class BitBoard {
       score += 100000;
     }
     if (count[ComboNames.OPENFOUR] > 0) {
+      // score += 100000;
       score += 15000;
     }
     if (count[ComboNames.OPENTHREE] > 1
       || count[ComboNames.CLOSEDFOUR] > 1
       || (count[ComboNames.CLOSEDFOUR] > 0 && count[ComboNames.OPENTHREE] > 1)
     ) {
+      // score += 100000;
       score += 10000;
     }
     if (count[ComboNames.CLOSEDFOUR] > 0 || count[ComboNames.OPENTHREE] > 0) {
+      // score += 100000;
       score += 1000;
     }
     if (count[ComboNames.CLOSEDTHREE] > 0) {
@@ -265,6 +274,7 @@ export class BitBoard {
   }
 
   generateActions(dilation: number = 1) {
+    //TODO:
     const occupied = this.boards.player | this.boards.enemy;
     let moves = occupied;
     // //console.debug(BitBoard.printBitBoard(moves, this.size));

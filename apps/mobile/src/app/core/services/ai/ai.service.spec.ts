@@ -9,7 +9,8 @@ import { Combination } from "../board/combination";
 describe('AiService', () => {
   let service: AiService;
   let board: BitBoard;
-  let size: number;
+  let size = 19;
+  const combination = new Combination(size);
   const jestConsole = console;
 
   beforeEach(() => {
@@ -88,4 +89,21 @@ describe('AiService', () => {
 
   });
 
+  it('should test wrong board', () => {
+    board = new BitBoard(combination.combinations, size);
+    board.boards.player = 527765581332480n;
+    board.boards.enemy = 154742578697930304177307648n;
+    service.getNextAction(board, console.log);
+
+
+  });
+
+  it('should test wrong board 2', () => {
+    board = new BitBoard(combination.combinations, size);
+    board.boards.player = 48n;
+    board.boards.enemy = 33554432n;
+    service.getNextAction(board, console.log);
+
+
+  });
 });

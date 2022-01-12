@@ -73,7 +73,7 @@ describe('BitBoard', () => {
   });
 
   it('should get score', () => {
-    console.log(board.updateScore());
+    // console.log(board.updateScore());
     console.log(BitBoard.printBitBoard(board.boards.player, board.size));
   });
 
@@ -125,7 +125,7 @@ describe('BitBoard', () => {
         from(shifts).subscribe(shift => {
           board.boards.player = combo.maskPlayer << shift;
           boards.push(board.boards.player);
-          score.push(board.updateScore());
+          // score.push(board.updateScore());
         });
       });
     const fails = score.map((v, i) => v === 0 ? i : null).filter(x => typeof x === "number");
@@ -136,6 +136,19 @@ describe('BitBoard', () => {
     }
     score.find(((value, index) => value === 0));
     expect(score.every(value => value > 0)).toBeTruthy();
+  });
+
+  it('should check updateScore()', () => {
+    board.boards.player = 488n;
+    board.boards.enemy = 140737589019152n;
+    expect(board.updateScore(true)).toEqual(1000);
+  });
+
+  it('should test wrong scoring', () => {
+    board.boards.player = 527765581332480n;
+    board.boards.enemy = 154742578697930304177307648n;
+
+    console.log(board.updateScore(false));
   });
 
 });

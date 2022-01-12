@@ -335,7 +335,8 @@ export class Combination {
   constructor(size: number) {
     this.size = size;
     this.rotateCombos();
-    this.setMasks();
+    // this.setMasks();
+    // this.setMasksOne()
   }
 
   private setMasks() {
@@ -402,4 +403,11 @@ export class Combination {
     });
   }
 
+  private setMasksOne() {
+    this.combinations.forEach(combo => {
+      combo.masksP.push(combo.maskPlayer);
+      combo.masksO.push(combo.maskEnemy);
+      combo.masksLen.push(combo.maskLen);
+      });
+  }
 }
