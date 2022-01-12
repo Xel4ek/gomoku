@@ -14,6 +14,7 @@ export class BoardService implements OnDestroy {
   store: BitBoard[] = [];
   currentBoard?: number;
   startTime = 0;
+
   constructor(private readonly gameService: GameService) {
     this.gameService
       .sequence$()
