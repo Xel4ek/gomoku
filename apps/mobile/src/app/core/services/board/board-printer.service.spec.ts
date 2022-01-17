@@ -86,12 +86,7 @@ describe('BoardPrinterService', () => {
    */
 
   it('should be created', () => {
-    let board = BigInt("0b" +
-      "1111" +
-      "1001" +
-      "1001" +
-      "1111"
-    );
+    let board: bigint;
     board = BigInt("0b" +
       "11111111" +
       "10000001" +
@@ -102,11 +97,47 @@ describe('BoardPrinterService', () => {
       "10000001" +
       "11111111"
     );
+    board = BigInt("0b" +
+      "10101010" +
+      "01010101" +
+      "10101010" +
+      "01010101" +
+      "10101010" +
+      "01010101" +
+      "10101010" +
+      "01010101"
+    );
+    board = BigInt("0b" +
+      "10001000" +
+      "01000100" +
+      "00100010" +
+      "00010001" +
+      "00001000" +
+      "00000100" +
+      "00000010" +
+      "00000001"
+    );
+    // board = BigInt("0b" +
+    //   "00000001" +
+    //   "00000010" +
+    //   "00000100" +
+    //   "00001000" +
+    //   "00010000" +
+    //   "00100000" +
+    //   "01000000" +
+    //   "10000000"
+    // );
     // console.log(flipMirrorOrReverse(board, true, false));
     console.log(board.toString(2));
     console.log(service.printBitBoard(board, 8));
     console.log(rotateRight(board, 10n, 8 * 8).toString(2));
     console.log(service.printBitBoard(pseudoRotate45clockwise(board, 8 * 8), 8));
+    const k1 = BigInt.asUintN(64, 0xAAAAAAAAAAAAAAAAn);
+    const k2 = BigInt.asUintN(64, 0xCCCCCCCCCCCCCCCCn);
+    const k4 = BigInt.asUintN(64, 0x0F0F0F0F0F0F0F0Fn);
+    console.log(service.printBitBoard(k1, 8));
+    console.log(service.printBitBoard(k2, 8));
+    console.log(service.printBitBoard(k4, 8));
     console.log(service.printBitBoard(pseudoRotate45antiClockwise(board, 8 * 8), 8));
     expect(service).toBeTruthy();
   });
