@@ -2,6 +2,11 @@ import { TestBed } from '@angular/core/testing';
 
 import { BoardPrinterService } from './board-printer.service';
 
+export enum Side {
+  PLAYER,
+  ENEMY
+}
+
 function rotateRight(x: bigint, s: bigint, size: number) {
   const full = (1n << BigInt(size)) - 1n;
   return (x >> s) | ((x << (BigInt(size) - s) & full));
@@ -101,8 +106,8 @@ describe('BoardPrinterService', () => {
     console.log(board.toString(2));
     console.log(service.printBitBoard(board, 8));
     console.log(rotateRight(board, 10n, 8 * 8).toString(2));
-    console.log(pseudoRotate45clockwise(board, 8 * 8).toString(2));
-    console.log(pseudoRotate45antiClockwise(board, 8 * 8).toString(2));
+    console.log(service.printBitBoard(pseudoRotate45clockwise(board, 8 * 8), 8));
+    console.log(service.printBitBoard(pseudoRotate45antiClockwise(board, 8 * 8), 8));
     expect(service).toBeTruthy();
   });
 });
