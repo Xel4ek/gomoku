@@ -221,7 +221,7 @@ describe('BitBoardServiceService', () => {
     )
   });
 
-  it('should rotate anticlockwise any size 45 32x32', () => {
+  it('should rotate clockwise any size 45 32x32', () => {
     size = 32;
     service = new BitBoardServiceService(30);
     const board = service.createEmpty();
@@ -234,6 +234,23 @@ describe('BitBoardServiceService', () => {
       "11111111111111111111111111111111\n" +
       "................................\n".repeat(30) +
       ".1111111111111111111111111111111"
+    )
+  });
+
+  it('should rotate anticlockwise any size 45 32x32', () => {
+    size = 32;
+    service = new BitBoardServiceService(30);
+    const board = service.createEmpty();
+    const row = 0b11000000000000000000000000000000n;
+    for (let i = 0n; i < 32n; i++) {
+      board.red |= row << (i * BigInt(size - 1));
+    }
+    board.red = BigInt.asUintN(size * size, board.red);
+    expect(printer.printBitBoard(service.pseudoRotate45AnticlockwiseAnySize(board.red, size * size), size)).toEqual(
+      "11111111111111111111111111111111\n" +
+      "................................\n".repeat(29) +
+      "...............................1\n" +
+      "1111111111111111111111111111111"
     )
   });
 

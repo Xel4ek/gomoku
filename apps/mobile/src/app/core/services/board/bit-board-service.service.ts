@@ -142,43 +142,38 @@ export class BitBoardServiceService {
   }
 
   pseudoRotate45AnticlockwiseAnySize(x: bigint, size: number) {
-    const k1 = BigInt.asUintN(size, this.kMaskRanks(BigInt(this.size), 0n));
-    const k2 = BigInt.asUintN(size, this.kMaskRanks(BigInt(this.size), 1n));
-    const k4 = BigInt.asUintN(size, this.kMaskRanks(BigInt(this.size), 2n));
-    //
-    // const k2 = BigInt.asUintN(size * size, this.kMask(this.size * this.size, 1));
-    // const k3 = BigInt.asUintN(size * size, this.kMask(this.size * this.size, 2));
-    // const k2 = BigInt.asUintN(size * size, 0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCn);
-    // const k4 = BigInt.asUintN(size * size, 0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0n);
-    // const k8 = BigInt.asUintN(size * size, 0xFF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00n);
-    // const k2 = BigInt(0xCCCCCCCCCCCCCCCC);
-    // const k4 = BigInt(0xF0F0F0F0F0F0F0F0);
-    x ^= k1 & (x ^ this.rotateRight(x, 8n, size));
-    x ^= k2 & (x ^ this.rotateRight(x, 16n, size));
-    x ^= k4 & (x ^ this.rotateRight(x, 32n, size));
-    // x ^= k8 & (x ^ rotateRight(x, 64n, size));
+    const k: bigint[] = [];
+    for (let i = 0n; i < 5n; i++) {
+      k.push(BigInt.asUintN(size, this.kMaskRanks(BigInt(size), i)));
+    }
+
+    // const k1 = BigInt.asUintN(size, this.kMaskRanks(BigInt(this.size), 0n));
+    // const k2 = BigInt.asUintN(size, this.kMaskRanks(BigInt(this.size), 1n));
+    // const k4 = BigInt.asUintN(size, this.kMaskRanks(BigInt(this.size), 2n));
+    k.forEach(((value, index) => {
+      x ^= value & (x ^ this.rotateRight(x, this.size << BigInt(index), size));
+    }))
+    // x ^= k1 & (x ^ this.rotateRight(x, 8n, size));
+    // x ^= k2 & (x ^ this.rotateRight(x, 16n, size));
+    // x ^= k4 & (x ^ this.rotateRight(x, 32n, size));
     return x;
   }
 
   pseudoRotate45clockwiseAnySize(x: bigint, size: number) {
-    const k1 = BigInt.asUintN(size, this.kMaskFiles(BigInt(size), 0n) << 1n);
-    const k2 = BigInt.asUintN(size, this.kMaskFiles(BigInt(size), 1n) << 2n);
-    const k4 = BigInt.asUintN(size, this.kMaskFiles(BigInt(size), 2n) << 4n);
-    const k8 = BigInt.asUintN(size, this.kMaskFiles(BigInt(size), 3n) << 8n);
-    const k16 = BigInt.asUintN(size, this.kMaskFiles(BigInt(size), 4n) << 16n);
-    //
-    // const k2 = BigInt.asUintN(size * size, this.kMask(this.size * this.size, 1));
-    // const k3 = BigInt.asUintN(size * size, this.kMask(this.size * this.size, 2));
-    // const k2 = BigInt.asUintN(size * size, 0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCn);
-    // const k4 = BigInt.asUintN(size * size, 0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0n);
-    // const k8 = BigInt.asUintN(size * size, 0xFF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00n);
-    // const k2 = BigInt(0xCCCCCCCCCCCCCCCC);
-    // const k4 = BigInt(0xF0F0F0F0F0F0F0F0);
-    x ^= k1 & (x ^ this.rotateRight(x, this.size, size));
-    x ^= k2 & (x ^ this.rotateRight(x, this.size << 1n, size));
-    x ^= k4 & (x ^ this.rotateRight(x, this.size << 2n, size));
-    x ^= k8 & (x ^ this.rotateRight(x, this.size << 3n, size));
-    x ^= k16 & (x ^ this.rotateRight(x, this.size << 4n, size));
+    const k: bigint[] = [];
+    for (let i = 0n; i < 5n; i++) {
+      k.push(BigInt.asUintN(size, this.kMaskFiles(BigInt(size), i) << (1n << i)));
+    }
+
+    // const k8 = BigInt.asUintN(size, this.kMaskFiles(BigInt(size), 3n) << 8n);
+    // const k16 = BigInt.asUintN(size, this.kMaskFiles(BigInt(size), 4n) << 16n);
+    k.forEach(((value, index) => {
+      x ^= value & (x ^ this.rotateRight(x, this.size << BigInt(index), size));
+    }))
+    // x ^= k2 & (x ^ this.rotateRight(x, this.size << 1n, size));
+    // x ^= k4 & (x ^ this.rotateRight(x, this.size << 2n, size));
+    // x ^= k8 & (x ^ this.rotateRight(x, this.size << 3n, size));
+    // x ^= k16 & (x ^ this.rotateRight(x, this.size << 4n, size));
     return x;
   }
 
@@ -283,11 +278,11 @@ export class BitBoardServiceService {
   }
 
   kMaskRanks(size: bigint, k: bigint) {
-    let mask = ((BigInt.asUintN(Number(size * size), -1n) / ((1n << (1n << k)) + 1n)));
-    for (let i = size * size - (size >> 1n); i > 0; i -= size) {
-      mask = this.insertBitShiftRight(mask, i, 0);
-    }
-    return BigInt.asUintN(Number(size * size), mask);
+    return  ((BigInt.asUintN(Number(size), -1n) / ((1n << (1n << k)) + 1n)));
+    // for (let i = size * size - (size >> 1n); i > 0; i -= size) {
+    //   mask = this.insertBitShiftRight(mask, i, 0);
+    // }
+    // return BigInt.asUintN(Number(size * size), mask);
   }
 
   kMaskFiles(size: bigint, k: bigint) {
