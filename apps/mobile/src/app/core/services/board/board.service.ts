@@ -1,10 +1,12 @@
 import { Injectable, OnDestroy, OnInit } from '@angular/core';
-import { BitBoard } from './bit-board';
+import { BitBoard, InvalidMoveError } from './bit-board';
 import { Combination } from './combination';
 import { GameBoard } from '../ai/ai.service';
 import { GameService, PlayerType } from '../game/game.service';
 import { Subject } from 'rxjs';
 import { filter, takeUntil, tap } from 'rxjs/operators';
+import { BoardBits } from "./boardBits";
+import { LoggerService } from "../logger/logger.service";
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +17,7 @@ export class BoardService implements OnDestroy {
   currentBoard?: number;
   startTime = 0;
 
-  constructor(private readonly gameService: GameService) {
+  constructor(private readonly gameService: GameService, private readonly loggerService: LoggerService) {
     this.gameService
       .sequence$()
       .pipe(
@@ -35,6 +37,7 @@ export class BoardService implements OnDestroy {
     // тут подписаться на сообжение воркера посчитать время работы и вызвать метод
     // gameService.makeTurn и передать туда борт
   }
+
   load(id: number) {
     this.currentBoard = id;
   }
@@ -42,6 +45,24 @@ export class BoardService implements OnDestroy {
   save() {
     throw 'Not implemented';
   }
+
+  createBoard(size: number): BoardBits {
+    return new BoardBits(size, 0n, 0n, BigInt(
+      '0b' + ('0' + '1'.repeat(size)).repeat(size) + '0'));
+  }
+
+  move(board: BoardBits, col: number, row: number, turn: 'player' | 'enemy') {
+    if (col >= board.size || row >= board.size || col < 0 || row < 0) {
+      throw new InvalidMoveError(`Cell out of board`);
+    }
+    const shift = BigInt(row * (board.size + 1) + col + 1);
+    const moveMask = 1n << shift;
+    if (board.player & moveMask || board.enemy & moveMask || board._border & moveMask) {
+      throw new InvalidMoveError(`Cell occupied`);
+    }
+    board[turn] |= moveMask;
+  }
+
 
   create(size: number) {
     const combos = new Combination(size);

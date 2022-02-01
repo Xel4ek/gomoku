@@ -3,6 +3,7 @@ import { BitBoard } from '../board/bit-board';
 import { GameService, PlayerType } from '../game/game.service';
 import { filter, tap } from "rxjs/operators";
 import { BoardService } from "../board/board.service";
+import { ActionService } from "./action.service";
 
 export enum AI {
   SIMPLE,
@@ -54,7 +55,11 @@ export class AiService {
   winCount = 5;
   size = 19;
 
-  constructor(private readonly gameService: GameService, private readonly boardService: BoardService) {
+  constructor(
+    private readonly gameService: GameService,
+    private readonly boardService: BoardService,
+    private readonly actionService: ActionService
+  ) {
     // const worker = new Worker('');
     const subscriber = gameService.sequence$()
       .pipe(

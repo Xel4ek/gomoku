@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { Pattern } from "./pattern";
 import { ComboNames, Dir } from "./combination";
 import { RotatedPattern } from "./rotated-pattern";
-import { Board } from "./board";
+import { BoardBits, Field } from "./boardBits";
+import { Side } from "../ai/action.service";
 
 @Injectable({
   providedIn: 'root'
@@ -168,10 +169,10 @@ export class PatternService {
     });
   }
 
-  findPatterns(board: Board, side: "player" | "enemy"): Pattern[] {
-    let player = side === "player" ? board.player : board.enemy;
-    let enemy = side === "player" ? board.enemy : board.player;
-    let border = board.border;
+  findPatterns(board: BoardBits, side: Field): Pattern[] {
+    let player = side === "red" ? board[side] : board._blue;
+    let enemy = side === "red" ? board._blue : board[side];
+    let border = board._border;
     const selected: Pattern[] = [];
     while (player) {
       selected.push(...this.patterns.filter(p => {

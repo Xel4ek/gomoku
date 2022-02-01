@@ -1,14 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 
 import { PatternService } from './pattern.service';
-import { Board } from "./board";
+import { BoardBits } from "./boardBits";
 
 describe('PatternService', () => {
   let service: PatternService;
-  let board: Board;
+  let board: BoardBits;
 
   beforeEach(() => {
-    board = new Board(19, BigInt("0b011111"), 0n, 1n)
+    board = new BoardBits(19, BigInt("0b011111"), 0n, 1n)
     TestBed.configureTestingModule({
     });
     service = new PatternService(19);
