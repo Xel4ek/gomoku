@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { Pattern } from "./pattern";
 import { ComboNames, Dir } from "./combination";
 import { RotatedPattern } from "./rotated-pattern";
@@ -9,7 +9,6 @@ import { Side } from "../ai/action.service";
   providedIn: 'root'
 })
 export class PatternService {
-  size: number;
   patterns: Pattern[] = [];
   templatePatterns = [
     {
@@ -112,8 +111,7 @@ export class PatternService {
     },
   ];
 
-  constructor(size: number) {
-    this.size = size;
+  constructor() {
     this.templatePatterns.forEach(t => {
       const p = new Pattern(
         t.name,
@@ -123,56 +121,53 @@ export class PatternService {
         t.empty,
       );
       this.patterns.push(p);
-      this.rotatePattern(p);
+      // this.rotatePattern(p);
     });
     this.patterns.sort(p => p.type);
   }
 
 
-  private rotateField(pattern: bigint, length: number, direction: Dir): bigint {
-    let rotatedMask = 0n;
-    let num = 0;
-    while (pattern) {
-      if (pattern & 1n) {
-        switch (direction) {
-          case Dir.S: {
-            rotatedMask |= 1n << BigInt(num * (this.size + 1));
-            break;
-          }
-          case Dir.SE: {
-            rotatedMask |= 1n << BigInt(num * (this.size + 1) + num);
-            break;
-          }
-          case Dir.SW: {
-            rotatedMask |= 1n << BigInt(num * (this.size + 1) + (length - num - 1));
-            break;
-          }
-        }
-      }
-      pattern >>= 1n;
-      num++;
-    }
-    return rotatedMask;
-  }
+  // private rotateField(pattern: bigint, length: number, direction: Dir): bigint {
+  //   let rotatedMask = 0n;
+  //   let num = 0;
+  //   while (pattern) {
+  //     if (pattern & 1n) {
+  //       switch (direction) {
+  //         case Dir.S: {
+  //           rotatedMask |= 1n << BigInt(num * (this.size + 1));
+  //           break;
+  //         }
+  //         case Dir.SE: {
+  //           rotatedMask |= 1n << BigInt(num * (this.size + 1) + num);
+  //           break;
+  //         }
+  //         case Dir.SW: {
+  //           rotatedMask |= 1n << BigInt(num * (this.size + 1) + (length - num - 1));
+  //           break;
+  //         }
+  //       }
+  //     }
+  //     pattern >>= 1n;
+  //     num++;
+  //   }
+  //   return rotatedMask;
+  // }
+  //
+  // private rotatePattern(p: Pattern) {
+  //   [Dir.SW, Dir.SE, Dir.S].forEach(direction => {
+      // this.patterns.push(new RotatedPattern(
+      //   this.size,
+      //   p.name,
+      //   p.type,
+        // this.rotateField(p.player, p.length, direction),
+        // this.rotateField(p.enemy, p.length, direction),
+        // this.rotateField(p.empty, p.length, direction),
+      // ));
+      // TODO: check rotation of new masks - size may be wrong
+    // });
+  // }
 
-  private rotatePattern(p: Pattern) {
-    [Dir.SW, Dir.SE, Dir.S].forEach(direction => {
-      this.patterns.push(new RotatedPattern(
-        this.size,
-        p.name,
-        p.type,
-        this.rotateField(p.player, p.length, direction),
-        this.rotateField(p.enemy, p.length, direction),
-        this.rotateField(p.empty, p.length, direction),
-      ));
-      //TODO: check rotation of new masks - size may be wrong
-    });
-  }
-
-  findPatterns(board: BoardBits, side: Field): Pattern[] {
-    let player = side === "red" ? board[side] : board._blue;
-    let enemy = side === "red" ? board._blue : board[side];
-    let border = board._border;
+  findPatterns(player: bigint, enemy: bigint, border: bigint): Pattern[] {
     const selected: Pattern[] = [];
     while (player) {
       selected.push(...this.patterns.filter(p => {

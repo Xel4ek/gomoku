@@ -6,7 +6,6 @@ import { GameService, PlayerType } from '../game/game.service';
 import { Subject } from 'rxjs';
 import { filter, takeUntil, tap } from 'rxjs/operators';
 import { BoardBits } from "./boardBits";
-import { LoggerService } from "../logger/logger.service";
 
 @Injectable({
   providedIn: 'root',
@@ -17,7 +16,7 @@ export class BoardService implements OnDestroy {
   currentBoard?: number;
   startTime = 0;
 
-  constructor(private readonly gameService: GameService, private readonly loggerService: LoggerService) {
+  constructor(private readonly gameService: GameService) {
     this.gameService
       .sequence$()
       .pipe(
@@ -47,17 +46,17 @@ export class BoardService implements OnDestroy {
   }
 
   createBoard(size: number): BoardBits {
-    return new BoardBits(size, 0n, 0n, BigInt(
+    return new BoardBits(BigInt(size), 0n, 0n, BigInt(
       '0b' + ('0' + '1'.repeat(size)).repeat(size) + '0'));
   }
 
-  move(board: BoardBits, col: number, row: number, turn: 'player' | 'enemy') {
+  move(board: BoardBits, col: number, row: number, turn: 'red' | 'blue') {
     if (col >= board.size || row >= board.size || col < 0 || row < 0) {
       throw new InvalidMoveError(`Cell out of board`);
     }
-    const shift = BigInt(row * (board.size + 1) + col + 1);
+    const shift = BigInt(row * (Number(board.size) + 1) + col + 1);
     const moveMask = 1n << shift;
-    if (board.player & moveMask || board.enemy & moveMask || board._border & moveMask) {
+    if (board.red & moveMask || board.blue & moveMask || board.border & moveMask) {
       throw new InvalidMoveError(`Cell occupied`);
     }
     board[turn] |= moveMask;
@@ -69,6 +68,10 @@ export class BoardService implements OnDestroy {
     const board = new BitBoard(combos.combinations, size);
     this.currentBoard = this.store.push(board);
     board.move(Math.floor(size / 2), Math.floor(size / 2), 'player');
+  }
+
+  createFromGameBoard1<A>(gameBoard: GameBoard, c: new() => A): A {
+    return new c();
   }
 
   createFromGameBoard(gameBoard: GameBoard) {

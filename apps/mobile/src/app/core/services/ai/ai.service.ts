@@ -4,6 +4,8 @@ import { GameService, PlayerType } from '../game/game.service';
 import { filter, tap } from "rxjs/operators";
 import { BoardService } from "../board/board.service";
 import { ActionService } from "./action.service";
+import { Strategy } from "./strategy";
+import { Board } from "../board/board";
 
 export enum AI {
   SIMPLE,
@@ -53,14 +55,13 @@ export class AiService {
   //TODO: add time limit
   timeLimit = 500; //milliseconds
   winCount = 5;
-  size = 19;
 
   constructor(
     private readonly gameService: GameService,
     private readonly boardService: BoardService,
-    private readonly actionService: ActionService
+    private readonly actionService: ActionService,
   ) {
-    // const worker = new Worker('');
+    const worker = new Worker('');
     const subscriber = gameService.sequence$()
       .pipe(
         filter(data => data.id % 2 ? data.enemy.type === PlayerType.AI : data.player.type === PlayerType.AI),
@@ -85,8 +86,17 @@ export class AiService {
     //console.debug("AI return number");
   }
 
+  // nextTurn(board: Board, callback: (turn: number) => void): void {
+  //   const action = this.strategy.getNextTurn(board);
+  //   if (action) {
+  //     callback(action.valueOf())
+  //   }
+  // }
+
+
+
+
   getNextAction(board: BitBoard, callback: (turn: number) => void): void {
-    console.debug(board);
     board.score = this.minimax(
       board,
       this.depth,
@@ -105,8 +115,7 @@ export class AiService {
       );
       //TODO: refactor turn
       board.move(action.col, action.row, 'enemy');
-      console.debug(action);
-      callback(action.row * this.size + action.col);
+      callback(action.row * board.size + action.col);
       return;
     }
     callback(-1);

@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Combo, ComboNames } from "../board/combination";
 import { Action } from "./action";
-import { DirectionNew } from "../board/bit-board";
+import { BitBoard, DirectionNew } from "../board/bit-board";
 import { BoardBits } from "../board/boardBits";
 import { BoardService } from "../board/board.service";
 import { PatternService } from "../board/pattern.service";
 import { Pattern } from "../board/pattern";
+import { Board } from "../board/board";
 
 export enum Side {
   PLAYER,
@@ -31,30 +32,33 @@ export class ActionService {
     SW: -(BigInt(this.size) + 1n) - 1n,
     W: -1n,
   };
-  constructor(private readonly patternService: PatternService) { }
+
+  constructor(private readonly patternService: PatternService) {
+  }
 
   generateActions(board: BoardBits, dilation: number = 1): Action[] {
-    const actions: Action[] = []
-    const occupied = board.player | board.enemy;
+    const actions: Action[] = [];
+    const occupied = board.red | board.blue;
     let moves = occupied;
     for (let i = dilation; i > 0; i--) {
+      const empty = ~board.border;
       moves = moves
-        | (moves >> this.shift.S & board._border)
-        | (moves >> this.shift.N & board._border)
-        | (moves >> this.shift.E & board._border)
-        | (moves >> this.shift.NE & board._border)
-        | (moves >> this.shift.SE & board._border)
-        | (moves >> this.shift.NW & board._border)
-        | (moves >> this.shift.SW & board._border)
-        | (moves >> this.shift.W & board._border);
+        | (moves >> this.shift.S & empty)
+        | (moves >> this.shift.N & empty)
+        | (moves >> this.shift.E & empty)
+        | (moves >> this.shift.NE & empty)
+        | (moves >> this.shift.SE & empty)
+        | (moves >> this.shift.NW & empty)
+        | (moves >> this.shift.SW & empty)
+        | (moves >> this.shift.W & empty);
     }
     moves ^= occupied;
     let i = 0;
-    moves >>= 1n; //shift for 1st zero bit
     while (moves) {
       if (moves & 1n) {
         actions.push(
-          new Action(i % (board.size + 1), Math.floor(i / (board.size + 1)))
+          new Action(i % (Number(board.size) + 1), Number(Math.floor(i / (Number(board.size) + 1))))
+          // new Action(Number(board.size), i % (Number(board.size) + 1), Number(Math.floor(i / (Number(board.size) + 1))))
         );
       }
       moves >>= 1n;
@@ -64,8 +68,8 @@ export class ActionService {
   }
 
   updateScore(board: BoardBits, side: Side) {
-    const maxCombos = this.patternService.findPatterns(board, side)
-    const minCombos = this.patternService.findPatterns(board, +!side)
+    const maxCombos = this.patternService.findPatterns(board.red, board.blue, board.border);
+    const minCombos = this.patternService.findPatterns(board.blue, board.red, board.border);
     const minScore = this.calculateScore(minCombos);
     const maxScore = this.calculateScore(maxCombos);
     // return maximising ? this.maxScore : this.minScore;
@@ -117,7 +121,7 @@ export class ActionService {
     const len: number[] = [];
     [DirectionNew.E, DirectionNew.S, DirectionNew.SE, DirectionNew.SW].forEach((value) => {
       let length = 0;
-      let bits = side ? board.enemy : board.player;
+      let bits = side ? board.red : board.blue;
       while (bits) {
         bits &= bits >> this.shift[value];
         length++;

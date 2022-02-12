@@ -60,4 +60,7 @@ export class BoardBits {
     }
   }
 
+  clone() {
+    return new BoardBits(this.size, this.red, this.blue, this.border);
+  }
 }

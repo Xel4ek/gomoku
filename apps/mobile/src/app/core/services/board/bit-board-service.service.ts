@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { BoardBits } from "./boardBits";
 import { BitBoard } from "./bit-board";
 import { BoardPrinterService } from "./board-printer.service";
@@ -31,7 +31,7 @@ type Shift = {
 export class BitBoardServiceService {
   //Little-Endian File-Rank mapping => A1, A2, A3...
 
-  size: bigint;
+  size = 1n;
   sizeBits: number;
   allBitsOn: bigint;
   sizeField: bigint;
@@ -39,13 +39,13 @@ export class BitBoardServiceService {
   lastFile: bigint;
   firstRank: bigint;
   lastRank: bigint;
-  border: bigint;
   shift: Shift;
   kMasks: { [i: number]: bigint }[];
 
-  constructor(size: number) {
-    this.sizeField = BigInt(size);
-    this.size = this.sizeField + this.calculateSize();
+  constructor() {
+    //TODO: refactor sizeField (put into constructor)
+    this.sizeField = 19n;
+    this.setSize();
     this.sizeBits = Number(this.size * this.size);
     this.firstFile = (1n << this.size) - 1n;
     this.lastFile = this.firstFile << (this.size * (this.size - 1n));
@@ -69,7 +69,6 @@ export class BitBoardServiceService {
       W: -this.size,
     };
     this.kMasks = this.createKMasks();
-    this.border = this.createBorder();
   }
 
   private createKMasks() {
@@ -81,12 +80,14 @@ export class BitBoardServiceService {
     return masks;
   }
 
-  private calculateSize(): bigint {
-    return 2n;
+  private setSize() {
+    while (this.size < this.sizeField) {
+      this.size <<= 1n;
+    }
   }
 
   createEmpty(): BoardBits {
-    return new BoardBits(this.size, 0n, 0n, this.border);
+    return new BoardBits(this.size, 0n, 0n, 0n);
   }
 
   clone(board: BoardBits): BoardBits {
@@ -325,14 +326,19 @@ export class BitBoardServiceService {
 // return x;
 // }
 
-  private createBorder() {
-    let border = this.firstFile | this.lastFile | this.firstRank | this.lastRank;
-    for (let i = 0n; i < ((this.size - this.sizeField) >> 1n); i += 1n) {
-      border |= (this.firstFile << (this.shift.E * i))
-        | (this.lastFile << this.shift.W)
-        | (this.firstRank << this.shift.N)
-        | (this.lastRank << this.shift.S);
+  createBorder(boardBits: BoardBits) {
+    boardBits.border = this.firstFile | this.lastFile | this.firstRank | this.lastRank;
+    const offset = (this.size - this.sizeField) >> 1n;
+    for (let i = 0n; i < offset; i += 1n) {
+      boardBits.border |= (this.firstFile << (this.shift.E * i))
+        | (this.lastFile << (this.shift.W * i))
+        | (this.firstRank << (this.shift.N * i))
+        | (this.lastRank << (this.shift.S * i));
     }
-    return border;
+    if (this.sizeField & 1n) {
+      boardBits.border |= (this.firstFile << (this.shift.E * (offset)))
+        | (this.lastRank << (this.shift.S * (offset)));
+
+    }
   }
 }
