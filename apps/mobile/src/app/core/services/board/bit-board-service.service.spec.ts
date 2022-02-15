@@ -3,6 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import { BitBoardServiceService } from './bit-board-service.service';
 import { BoardPrinterService } from "./board-printer.service";
 import { BoardBits } from "./boardBits";
+import { GameBoard, Player } from "../ai/ai.service";
+import { PlayerType } from "../game/game.service";
 
 describe('BitBoardServiceService', () => {
   let service: BitBoardServiceService;
@@ -361,6 +363,38 @@ describe('BitBoardServiceService', () => {
     board.border = service.createBorder();
     service.move(board, 3, 3, 'red');
     expect(board.red).toEqual(1093625362391505962186251113558810682676584715446606218212885303204976499599687961611756588511526912n);
+  });
+
+  it('should create board from GameBoard', () => {
+
+    const gb = {
+      id: 5,
+    } as GameBoard;
+    const pl = {
+      type: 0,
+      // map: [5, 6, 7, 8],
+      map: [0, 5, 6, 7],
+      turn: [1, 3],
+      captured: 0,
+      options: {
+        deep: 1
+      }
+    } as Player;
+    const enemy = {
+      type: 1,
+      map: [ 1 ],
+      // map: [ 0, 1, 2, 3, ],
+      turn: [2, 4, 6, 8,],
+      captured: 0,
+      options: {
+        deep: 1
+      }
+    } as Player;
+    gb.player = pl;
+    gb.enemy = enemy;
+    gb.size = size;
+    const board = service.createFromGameBoard(gb);
+    expect(board.red).toEqual(388223232006969213043205017253082681700374879684584243727891987588710400n)
   });
 
 });
