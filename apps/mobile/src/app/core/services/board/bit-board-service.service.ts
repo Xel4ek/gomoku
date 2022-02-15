@@ -1,7 +1,8 @@
-import { Inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { BoardBits } from "./boardBits";
-import { BitBoard } from "./bit-board";
-import { BoardPrinterService } from "./board-printer.service";
+import { InvalidMoveError } from "./bit-board";
+import { GameBoard } from "../ai/ai.service";
+import { Combination } from "./combination";
 
 export enum Orientation {
   // https://www.chessprogramming.org/Bibob
@@ -98,10 +99,6 @@ export class BitBoardServiceService {
     return board | mask;
   }
 
-  update(board: BitBoard, mask: bigint, action: 'AND') {
-
-  }
-
   rotateRight(x: bigint, s: bigint, size: number) {
     const full = (1n << BigInt(size)) - 1n;
     return (x >> s) | ((x << (BigInt(size) - s) & full));
@@ -153,7 +150,7 @@ export class BitBoardServiceService {
     // const k4 = BigInt.asUintN(size, this.kMaskRanks(BigInt(this.size), 2n));
     k.forEach(((value, index) => {
       x ^= value & (x ^ this.rotateRight(x, this.size << BigInt(index), size));
-    }))
+    }));
     // x ^= k1 & (x ^ this.rotateRight(x, 8n, size));
     // x ^= k2 & (x ^ this.rotateRight(x, 16n, size));
     // x ^= k4 & (x ^ this.rotateRight(x, 32n, size));
@@ -170,7 +167,7 @@ export class BitBoardServiceService {
     // const k16 = BigInt.asUintN(size, this.kMaskFiles(BigInt(size), 4n) << 16n);
     k.forEach(((value, index) => {
       x ^= value & (x ^ this.rotateRight(x, this.size << BigInt(index), size));
-    }))
+    }));
     // x ^= k2 & (x ^ this.rotateRight(x, this.size << 1n, size));
     // x ^= k4 & (x ^ this.rotateRight(x, this.size << 2n, size));
     // x ^= k8 & (x ^ this.rotateRight(x, this.size << 3n, size));
@@ -279,7 +276,7 @@ export class BitBoardServiceService {
   }
 
   kMaskRanks(size: bigint, k: bigint) {
-    return  ((BigInt.asUintN(Number(size), -1n) / ((1n << (1n << k)) + 1n)));
+    return ((BigInt.asUintN(Number(size), -1n) / ((1n << (1n << k)) + 1n)));
     // for (let i = size * size - (size >> 1n); i > 0; i -= size) {
     //   mask = this.insertBitShiftRight(mask, i, 0);
     // }
@@ -310,9 +307,6 @@ export class BitBoardServiceService {
 
   /**
    * Flip, mirror or reverse a bitboard
-   * @param x any bitboard
-   * @param flip the bitboard
-   * @param mirror the bitboard
    * @return bitboard x flipped, mirrored or reversed
    */
 //   U64 flipMirrorOrReverse(U64 x, bool flip, bool mirror)
@@ -326,19 +320,59 @@ export class BitBoardServiceService {
 // return x;
 // }
 
-  createBorder(boardBits: BoardBits) {
-    boardBits.border = this.firstFile | this.lastFile | this.firstRank | this.lastRank;
+  createBorder() {
+    let board;
+    board = this.firstFile | this.lastFile | this.firstRank | this.lastRank;
     const offset = (this.size - this.sizeField) >> 1n;
     for (let i = 0n; i < offset; i += 1n) {
-      boardBits.border |= (this.firstFile << (this.shift.E * i))
+      board |= (this.firstFile << (this.shift.E * i))
         | (this.lastFile << (this.shift.W * i))
         | (this.firstRank << (this.shift.N * i))
         | (this.lastRank << (this.shift.S * i));
     }
     if (this.sizeField & 1n) {
-      boardBits.border |= (this.firstFile << (this.shift.E * (offset)))
+      board |= (this.firstFile << (this.shift.E * (offset)))
         | (this.lastRank << (this.shift.S * (offset)));
 
     }
+    return board;
+  }
+
+  private checkMove(board: BoardBits, mask: bigint) {
+    if (board.red & mask || board.blue & mask) {
+      throw new InvalidMoveError(`Cell occupied`);
+    }
+  }
+
+  move(board: BoardBits, col: number, row: number, side: 'red' | 'blue') {
+    if (col >= this.sizeField || row >= this.sizeField || col < 0 || row < 0) {
+      throw new InvalidMoveError(`Cell out of board`);
+    }
+    let mask = 1n << BigInt(row);
+    mask <<= BigInt(col) * this.size;
+    let border = board.border;
+    while (border & 1n) {
+      mask <<= 1n;
+      border >>= 1n;
+    }
+    this.checkMove(board, mask);
+    board[side] |= mask;
+  }
+
+  //TODO: добавить биты между рядами на размер разницы между длиной борда и длиной игрового поля.
+
+  createFromArray(arr: number[], board: BoardBits, side: 'red' | 'blue') {
+    const size = Number(this.sizeField);
+    arr.forEach((value) => {
+      this.move(board, Math.floor(value / size), value % size, side);
+    });
+  }
+
+  createFromGameBoard(gameBoard: GameBoard) {
+    const board = this.createEmpty();
+    board.border = this.createBorder();
+    this.createFromArray(gameBoard.player.map, board, 'red');
+    this.createFromArray(gameBoard.enemy.map, board, 'blue');
+    return board;
   }
 }

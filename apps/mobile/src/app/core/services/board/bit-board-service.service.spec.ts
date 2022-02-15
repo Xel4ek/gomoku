@@ -24,7 +24,7 @@ describe('BitBoardServiceService', () => {
 
   it('should create border', () => {
     const board = service.createEmpty();
-    service.createBorder(board);
+    board.border = service.createBorder();
     expect(board.border).toEqual(179769313486231590772930519078902473361797697894230657273429857416722513549807456439521370524398016313747864138576501143761788526132752112794635304368249493456807085762422823135099751306398720293598418473628815745346865403688608154084369737106872856864305097429232224688701578133204645972143338320850776489983n)
   });
 
@@ -354,6 +354,13 @@ describe('BitBoardServiceService', () => {
     // console.log(printer.printBitBoard(pseudoRotate45antiClockwise(board, size * size), size));
     console.log(printer.printBitBoard(service.pseudoRotate45clockwise(board, size * size), size));
     expect(service).toBeTruthy();
+  });
+
+  it('should make move', () => {
+    const board = service.createEmpty();
+    board.border = service.createBorder();
+    service.move(board, 3, 3, 'red');
+    expect(board.red).toEqual(1093625362391505962186251113558810682676584715446606218212885303204976499599687961611756588511526912n);
   });
 
 });
