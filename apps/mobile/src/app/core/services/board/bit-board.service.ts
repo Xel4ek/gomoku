@@ -29,7 +29,7 @@ type Shift = {
 @Injectable({
   providedIn: 'root'
 })
-export class BitBoardServiceService {
+export class BitBoardService {
   //Little-Endian File-Rank mapping => A1, A2, A3...
 
   size = 1n;
@@ -358,8 +358,6 @@ export class BitBoardServiceService {
     this.checkMove(board, mask);
     board[side] |= mask;
   }
-
-  //TODO: добавить биты между рядами на размер разницы между длиной борда и длиной игрового поля.
 
   createFromArray(arr: number[], board: BoardBits, side: 'red' | 'blue') {
     const size = Number(this.sizeField);

@@ -1,15 +1,10 @@
 import { Injectable } from '@angular/core';
-import { BitBoard } from '../board/bit-board';
 import { GameService, PlayerType } from '../game/game.service';
 import { filter, tap } from "rxjs/operators";
 import { BoardService } from "../board/board.service";
 import { ActionService } from "./action.service";
-import { Strategy } from "./strategy";
-import { Board } from "../board/board";
-
-export enum AI {
-  SIMPLE,
-}
+import { MinimaxStrategy } from "./minimax-strategy";
+import { BitBoardService } from "../board/bit-board.service";
 
 //TODO: Check score calculation (may be wrong shift to N, NW, NE)
 //TODO: place AI to worker
@@ -58,8 +53,8 @@ export class AiService {
 
   constructor(
     private readonly gameService: GameService,
-    private readonly boardService: BoardService,
     private readonly actionService: ActionService,
+    private readonly strategy: MinimaxStrategy,
   ) {
     const worker = new Worker('');
     const subscriber = gameService.sequence$()
@@ -74,116 +69,19 @@ export class AiService {
             this.gameService.makeTurn(data);
             // worker.onmessage = tu;
           };
-          this.getNextAction(this.boardService.createFromGameBoard({ ...data }), onmessage);
+          this.getNextAction({ ...data }, onmessage);
+          // this.getNextAction(this.boardService.createFromGameBoard({ ...data }), onmessage);
           // this.mockAction('', onmessage);
         }))
       .subscribe();
     // TODO: Subscribe to messages
   }
 
-  mockAction(dummy: string, callback: (turn: number) => void) {
-    callback(Math.trunc(Math.random() * 19 * 19));
-    //console.debug("AI return number");
-  }
-
-  // nextTurn(board: Board, callback: (turn: number) => void): void {
-  //   const action = this.strategy.getNextTurn(board);
-  //   if (action) {
-  //     callback(action.valueOf())
-  //   }
+  // mockAction(dummy: string, callback: (turn: number) => void) {
+  //   callback(Math.trunc(Math.random() * 19 * 19));
   // }
 
-
-
-
-  getNextAction(board: BitBoard, callback: (turn: number) => void): void {
-    board.score = this.minimax(
-      board,
-      this.depth,
-      false,
-      Number.NEGATIVE_INFINITY,
-      Number.POSITIVE_INFINITY
-    );
-    // console.log(board);
-    if (board.possibleActions.length > 0) {
-      const action = board.possibleActions.reduce(
-        (previousValue, currentValue) => {
-          return previousValue.score < currentValue.score
-            ? previousValue
-            : currentValue;
-        }
-      );
-      //TODO: refactor turn
-      board.move(action.col, action.row, 'enemy');
-      callback(action.row * board.size + action.col);
-      return;
-    }
-    callback(-1);
-    return;
-  }
-
-  eval(
-    isMax: boolean,
-    board: BitBoard,
-    depth: number,
-    alpha: number,
-    beta: number
-  ) {
-    let evalScore = isMax ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY;
-    for (const action of board.possibleActions) {
-      if (depth > 1) {
-        // console.debug(`===${depth}: ${isMax} ${action.row} - ${action.col}`);
-      }
-      const newBoard = board.clone();
-      newBoard.move(action.col, action.row, isMax ? 'player' : 'enemy');
-      action.score = this.minimax(newBoard, depth - 1, !isMax, alpha, beta);
-      evalScore = isMax
-        ? Math.max(evalScore, action.score)
-        : Math.min(evalScore, action.score);
-      // console.debug(`${depth}: ${isMax} ${action.row} - ${action.col}, score: ${action.score}`);
-      //console.debug('max: ', oldMax, action.score, ' -> ', maxEval);
-      if (isMax) {
-        alpha = Math.max(alpha, action.score);
-      } else {
-        beta = Math.min(beta, action.score);
-      }
-      if (beta <= alpha) {
-        // console.debug(`===${depth}: ${isMax}, ${action.row} - ${action.col}, score: ${action.score}, alpha: ${alpha}, beta: ${beta}`);
-        console.log(isMax + ' pruned! ' + beta + '<=' + alpha);
-        break;
-      }
-      // console.debug(`===${depth}: ${isMax}, ${action.row} - ${action.col}, score: ${action.score}, alpha: ${alpha}, beta: ${beta}`);
-    }
-    console.log(`${depth}:`, board.possibleActions);
-    return evalScore;
-  }
-
-  minimax(
-    board: BitBoard,
-    depth: number,
-    maximizing: boolean,
-    alpha: number,
-    beta: number
-  ): number {
-    //console.debug("isMax: " + maximizing, board.possibleActions);
-    //console.debug(BitBoard.printBitBoard(board.boards.player, board.size));
-    if (depth === 0 || board.checkWin(maximizing)) {
-      const score = board.updateScore(maximizing);
-      // console.log(
-      //   'Depth 0. Score: ' + score,
-      //   'WIN: ' + board.checkWin(maximizing),
-      //   'Actions :' + board.possibleActions.length
-      // );
-      // console.debug(BitBoard.printBitBoard(board.boards.player, board.size));
-      // console.debug(BitBoard.printBitBoard(board.boards.enemy, board.size));
-      return score;
-    }
-    // TODO: stop of first win action
-    board.generateActions();
-    if (board.possibleActions.length === 0) {
-      const score = board.updateScore(maximizing);
-      return score;
-    }
-    return this.eval(maximizing, board, depth, alpha, beta);
+  getNextAction(board: GameBoard, callback: (turn: number) => void): void {
+    callback(this.strategy.getNextTurn(board));
   }
 }

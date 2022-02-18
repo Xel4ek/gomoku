@@ -45,7 +45,6 @@ describe('AiService', () => {
   it('should test mimimax', () => {
     const gb = {
       id: 5,
-
     } as GameBoard;
     const pl = {
       type: 0,

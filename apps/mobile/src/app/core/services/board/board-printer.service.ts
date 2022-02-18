@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Orientation } from "./bit-board-service.service";
+import { Orientation } from "./bit-board.service";
 
 @Injectable({
   providedIn: 'root'

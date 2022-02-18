@@ -1,5 +1,5 @@
-import { InvalidMoveError } from "./bit-board";
-import { Orientation } from "./bit-board-service.service";
+import { Orientation } from "./bit-board.service";
+import { Action } from "../ai/action";
 
 export enum Field {
   RED = "red",
@@ -15,7 +15,9 @@ export class BoardBits {
   private _red = 0n;
   private _blue = 0n;
   private _border = 0n;
+  possibleActions: Action[] = [];
   orientation = Orientation.LEFR;
+  firstCell = 1n;
 
   get red() {
     return this._red;
@@ -49,6 +51,16 @@ export class BoardBits {
     this._red = player;
     this._blue = enemy;
     this._border = border;
+    this._setFistCell()
+  }
+
+  _setFistCell() {
+    let border = this.border;
+    border <<= 1n;
+    while (border & 1n) {
+      this.firstCell <<= 1n;
+      border <<= 1n;
+    }
   }
 
   update(field: Field, index: bigint, value: 0 | 1) {
