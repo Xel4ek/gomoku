@@ -52,9 +52,8 @@ export class MinimaxStrategy {
             : currentValue;
         }
       );
-      //TODO: refactor turn
-      this.boardService.move(board, action.col, action.row, 'blue');
-      return (action.row * Number(this.boardService.sizeField) + action.col);
+      this.boardService.moveByMask(board, action.mask, 'red');
+      return this.boardService.getFieldIndex(board, action.mask);
     }
     return -1;
   }
@@ -72,7 +71,7 @@ export class MinimaxStrategy {
         // console.debug(`===${depth}: ${isMax} ${action.row} - ${action.col}`);
       }
       const newBoard = board.clone();
-      this.boardService.move(newBoard, action.col, action.row, isMax ? 'red' : 'blue');
+      this.boardService.moveByMask(newBoard, action.mask, isMax ? 'blue' : 'red')
       action.score = this.minimax(newBoard, depth - 1, !isMax, alpha, beta);
       evalScore = isMax
         ? Math.max(evalScore, action.score)
@@ -115,7 +114,7 @@ export class MinimaxStrategy {
       // console.debug(BitBoard.printBitBoard(board.boards.enemy, board.size));
     }
     // TODO: stop of first win action
-    board.possibleActions = this.actionService.generateActions(board, this.dilation);
+    board.possibleActions = this.boardService.generateActions(board, this.dilation);
     //   if (actions) {
     //     return this.eval(maximizing, board, depth, alpha, beta, actions);
     //   }
@@ -126,65 +125,4 @@ export class MinimaxStrategy {
     return this.eval(maximizing, board, depth, alpha, beta);
   }
 
-  // eval(
-  //   isMax: boolean,
-  //   board: BoardBits,
-  //   depth: number,
-  //   alpha: number,
-  //   beta: number,
-  //   actions: Action[],
-  // ) {
-  //   // let best = isMax ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY;
-  //   for (const action of actions) {
-  //     if (depth > 1) {
-  //       // console.debug(`===${depth}: ${isMax} ${action.row} - ${action.col}`);
-  //     }
-  //     const newBoard = board.clone();
-  //     this.boardService.move(newBoard, action.row, action.col, isMax ? 'red' : 'blue')
-  //     this.minimax(newBoard, depth - 1, !isMax, alpha, beta, action);
-  //     // best = isMax
-  //     //   ? Math.max(best, action.score)
-  //     //   : Math.min(best, action.score);
-  //     // console.debug(`${depth}: ${isMax} ${action.row} - ${action.col}, score: ${action.score}`);
-  //     //console.debug('max: ', oldMax, action.score, ' -> ', maxEval);
-  //     if (isMax) {
-  //       alpha = Math.max(alpha, action.score);
-  //     } else {
-  //       beta = Math.min(beta, action.score);
-  //     }
-  //     if (beta <= alpha) {
-  //       // console.debug(`===${depth}: ${isMax}, ${action.row} - ${action.col}, score: ${action.score}, alpha: ${alpha}, beta: ${beta}`);
-  //       console.log(isMax + ' pruned! ' + beta + '<=' + alpha);
-  //       break;
-  //     }
-  //     // console.debug(`===${depth}: ${isMax}, ${action.row} - ${action.col}, score: ${action.score}, alpha: ${alpha}, beta: ${beta}`);
-  //   }
-  //   actions.sort((a, b) => (a.score - b.score));
-  //   return isMax ? actions[0] : actions[actions.length - 1];
-  // }
-  //
-  // minimax(
-  //   board: BoardBits,
-  //   depth: number,
-  //   maximizing: boolean,
-  //   alpha: number,
-  //   beta: number,
-  //   action?: Action,
-  // ): Action | void {
-  //   //console.debug("isMax: " + maximizing, board.possibleActions);
-  //   //console.debug(BitBoard.printBitBoard(board.boards.player, board.size));
-  //   if (depth === 0 || this.scoringService.checkWin(board)) {
-  //     if (action) {
-  //       action.score = this.scoringService.calculate(board);
-  //       return action
-  //     }
-  //     return;
-  //   }
-  //   // TODO: stop of first win action
-  //   const actions = this.actionService.generateActions(board, this.dilation);
-  //   if (actions) {
-  //     return this.eval(maximizing, board, depth, alpha, beta, actions);
-  //   }
-  //   return ;
-  // }
 }

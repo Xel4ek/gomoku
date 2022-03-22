@@ -1,5 +1,5 @@
 import { Orientation } from "./bit-board.service";
-import { Action } from "../ai/action";
+import { Action, BoardAction } from "../ai/action";
 
 export enum Field {
   RED = "red",
@@ -10,12 +10,16 @@ export enum Field {
 export class BoardBits {
   //Little-Endian File-Rank mapping => A1, A2, A3...
 
+  get sizeNumber() {
+    return Number(this.size);
+  }
+
   size: bigint;
 
   private _red = 0n;
   private _blue = 0n;
   private _border = 0n;
-  possibleActions: Action[] = [];
+  possibleActions: BoardAction[] = [];
   orientation = Orientation.LEFR;
   firstCell = 1n;
 

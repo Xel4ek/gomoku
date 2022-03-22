@@ -1,12 +1,11 @@
 import { Injectable } from '@angular/core';
-import { Combo, ComboNames } from "../board/combination";
+import { ComboNames } from "../board/combination";
 import { Action } from "./action";
-import { BitBoard, DirectionNew } from "../board/bit-board";
+import { DirectionNew } from "../board/bit-board";
 import { BoardBits } from "../board/boardBits";
-import { BoardService } from "../board/board.service";
+import { BoardPrinterService } from "../board/board-printer.service";
 import { PatternService } from "../board/pattern.service";
 import { Pattern } from "../board/pattern";
-import { Board } from "../board/board";
 
 export enum Side {
   PLAYER,
@@ -19,21 +18,21 @@ export enum Side {
 
 export class ActionService {
 
-  //TODO: refactor
-  size = 19;
+  size = 32n;
 
+  //TODO: make function shift with param (border.size)
   shift = {
     E: 1n,
-    N: BigInt(this.size) + 1n,
-    NE: BigInt(this.size) + 1n + 1n,
-    NW: BigInt(this.size) + 1n - 1n,
-    S: -(BigInt(this.size) + 1n),
-    SE: -(BigInt(this.size) + 1n) + 1n,
-    SW: -(BigInt(this.size) + 1n) - 1n,
+    N: this.size,
+    NE: this.size + 1n,
+    NW: this.size - 1n,
+    S: -this.size,
+    SE: -this.size + 1n,
+    SW: -this.size - 1n,
     W: -1n,
   };
 
-  constructor(private readonly patternService: PatternService) {
+  constructor(private readonly patternService: PatternService, private readonly boardPrinterService: BoardPrinterService) {
   }
 
   generateActions(board: BoardBits, dilation: number = 1): Action[] {
@@ -41,35 +40,39 @@ export class ActionService {
     const occupied = board.red | board.blue;
     let moves = occupied;
     for (let i = dilation; i > 0; i--) {
-      const empty = ~board.border;
       moves = moves
-        | (moves >> this.shift.S & empty)
-        | (moves >> this.shift.N & empty)
-        | (moves >> this.shift.E & empty)
-        | (moves >> this.shift.NE & empty)
-        | (moves >> this.shift.SE & empty)
-        | (moves >> this.shift.NW & empty)
-        | (moves >> this.shift.SW & empty)
-        | (moves >> this.shift.W & empty);
+        | (moves >> this.shift.S)
+        | (moves >> this.shift.N)
+        | (moves >> this.shift.E)
+        | (moves >> this.shift.NE)
+        | (moves >> this.shift.SE)
+        | (moves >> this.shift.NW)
+        | (moves >> this.shift.SW)
+        | (moves >> this.shift.W);
     }
-    moves ^= occupied;
+    moves = (moves | board.border) ^ board.border;
     let i = 0;
+    let border = board.border;
     while (moves) {
       if (moves & 1n) {
         actions.push(
-          new Action(i % (Number(board.size) + 1), Number(Math.floor(i / (Number(board.size) + 1))))
+          new Action(board.sizeNumber, i)
+          // new Action(i % (Number(board.size)), Number(Math.floor(i / Number(board.size))))
           // new Action(Number(board.size), i % (Number(board.size) + 1), Number(Math.floor(i / (Number(board.size) + 1))))
         );
       }
       moves >>= 1n;
-      i++;
+      border >>= 1n;
+      if ((border & 1n) === 0n) {
+        i++;
+      }
     }
     return actions;
   }
 
   updateScore(board: BoardBits, side: Side) {
-    const maxCombos = this.patternService.findPatterns(board.red, board.blue, board.border);
-    const minCombos = this.patternService.findPatterns(board.blue, board.red, board.border);
+    const maxCombos = this.patternService.findPatterns(board.blue, board.red, board.border);
+    const minCombos = this.patternService.findPatterns(board.red, board.blue, board.border);
     const minScore = this.calculateScore(minCombos);
     const maxScore = this.calculateScore(maxCombos);
     // return maximising ? this.maxScore : this.minScore;
@@ -117,11 +120,11 @@ export class ActionService {
     return score;
   }
 
-  checkWin(board: BoardBits, side: Side) {
+  checkWin(board: BoardBits, side: 'red' | 'blue') {
     const len: number[] = [];
     [DirectionNew.E, DirectionNew.S, DirectionNew.SE, DirectionNew.SW].forEach((value) => {
       let length = 0;
-      let bits = side ? board.red : board.blue;
+      let bits = board[side];
       while (bits) {
         bits &= bits >> this.shift[value];
         length++;

@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { BoardBits } from "./boardBits";
 import { InvalidMoveError } from "./bit-board";
 import { GameBoard } from "../ai/ai.service";
-import { Combination } from "./combination";
+import { BoardAction } from "../ai/action";
+import { BoardPrinterService } from "./board-printer.service";
 
 export enum Orientation {
   // https://www.chessprogramming.org/Bibob
@@ -339,9 +340,13 @@ export class BitBoardService {
   }
 
   private checkMove(board: BoardBits, mask: bigint) {
-    if (board.red & mask || board.blue & mask) {
+    if ((board.red & mask) || (board.blue & mask)) {
       throw new InvalidMoveError(`Cell occupied`);
     }
+  }
+
+  moveByMask(board: BoardBits, mask: bigint, side: 'red' | 'blue') {
+    board[side] |= mask;
   }
 
   move(board: BoardBits, col: number, row: number, side: 'red' | 'blue') {
@@ -369,8 +374,44 @@ export class BitBoardService {
   createFromGameBoard(gameBoard: GameBoard) {
     const board = this.createEmpty();
     board.border = this.createBorder();
-    this.createFromArray(gameBoard.player.map, board, 'red');
-    this.createFromArray(gameBoard.enemy.map, board, 'blue');
+    this.createFromArray(gameBoard.player.map, board, 'blue');
+    this.createFromArray(gameBoard.enemy.map, board, 'red');
     return board;
+  }
+
+  generateActions(board: BoardBits, dilation: number = 1): BoardAction[] {
+    const actions: BoardAction[] = [];
+    const occupied = board.red | board.blue;
+    let moves = occupied;
+    for (let i = dilation; i > 0; i--) {
+      moves = moves
+        | (moves >> this.shift.S)
+        | (moves >> this.shift.N)
+        | (moves >> this.shift.E)
+        | (moves >> this.shift.NE)
+        | (moves >> this.shift.SE)
+        | (moves >> this.shift.NW)
+        | (moves >> this.shift.SW)
+        | (moves >> this.shift.W);
+    }
+    moves = (moves | board.border) ^ board.border ^ board.red ^ board.blue;
+    while (moves) {
+      const lsb = moves & -moves;
+      actions.push(new BoardAction(board.sizeNumber, lsb));
+      moves &= ~lsb // clear LSB
+    }
+    return actions;
+  }
+
+  getFieldIndex(board: BoardBits, mask: bigint): number {
+    let border = board.border;
+    let i = 0;
+    for (mask; mask > 0; mask >>= 1n) {
+      if ((border & 1n) === 0n) {
+        i++;
+      }
+      border >>= 1n;
+    }
+    return i;
   }
 }
