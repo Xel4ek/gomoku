@@ -274,7 +274,6 @@ export class BitBoard {
   }
 
   generateActions(dilation: number = 1) {
-    //TODO:
     const occupied = this.boards.player | this.boards.enemy;
     let moves = occupied;
     // //console.debug(BitBoard.printBitBoard(moves, this.size));

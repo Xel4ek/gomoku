@@ -44,7 +44,7 @@ export class BitBoardService {
   shift: Shift;
   kMasks: { [i: number]: bigint }[];
 
-  constructor() {
+  constructor(private readonly boardPrinterService: BoardPrinterService) {
     //TODO: refactor sizeField (put into constructor)
     this.sizeField = 19n;
     this.setSize();
@@ -397,16 +397,39 @@ export class BitBoardService {
     moves = (moves | board.border) ^ board.border ^ board.red ^ board.blue;
     while (moves) {
       const lsb = moves & -moves;
-      actions.push(new BoardAction(board.sizeNumber, lsb));
+      actions.push(new BoardAction(board.sizeNumber, lsb, -1, -1));
       moves &= ~lsb // clear LSB
     }
     return actions;
   }
 
-  getFieldIndex(board: BoardBits, mask: bigint): number {
-    let border = board.border;
+  generateBoards(board: BoardBits, dilation: number = 1, side: 'red' | 'blue'): void {
+    const occupied = board.red | board.blue;
+    let moves = occupied;
+    for (let i = dilation; i > 0; i--) {
+      moves = moves
+        | (moves >> this.shift.S)
+        | (moves >> this.shift.N)
+        | (moves >> this.shift.E)
+        | (moves >> this.shift.NE)
+        | (moves >> this.shift.SE)
+        | (moves >> this.shift.NW)
+        | (moves >> this.shift.SW)
+        | (moves >> this.shift.W);
+    }
+    moves = (moves | board.border) ^ board.border ^ board.red ^ board.blue;
+    while (moves) {
+      const lsb = moves & -moves;
+      const newBoard = this.clone(board);
+      newBoard[side] |= lsb;
+      board.childBoards.push(newBoard);
+      moves &= ~lsb // clear LSB
+    }
+  }
+
+  getFieldIndex(border: bigint, mask: bigint): number {
     let i = 0;
-    for (mask; mask > 0; mask >>= 1n) {
+    for (mask; mask > 1n; mask >>= 1n) {
       if ((border & 1n) === 0n) {
         i++;
       }
@@ -414,4 +437,6 @@ export class BitBoardService {
     }
     return i;
   }
+
+
 }

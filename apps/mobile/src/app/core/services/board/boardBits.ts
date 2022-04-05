@@ -20,8 +20,10 @@ export class BoardBits {
   private _blue = 0n;
   private _border = 0n;
   possibleActions: BoardAction[] = [];
+  childBoards: BoardBits[] = [];
   orientation = Orientation.LEFR;
   firstCell = 1n;
+  score = 0;
 
   get red() {
     return this._red;
