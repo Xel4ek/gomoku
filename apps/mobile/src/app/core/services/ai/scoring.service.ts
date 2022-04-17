@@ -9,7 +9,8 @@ import { PatternService } from "../board/pattern.service";
 })
 export class ScoringService {
 
-  constructor(private readonly patternService: PatternService) { }
+  constructor(private readonly patternService: PatternService) {
+  }
 
   checkWin(board: BoardBits) {
     return false;
@@ -17,11 +18,14 @@ export class ScoringService {
 
   calculate(board: BoardBits): number {
     const maxCombos = this.patternService.findPatterns(board.blue, board.red, board.border);
-    const minCombos = this.patternService.findPatterns(board.red, board.blue, board.border);
-    const minScore = this.calculateScore(minCombos);
-    const maxScore = this.calculateScore(maxCombos);
-    // return maximising ? this.maxScore : this.minScore;
-    const score = 1.1 * maxScore - minScore;
+    let score = this.calculateScore(maxCombos);
+    if (score < 15000) {
+      const minCombos = this.patternService.findPatterns(board.red, board.blue, board.border);
+      const minScore = this.calculateScore(minCombos);
+      // return maximising ? this.maxScore : this.minScore;
+      score *= 1.1;
+      score -= minScore;
+    }
     // console.log("updateScore: " + score + ", " + maximising, this.maxCombos, this.minCombos, this.boards.player, this.boards.enemy)
     return score;
   }
