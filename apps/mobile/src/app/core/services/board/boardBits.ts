@@ -23,7 +23,7 @@ export class BoardBits {
   childBoards: BoardBits[] = [];
   orientation = Orientation.LEFR;
   firstCell = 1n;
-  score = 0;
+  score = Number.NaN;
 
   get red() {
     return this._red;
@@ -81,4 +81,19 @@ export class BoardBits {
   clone() {
     return new BoardBits(this.size, this.red, this.blue, this.border);
   }
+
+  printBitBoard(board: 'red' | 'blue' | 'border') {
+    const str = this[board].toString(2)
+      .replaceAll("0", ".")
+      .split('')
+      .reverse()
+      .map((value, index) => {
+        if (index > 0 && index % Number(this.size) === 0) {
+          value = '\n' + value
+        }
+        return value
+      })
+    return str.join('');
+  }
+
 }
