@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable, NgZone} from '@angular/core';
 import { GameService, PlayerType } from '../game/game.service';
 import { filter, tap } from "rxjs/operators";
 import { BoardService } from "../board/board.service";
@@ -55,6 +55,7 @@ export class AiService {
     private readonly gameService: GameService,
     private readonly actionService: ActionService,
     private readonly strategy: MinimaxStrategy,
+    private readonly ngZone: NgZone,
   ) {
     const worker = new Worker('');
     const subscriber = gameService.sequence$()
@@ -82,6 +83,8 @@ export class AiService {
   // }
 
   getNextAction(board: GameBoard, callback: (turn: number) => void): void {
-    callback(this.strategy.getNextTurn(board));
+    this.ngZone.runOutsideAngular(() => {
+      callback(this.strategy.getNextTurn(board));
+    })
   }
 }
