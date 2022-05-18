@@ -49,7 +49,7 @@ export class MinimaxStrategy {
     this.minimax(
       board,
       this.depth,
-      false,
+      true,
       Number.NEGATIVE_INFINITY,
       Number.POSITIVE_INFINITY
     );
@@ -81,15 +81,16 @@ export class MinimaxStrategy {
       return this.scoringService.calculate(board);
     }
     // TODO: stop of first win action
-    this.boardService.generateBoards(board, this.dilation, maximizing ? 'blue' : 'red');
+    this.boardService.generateBoards(board, this.dilation, maximizing ? 'red' : 'blue');
     if (board.childBoards.length === 0) {
       // TODO: replace with board score
       return this.scoringService.calculate(board);
     }
-    if (!maximizing) {
-      let value = Number.POSITIVE_INFINITY;
+    if (maximizing) {
+      let value = Number.NEGATIVE_INFINITY;
       for (const brd of board.childBoards) {
-        value = Math.max(value, this.minimax(brd, depth - 1, maximizing, alpha, beta));
+        brd.score = this.minimax(brd, depth - 1, !maximizing, alpha, beta);
+        value = Math.max(value, brd.score);
         beta = Math.min(beta, value);
         if (value <= alpha) {
           break;
@@ -97,9 +98,10 @@ export class MinimaxStrategy {
       }
       return value;
     } else {
-      let value = Number.NEGATIVE_INFINITY;
+      let value = Number.POSITIVE_INFINITY;
       for (const brd of board.childBoards) {
-        value = Math.min(value, this.minimax(brd, depth - 1, maximizing, alpha, beta));
+        brd.score = this.minimax(brd, depth - 1, !maximizing, alpha, beta);
+        value = Math.min(value, brd.score);
         alpha = Math.max(alpha, value);
         if (value >= beta) {
           break;
