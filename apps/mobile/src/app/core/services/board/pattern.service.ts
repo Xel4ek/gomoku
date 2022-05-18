@@ -1,9 +1,10 @@
-import { Inject, Injectable } from '@angular/core';
-import { Pattern } from "./pattern";
-import { ComboNames, Dir } from "./combination";
-import { RotatedPattern } from "./rotated-pattern";
-import { BoardBits, Field } from "./boardBits";
-import { Side } from "../ai/action.service";
+import {Inject, Injectable} from '@angular/core';
+import {Pattern} from "./pattern";
+import {ComboNames, Dir} from "./combination";
+import {RotatedPattern} from "./rotated-pattern";
+import {BoardBits, Field} from "./boardBits";
+import {Side} from "../ai/action.service";
+import counter from "@nrwl/workspace/src/executors/counter/counter.impl";
 
 @Injectable({
   providedIn: 'root'
@@ -111,6 +112,8 @@ export class PatternService {
     },
   ];
 
+  counter = 0;
+
   constructor() {
     this.templatePatterns.forEach(t => {
       const p = new Pattern(
@@ -155,20 +158,59 @@ export class PatternService {
   //
   // private rotatePattern(p: Pattern) {
   //   [Dir.SW, Dir.SE, Dir.S].forEach(direction => {
-      // this.patterns.push(new RotatedPattern(
-      //   this.size,
-      //   p.name,
-      //   p.type,
-        // this.rotateField(p.player, p.length, direction),
-        // this.rotateField(p.enemy, p.length, direction),
-        // this.rotateField(p.empty, p.length, direction),
-      // ));
-      // TODO: check rotation of new masks - size may be wrong
-    // });
+  // this.patterns.push(new RotatedPattern(
+  //   this.size,
+  //   p.name,
+  //   p.type,
+  // this.rotateField(p.player, p.length, direction),
+  // this.rotateField(p.enemy, p.length, direction),
+  // this.rotateField(p.empty, p.length, direction),
+  // ));
+  // TODO: check rotation of new masks - size may be wrong
+  // });
   // }
 
+  //TODO: 1. Подключить поиск диагональных и вертикальных паттернов - возможна оптимизация по быстрому поиску
+  //TODO: 2. Ограничить область поиска паттернов областью вокруг новой точки с кешированием ранее найденных паттернов
+
   findPatterns(player: bigint, enemy: bigint, border: bigint): Pattern[] {
+    while (((player | enemy) & 1n) === 0n) {
+      player >>= 1n;
+      enemy >>= 1n;
+      border >>= 1n;
+    }
+    while (player) {
+      const pattern = this.patterns.find(p => {
+        this.counter++;
+        if ((player & p.player) === p.player
+          && ((player | enemy) & p.empty) === 0n
+          && ((enemy & p.enemy) === p.enemy
+            || (border & p.enemy) === p.enemy)) {
+          //TODO: incorrect shift for rotated patterns -
+          if (!(p instanceof RotatedPattern)) {
+            player >>= BigInt(p.length);
+            enemy >>= BigInt(p.length);
+            border >>= BigInt(p.length);
+          }
+          return true;
+        }
+        return false;
+      });
+      if (pattern) {
+        return [pattern];
+      }
+      player >>= 1n;
+      enemy >>= 1n;
+      border >>= 1n;
+    }
+    return [];
+  }
+
+  _findPatterns(player: bigint, enemy: bigint, border: bigint): Pattern[] {
     const selected: Pattern[] = [];
+    console.log(player);
+    console.log(enemy);
+    console.log(border);
     while (player) {
       selected.push(...this.patterns.filter(p => {
           if ((player & p.player) === p.player
@@ -190,6 +232,7 @@ export class PatternService {
       enemy >>= 1n;
       border >>= 1n;
     }
+    console.log(selected);
     return selected;
   }
 

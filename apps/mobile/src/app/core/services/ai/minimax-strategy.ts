@@ -8,6 +8,7 @@ import {LoggerService} from "../logger/logger.service";
 import {logger} from "@nrwl/tao/src/shared/logger";
 import {Num} from "pts";
 import {max} from "rxjs/operators";
+import {PatternService} from "../board/pattern.service";
 
 @Injectable({
   providedIn: 'root',
@@ -31,7 +32,8 @@ export class MinimaxStrategy {
   }
 
   counter = 0;
-  private _depth = 3;
+  generateBoardTime = 0;
+  private _depth = 2;
   private _dilation = 1;
 
   constructor(
@@ -39,13 +41,16 @@ export class MinimaxStrategy {
     private readonly boardService: BitBoardService,
     private readonly actionService: ActionService,
     private readonly logger: LoggerService,
+    private readonly patternService: PatternService,
   ) {
   }
 
   getNextTurn(gameBoard: GameBoard): number {
     const board = this.boardService.createFromGameBoard(gameBoard);
     this.counter = 0;
+    this.generateBoardTime = 0;
     const start = performance.now();
+    this.patternService.counter = 0;
     this.minimax(
       board,
       this.depth,
@@ -55,6 +60,8 @@ export class MinimaxStrategy {
     );
     this.logger.log("counter: " + this.counter + " by " + (performance.now() - start) / this.counter);
     this.logger.log("Total time minimax: " + (performance.now() - start));
+    this.logger.log("Total time generateBoard: " + this.generateBoardTime + ", " + this.generateBoardTime / (performance.now() - start));
+    this.logger.log("Total calls patternService: " + this.patternService.counter);
     if (board.childBoards.length > 0) {
       const best = board.childBoards.reduce(
         ((previousValue, currentValue) => {
@@ -81,7 +88,9 @@ export class MinimaxStrategy {
       return this.scoringService.calculate(board);
     }
     // TODO: stop of first win action
+    const start = performance.now();
     this.boardService.generateBoards(board, this.dilation, maximizing ? 'red' : 'blue');
+    this.generateBoardTime += (performance.now() - start);
     if (board.childBoards.length === 0) {
       // TODO: replace with board score
       return this.scoringService.calculate(board);
