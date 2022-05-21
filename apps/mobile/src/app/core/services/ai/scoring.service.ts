@@ -17,10 +17,10 @@ export class ScoringService {
   }
 
   calculate(board: BoardBits): number {
-    const maxCombos = this.patternService.findPatterns(board.blue, board.red, board.border);
+    const maxCombos = this.patternService.findMaxPatters(board);
     let score = this.calculateScore(maxCombos);
     if (score < 15000) {
-      const minCombos = this.patternService.findPatterns(board.red, board.blue, board.border);
+      const minCombos = this.patternService.findMinPatters(board);
       const minScore = this.calculateScore(minCombos);
       // return maximising ? this.maxScore : this.minScore;
       score *= 1.1;

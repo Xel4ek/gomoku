@@ -5,6 +5,7 @@ import {RotatedPattern} from "./rotated-pattern";
 import {BoardBits, Field} from "./boardBits";
 import {Side} from "../ai/action.service";
 import counter from "@nrwl/workspace/src/executors/counter/counter.impl";
+import {BitBoardService} from "./bit-board.service";
 
 @Injectable({
   providedIn: 'root'
@@ -114,7 +115,7 @@ export class PatternService {
 
   counter = 0;
 
-  constructor() {
+  constructor(private readonly bitBoardService: BitBoardService) {
     this.templatePatterns.forEach(t => {
       const p = new Pattern(
         t.name,
@@ -173,12 +174,53 @@ export class PatternService {
   //TODO: 1. Подключить поиск диагональных и вертикальных паттернов - возможна оптимизация по быстрому поиску
   //TODO: 2. Ограничить область поиска паттернов областью вокруг новой точки с кешированием ранее найденных паттернов
 
-  findPatterns(player: bigint, enemy: bigint, border: bigint): Pattern[] {
-    while (((player | enemy) & 1n) === 0n) {
-      player >>= 1n;
-      enemy >>= 1n;
-      border >>= 1n;
+  rotateBoard(board: BoardBits): BoardBits[] {
+    const boards = [board];
+    const board45CW = board.clone();
+    board45CW.red = this.bitBoardService.pseudoRotate45clockwiseAnySize(board45CW.red, board.sizeNumber * board.sizeNumber);
+    board45CW.blue = this.bitBoardService.pseudoRotate45clockwiseAnySize(board45CW.blue, board.sizeNumber *  board.sizeNumber);
+    board45CW.border = this.bitBoardService.pseudoRotate45clockwiseAnySize(board45CW.border, board.sizeNumber *  board.sizeNumber);
+
+    const board45ACW = board.clone();
+    board45ACW.red = this.bitBoardService.pseudoRotate45AnticlockwiseAnySize(board45ACW.red, board.sizeNumber *  board.sizeNumber);
+    board45ACW.blue = this.bitBoardService.pseudoRotate45AnticlockwiseAnySize(board45ACW.blue, board.sizeNumber *  board.sizeNumber);
+    board45ACW.border = this.bitBoardService.pseudoRotate45AnticlockwiseAnySize(board45ACW.border, board.sizeNumber *  board.sizeNumber);
+
+    const board90 = board.clone();
+    board90.red = this.bitBoardService.rotate90antiClockwise(board90.red);
+    board90.blue = this.bitBoardService.rotate90antiClockwise(board90.blue);
+    board90.border = this.bitBoardService.rotate90antiClockwise(board90.border);
+    boards.push(board45CW, board45ACW, board90);
+
+    return boards;
+  }
+
+  findMaxPatters(board: BoardBits): Pattern[] {
+    const patters = [];
+    const boards = this.rotateBoard(board);
+    for (const brd of boards) {
+      patters.push(...this.findPatterns(brd.blue, brd.red, brd.border));
     }
+    console.log(boards);
+    return patters;
+  }
+
+  findMinPatters(board: BoardBits): Pattern[] {
+    const patters = [];
+    const boards = this.rotateBoard(board);
+    for (const brd of boards) {
+      patters.push(...this.findPatterns(brd.red, brd.blue, brd.border));
+    }
+    return patters;
+  }
+
+  findPatterns(player: bigint, enemy: bigint, border: bigint): Pattern[] {
+    const selected = [];
+    // while (((player | enemy) & 1n) === 0n) {
+    //   player >>= 1n;
+    //   enemy >>= 1n;
+    //   border >>= 1n;
+    // }
     while (player) {
       const pattern = this.patterns.find(p => {
         this.counter++;
@@ -197,13 +239,13 @@ export class PatternService {
         return false;
       });
       if (pattern) {
-        return [pattern];
+        selected.push(pattern);
       }
       player >>= 1n;
       enemy >>= 1n;
       border >>= 1n;
     }
-    return [];
+    return selected;
   }
 
   _findPatterns(player: bigint, enemy: bigint, border: bigint): Pattern[] {

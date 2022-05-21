@@ -177,6 +177,7 @@ export class BitBoardService {
   }
 
   pseudoRotate45clockwise(x: bigint, size: number) {
+    let mask = x;
     // const k1 = BigInt(0xAAAAAAAAAAAAAAAA)
     // const k1 = BigInt.asUintN(size, -1n) / 3n;
     // const k2 = BigInt.asUintN(size, -1n) / 5n;
@@ -188,11 +189,11 @@ export class BitBoardService {
     const k8 = BigInt.asUintN(size * size, 0xFF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00n);
     // const k2 = BigInt(0xCCCCCCCCCCCCCCCC);
     // const k4 = BigInt(0xF0F0F0F0F0F0F0F0);
-    x ^= k1 & (x ^ this.rotateRight(x, 8n, size));
-    x ^= k2 & (x ^ this.rotateRight(x, 16n, size));
-    x ^= k4 & (x ^ this.rotateRight(x, 32n, size));
-    // x ^= k8 & (x ^ rotateRight(x, 64n, size));
-    return x;
+    mask ^= (k1 & (mask ^ this.rotateRight(mask, 8n, size)));
+    mask ^= (k2 & (mask ^ this.rotateRight(mask, 16n, size)));
+    mask ^= (k4 & (mask ^ this.rotateRight(mask, 32n, size)));
+    // mask ^= k8 & (mask ^ rotateRight(mask, 64n, size));
+    return mask;
   }
 
   pseudoRotate45antiClockwise(x: bigint, size: number) {

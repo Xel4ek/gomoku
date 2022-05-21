@@ -53,10 +53,10 @@ export class BoardBits {
   //TODO: rotate border only to check its shape
 
   constructor(size: bigint, player: bigint, enemy: bigint, border: bigint) {
-    this.size = size;
-    this._red = player;
-    this._blue = enemy;
-    this._border = border;
+    this.size = BigInt(size);
+    this._red = BigInt(player);
+    this._blue = BigInt(enemy);
+    this._border = BigInt(border);
     this._setFistCell()
   }
 

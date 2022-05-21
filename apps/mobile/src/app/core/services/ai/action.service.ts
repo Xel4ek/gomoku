@@ -71,8 +71,8 @@ export class ActionService {
   }
 
   updateScore(board: BoardBits, side: Side) {
-    const maxCombos = this.patternService.findPatterns(board.blue, board.red, board.border);
-    const minCombos = this.patternService.findPatterns(board.red, board.blue, board.border);
+    const maxCombos = this.patternService.findMaxPatters(board);
+    const minCombos = this.patternService.findMinPatters(board);
     const minScore = this.calculateScore(minCombos);
     const maxScore = this.calculateScore(maxCombos);
     // return maximising ? this.maxScore : this.minScore;

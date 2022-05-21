@@ -12,7 +12,7 @@ describe('BitBoardService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({});
     printer = TestBed.inject(BoardPrinterService);
-    service = new BitBoardService();
+    service = new BitBoardService(printer);
   });
 
   it('should be created', () => {
@@ -70,7 +70,7 @@ describe('BitBoardService', () => {
 
   it('should test flipMirrorOrReverse 16x16', () => {
     const size = 16;
-    service = new BitBoardService();
+    service = new BitBoardService(printer);
     const board = service.createEmpty();
     board.border = BigInt("0b" +
       "1111111111111111" +
@@ -130,7 +130,7 @@ describe('BitBoardService', () => {
 
   it('should rotate 45 8x8', () => {
     size = 8;
-    service = new BitBoardService();
+    service = new BitBoardService(printer);
     const board = service.createEmpty();
     board.red = BigInt("0b" +
       "10001000" +
@@ -153,7 +153,7 @@ describe('BitBoardService', () => {
 
   it('should rotate any size 45 8x8', () => {
     size = 8;
-    service = new BitBoardService();
+    service = new BitBoardService(printer);
     const board = service.createEmpty();
     board.red = BigInt("0b" +
       "10001000" +
@@ -176,7 +176,7 @@ describe('BitBoardService', () => {
 
   it('should rotate any size 45 8x8', () => {
     size = 8;
-    service = new BitBoardService();
+    service = new BitBoardService(printer);
     const board = service.createEmpty();
     board.red = BigInt("0b" +
       "10001000" +
@@ -199,7 +199,7 @@ describe('BitBoardService', () => {
 
   it('should rotate anticlockwise any size 45 16x16', () => {
     size = 16;
-    service = new BitBoardService();
+    service = new BitBoardService(printer);
     const board = service.createEmpty();
     board.red = BigInt("0b" +
       "1000100000000000" +
@@ -230,7 +230,7 @@ describe('BitBoardService', () => {
 
   it('should rotate clockwise any size 45 32x32', () => {
     size = 32;
-    service = new BitBoardService();
+    service = new BitBoardService(printer);
     const board = service.createEmpty();
     const row = BigInt("0b00000000000000000000000000000011");
     for (let i = 0n; i < 32n; i++) {
@@ -246,7 +246,7 @@ describe('BitBoardService', () => {
 
   it('should rotate anticlockwise any size 45 32x32', () => {
     size = 32;
-    service = new BitBoardService();
+    service = new BitBoardService(printer);
     const board = service.createEmpty();
     const row = 0b11000000000000000000000000000000n;
     for (let i = 0n; i < 32n; i++) {

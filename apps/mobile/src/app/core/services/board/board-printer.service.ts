@@ -29,8 +29,8 @@ export class BoardPrinterService {
 
   printBitBoard(board: bigint, size: number) {
     const str = board.toString(2)
-      .replaceAll("0", ".")
       .split('')
+      .map(v => (v === "0" ? "." : v))
       .reverse()
       .map((value, index) => {
         if (index > 0 && index % size === 0) {
