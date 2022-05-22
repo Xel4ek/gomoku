@@ -5,7 +5,7 @@ import { Injectable } from '@angular/core';
 })
 export class LoggerService {
 
-  debug = true;
+  debug = false;
 
   constructor() { }
 

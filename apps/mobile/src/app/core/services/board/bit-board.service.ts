@@ -1,9 +1,11 @@
-import { Injectable } from '@angular/core';
-import { BoardBits } from "./boardBits";
-import { InvalidMoveError } from "./bit-board";
-import { GameBoard } from "../ai/ai.service";
-import { BoardAction } from "../ai/action";
-import { BoardPrinterService } from "./board-printer.service";
+import {Injectable} from '@angular/core';
+import {BoardBits} from "./boardBits";
+import {InvalidMoveError} from "./bit-board";
+import {GameBoard} from "../ai/ai.service";
+import {BoardAction} from "../ai/action";
+import {BoardPrinterService} from "./board-printer.service";
+import {LoggerService} from "../logger/logger.service";
+import {Mat, Num} from "pts";
 
 export enum Orientation {
   // https://www.chessprogramming.org/Bibob
@@ -42,9 +44,13 @@ export class BitBoardService {
   firstRank: bigint;
   lastRank: bigint;
   shift: Shift;
-  kMasks: { [i: number]: bigint }[];
+  kMasksFiles: { [key: number]: bigint } = {};
+  kMasksRanks: { [key: number]: bigint } = {};
+  kMasksDiag: { [key: number]: bigint } = {};
 
-  constructor(private readonly boardPrinterService: BoardPrinterService) {
+  constructor(private readonly boardPrinterService: BoardPrinterService,
+              private readonly logger: LoggerService,
+  ) {
     //TODO: refactor sizeField (put into constructor)
     this.sizeField = 19n;
     this.setSize();
@@ -70,16 +76,30 @@ export class BitBoardService {
       SW: -this.size - 1n,
       W: -this.size,
     };
-    this.kMasks = this.createKMasks();
+    this.createKMasks();
+
   }
 
   private createKMasks() {
-    const masks = [];
+    const size = this.size * this.size;
+    for (let i = 0; size >> BigInt(i + 1); i++) {
+      const base = Array.from({length: Math.pow(2, i)})
+      const pattern = base.fill('0').join('') + base.fill('1').join('');
+      const str = Array.from({length: Number(size) / pattern.length}).fill(pattern).join('');
+      this.kMasksFiles[i] = BigInt('0b' + str);
+    }
+    for (let i = 0; this.size >> BigInt(i + 1); i++) {
+      this.kMasksDiag[i] = (this.kMasksFiles[i] & this.kMasksFiles[i + Math.log2(Number(this.size))]);
+    }
+  }
+
+  private _createKMasks() {
     const size = this.size * this.size;
     for (let i = 0; size >> BigInt(i); i++) {
-      masks.push({ [i]: this.kMaskFiles(size, BigInt(i)) });
+      this.kMasksFiles[i] = this.kMaskFiles(size, BigInt(i));
+      this.kMasksRanks[i] = this.kMaskRanks(32, BigInt(i));
+      this.kMasksDiag[i] = (this.kMasksFiles[i] & this.kMasksRanks[i]);
     }
-    return masks;
   }
 
   private setSize() {
@@ -123,11 +143,16 @@ export class BitBoardService {
    * @param delta of pairwise swapped bits
    * @return bitboard b with bits swapped
    */
-  deltaSwap(b: bigint, mask: bigint, delta: bigint) {
+  deltaSwap(b: bigint, mask: bigint, delta: bigint): bigint {
     const x = BigInt.asUintN(this.sizeBits, (b ^ (b >> delta)) & mask);
     return (x ^ BigInt.asUintN(this.sizeBits, x << delta) ^ b);
   }
 
+  pMask(i: number) {
+    const s = 1n << BigInt(i);
+    const f = BigInt.asUintN(this.sizeBits, 1n << s);
+    return BigInt.asUintN(this.sizeBits, -1n) / (f + 1n);
+  }
 
   //TODO: what is 3 here?
   flipMirrorOrReverse(x: bigint, flip: boolean, mirror: boolean) {
@@ -140,10 +165,10 @@ export class BitBoardService {
     return x;
   }
 
-  pseudoRotate45AnticlockwiseAnySize(x: bigint, size: number) {
+  _pseudoRotate45AnticlockwiseAnySize(x: bigint, size: number) {
     const k: bigint[] = [];
     for (let i = 0n; i < 5n; i++) {
-      k.push(BigInt.asUintN(size, this.kMaskRanks(BigInt(size), i)));
+      k.push(BigInt.asUintN(size, this.kMaskFiles(BigInt(size), i)));
     }
 
     // const k1 = BigInt.asUintN(size, this.kMaskRanks(BigInt(this.size), 0n));
@@ -224,15 +249,10 @@ export class BitBoardService {
   }
 
   flipVertical64(x: bigint) {
-    let y = x;
-    this.kMasks.forEach(((value, index) => {
-      y = this.deltaSwap(x, value[index], this.size * (1n << BigInt(index)));
-      x = ((x >> this.size * (1n << BigInt(index))) & value[index])
-        | BigInt.asUintN(this.sizeBits, (x & value[index]) << (this.size * (1n << BigInt(index))));
-      console.log(x);
-    }));
-    for (const k in this.kMasks) {
-      console.log(k);
+    for (const i in this.kMasksFiles) {
+      x = ((x >> this.size * (1n << BigInt(i))) & this.kMasksFiles[i])
+        | BigInt.asUintN(this.sizeBits, (x & this.kMasksFiles[i]) << (this.size * (1n << BigInt(i))));
+      this.logger.log(x);
     }
     // x = ((x >>  8n) & k1) | BigInt.asUintN(this.sizeBits, (x & k1) <<  8n);
     // x = ((x >> 16n) & k2) | BigInt.asUintN(this.sizeBits, (x & k2) << 16n);
@@ -277,18 +297,32 @@ export class BitBoardService {
     return x;
   }
 
-  kMaskRanks(size: bigint, k: bigint) {
-    return ((BigInt.asUintN(Number(size), -1n) / ((1n << (1n << k)) + 1n)));
-    // for (let i = size * size - (size >> 1n); i > 0; i -= size) {
-    //   mask = this.insertBitShiftRight(mask, i, 0);
-    // }
-    // return BigInt.asUintN(Number(size * size), mask);
+  _kMaskRanks(size: number, k: bigint) {
+    return this.pAdicNumber(BigInt(size * size), k + 5n);
+  }
+
+  kMaskRanks(size: number, k: bigint) {
+    let mask = 0n;
+    let p = this.pAdicNumber(BigInt(size), k);
+    let i = 0n;
+    while (p) {
+      if ((p & 1n) === 1n) {
+        mask |= (this.firstFile << (this.size * i));
+      }
+      p >>= 1n;
+      i++;
+    }
+    return mask;
   }
 
   kMaskFiles(size: bigint, k: bigint) {
-    const rightHalf = ((BigInt.asUintN(Number(size >> 1n), -1n) / ((1n << (1n << k)) + 1n)));
+    const rightHalf = this.pAdicNumber(size >> 1n, k);
     const leftHalf = (BigInt.asUintN(Number(size), rightHalf << ((size >> 1n) + (size & 1n))));
     return rightHalf | leftHalf;
+  }
+
+  pAdicNumber(size: bigint, k: bigint) {
+    return BigInt.asUintN(Number(size), -1n) / ((1n << (1n << k)) + 1n);
   }
 
   flipVertical(z: bigint, size: bigint = this.size * this.size) {
@@ -302,25 +336,87 @@ export class BitBoardService {
     return z;
   }
 
-  rotate90antiClockwise(x: bigint) {
-    return 0n;
-    // return flipDiagA1H8(flipVertical(x));
+  /**
+   * Flip a bitboard about the diagonal a1-h8.
+   * Square h1 is mapped to a8 and vice versa.
+   * @param x any bitboard
+   * @return bitboard x flipped about diagonal a1-h8
+
+   U64 flipDiagA1H8(U64 x) {
+  U64 t;
+  const U64 k1 = C64(0x5500550055005500);
+  const U64 k2 = C64(0x3333000033330000);
+  const U64 k4 = C64(0x0f0f0f0f00000000);
+  t  = k4 & (x ^ (x << 28));
+  x ^=       t ^ (t >> 28) ;
+  t  = k2 & (x ^ (x << 14));
+  x ^=       t ^ (t >> 14) ;
+  t  = k1 & (x ^ (x <<  7));
+  x ^=       t ^ (t >>  7) ;
+  return x;
+}
+   */
+
+  flipDiagA1H8(z: bigint, size: bigint): bigint {
+    let x = BigInt(z);
+    const pow = Math.log2(Number(size));
+    let poh = ((size * size) >> 1n) - BigInt(Math.pow(2, pow - 1));
+    for (let i = pow; i > 0; i--) {
+      x = this.deltaSwap(x, this.kMasksDiag[i - 1], poh);
+      poh >>= 1n;
+    }
+    return x;
+  }
+  _flipDiagA1H8(z: bigint, size: bigint): bigint {
+    let x = BigInt(z);
+    const pow = Math.log2(Number(size));
+    let poh = ((size * size) >> 1n) - BigInt(Math.pow(2, pow - 1));
+    for (let i = pow; i > 0; i--) {
+      const t = this.kMasksDiag[i - 1] & (z ^ (z << poh));
+      x ^= (t ^ (t >> poh));
+      poh >>= 1n;
+    }
+    return x;
+  }
+
+  pseudoRotate45AnticlockwiseAnySize(x: bigint, size: number) {
+    const k: bigint[] = [];
+    for (let i = 0n; i < 5n; i++) {
+      k.push(BigInt.asUintN(size, this.kMaskFiles(BigInt(size), i)));
+    }
+
+    // const k1 = BigInt.asUintN(size, this.kMaskRanks(BigInt(this.size), 0n));
+    // const k2 = BigInt.asUintN(size, this.kMaskRanks(BigInt(this.size), 1n));
+    // const k4 = BigInt.asUintN(size, this.kMaskRanks(BigInt(this.size), 2n));
+    k.forEach(((value, index) => {
+      x ^= value & (x ^ this.rotateRight(x, this.size << BigInt(index), size));
+    }));
+    // x ^= k1 & (x ^ this.rotateRight(x, 8n, size));
+    // x ^= k2 & (x ^ this.rotateRight(x, 16n, size));
+    // x ^= k4 & (x ^ this.rotateRight(x, 32n, size));
+    return x;
+  }
+
+  rotate90antiClockwise(x: bigint): bigint {
+    // return this.flipDiagA1H8(this.flipVertical(x), this.size);
+    return this.flipDiagA1H8(x, this.size);
   }
 
   /**
    * Flip, mirror or reverse a bitboard
    * @return bitboard x flipped, mirrored or reversed
+
+   U64 flipMirrorOrReverse(U64 x, bool flip, bool mirror)
+   {
+      for (U32 i = 3*(1-mirror); i < 3*(1+flip); i++) {
+      int s(      1  << i);
+      U64 f( C64( 1) << s);
+      U64 k( C64(-1) / (f+1) );
+      x = ((x >> s) & k) + f*(x & k);
+    }
+    return x;
+    }
    */
-//   U64 flipMirrorOrReverse(U64 x, bool flip, bool mirror)
-// {
-//   for (U32 i = 3*(1-mirror); i < 3*(1+flip); i++) {
-//   int s(      1  << i);
-//   U64 f( C64( 1) << s);
-//   U64 k( C64(-1) / (f+1) );
-//   x = ((x >> s) & k) + f*(x & k);
-// }
-// return x;
-// }
 
   createBorder() {
     let board;

@@ -1,18 +1,22 @@
-import { TestBed } from '@angular/core/testing';
+import {TestBed} from '@angular/core/testing';
 
-import { BitBoardService } from './bit-board.service';
-import { BoardPrinterService } from "./board-printer.service";
-import { GameBoard, Player } from "../ai/ai.service";
+import {BitBoardService} from './bit-board.service';
+import {BoardPrinterService} from "./board-printer.service";
+import {GameBoard, Player} from "../ai/ai.service";
+import {LoggerService} from "../logger/logger.service";
+import {exitCodeFromResult} from "@angular/compiler-cli";
 
 describe('BitBoardService', () => {
   let service: BitBoardService;
   let printer: BoardPrinterService;
+  let logger: LoggerService;
   let size = 6;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
     printer = TestBed.inject(BoardPrinterService);
-    service = new BitBoardService(printer);
+    logger = TestBed.inject(LoggerService);
+    service = new BitBoardService(printer, logger);
   });
 
   it('should be created', () => {
@@ -47,6 +51,25 @@ describe('BitBoardService', () => {
     console.log(printer.printBitBoard(service.flipMirrorOrReverse(board.border, true, true), Number(size)));
   });
 
+  it('should rotate 90 anticlockwise 8x8', () => {
+    const board = service.createEmpty();
+    size = 8;
+    board.border = BigInt("0b" +
+      "11111111" +
+      "10000001" +
+      "10111001" +
+      "10100101" +
+      "10111101" +
+      "10101001" +
+      "10100101" +
+      "11111111"
+    );
+    console.log(printer.printBitBoard(board.border, Number(size)));
+    let brd = service.rotate90antiClockwise(board.border);
+    // brd = service.flipMirrorOrReverse(brd, true, true);
+    console.log(printer.printBitBoard(brd, size));
+  });
+
   it('should test flipMirrorOrReverse 10x10', () => {
     const board = service.createEmpty();
     const size = 10;
@@ -70,7 +93,7 @@ describe('BitBoardService', () => {
 
   it('should test flipMirrorOrReverse 16x16', () => {
     const size = 16;
-    service = new BitBoardService(printer);
+    service = new BitBoardService(printer, logger);
     const board = service.createEmpty();
     board.border = BigInt("0b" +
       "1111111111111111" +
@@ -98,19 +121,21 @@ describe('BitBoardService', () => {
 
   it('should flip bitboard vertical', () => {
     const board = service.createEmpty();
+    service.size = 8n;
+    size = Number(service.size);
     board.border = BigInt("0b" +
       "11111111" +
       "10000001" +
+      "10000001" +
+      "10000001" +
       "10100001" +
-      "10000001" +
-      "10000001" +
-      "10000001" +
-      "10001101" +
+      "10100001" +
+      "10100001" +
       "11111111"
     );
-    console.log(printer.printBitBoard(board.border, Number(8)));
-    console.log(printer.printBitBoard(service.flipVertical64(board.border), Number(8)));
-    console.log(printer.printBitBoard(service.flipVertical(board.border), Number(8)));
+    console.log(printer.printBitBoard(board.border, size));
+    console.log(printer.printBitBoard(service.flipVertical64(board.border), size));
+    console.log(printer.printBitBoard(service.flipVertical(board.border), size));
     expect(service).toBeTruthy();
   });
 
@@ -130,7 +155,7 @@ describe('BitBoardService', () => {
 
   it('should rotate 45 8x8', () => {
     size = 8;
-    service = new BitBoardService(printer);
+    service = new BitBoardService(printer, logger);
     const board = service.createEmpty();
     board.red = BigInt("0b" +
       "10001000" +
@@ -147,13 +172,46 @@ describe('BitBoardService', () => {
       "........\n" +
       "........\n" +
       "........\n" +
-      "1111"
+      "1111....\n" +
+      "........\n" +
+      "........\n" +
+      "........\n"
+    );
+  });
+
+  it('should double rotate 45 8x8', () => {
+    size = 8;
+    service = new BitBoardService(printer, logger);
+    const board = service.createEmpty();
+    board.red = BigInt("0b" +
+      "10001000" +
+      "11000100" +
+      "10100010" +
+      "10010001" +
+      "10001000" +
+      "10000100" +
+      "10000010" +
+      "10000001"
+    );
+    const res = service.pseudoRotate45clockwise(
+      service.pseudoRotate45antiClockwise(board.red, size * size)
+      , size * size);
+    console.log(printer.printBitBoard(res, size));
+    expect(printer.printBitBoard(res, size)).toEqual(
+      "11111111\n" +
+      "........\n" +
+      "........\n" +
+      "........\n" +
+      "1111....\n" +
+      "........\n" +
+      "........\n" +
+      "........\n"
     );
   });
 
   it('should rotate any size 45 8x8', () => {
     size = 8;
-    service = new BitBoardService(printer);
+    service = new BitBoardService(printer, logger);
     const board = service.createEmpty();
     board.red = BigInt("0b" +
       "10001000" +
@@ -176,7 +234,7 @@ describe('BitBoardService', () => {
 
   it('should rotate any size 45 8x8', () => {
     size = 8;
-    service = new BitBoardService(printer);
+    service = new BitBoardService(printer, logger);
     const board = service.createEmpty();
     board.red = BigInt("0b" +
       "10001000" +
@@ -199,7 +257,7 @@ describe('BitBoardService', () => {
 
   it('should rotate anticlockwise any size 45 16x16', () => {
     size = 16;
-    service = new BitBoardService(printer);
+    service = new BitBoardService(printer, logger);
     const board = service.createEmpty();
     board.red = BigInt("0b" +
       "1000100000000000" +
@@ -230,7 +288,7 @@ describe('BitBoardService', () => {
 
   it('should rotate clockwise any size 45 32x32', () => {
     size = 32;
-    service = new BitBoardService(printer);
+    service = new BitBoardService(printer, logger);
     const board = service.createEmpty();
     const row = BigInt("0b00000000000000000000000000000011");
     for (let i = 0n; i < 32n; i++) {
@@ -246,7 +304,7 @@ describe('BitBoardService', () => {
 
   it('should rotate anticlockwise any size 45 32x32', () => {
     size = 32;
-    service = new BitBoardService(printer);
+    service = new BitBoardService(printer, logger);
     const board = service.createEmpty();
     const row = 0b11000000000000000000000000000000n;
     for (let i = 0n; i < 32n; i++) {
@@ -262,7 +320,84 @@ describe('BitBoardService', () => {
   });
 
   it('should return kMask 0', () => {
-    console.log(printer.printBitBoard(service.kMaskRanks(9n, 0n), 9));
+    // console.log(printer.printBitBoard(service.kMaskRanks(9n, 0n), 9));
+  });
+
+  it('should return kMaskRanks k=3 alternative ', function () {
+    for (const k in service.kMasksDiag) {
+      console.log(printer.printBitBoard(service.kMasksDiag[k]
+        // & service.kMasksFiles[4]
+        , 32));
+    }
+    expect(service._kMaskRanks(8, 3n)).toEqual(1n);
+  })
+
+  it('should return flipDIag mask', function () {
+    const board = service.createEmpty();
+    board.red = BigInt("0b" +
+      "1000100000000000" +
+      "0100010000000000" +
+      "0110001000000000" +
+      "0101000100000000" +
+      "0100100010000000" +
+      "0100010001000000" +
+      "0100001000100000" +
+      "0100000100010000" +
+      "0100000010001000" +
+      "0100000001000100" +
+      "0100000000100010" +
+      "0100000000010001" +
+      "0100000000001000" +
+      "0100000000000100" +
+      "0100000000000010" +
+      "0000000000000001"
+    );
+    console.log(printer.printBitBoard(board.red, 16));
+    console.log(printer.printBitBoard(service.flipDiagA1H8(board.red, 16n), 16));
+  });
+
+  it('should print pMask', function () {
+    console.log(printer.printBitBoard(service.pMask(1), 32));
+    expect(service.pMask(3)).toEqual(0n);
+  });
+
+  it('should return kMaskDiag k=3', function () {
+    expect(printer.printBitBoard(service.kMasksDiag[3], Number(service.size))).toEqual(
+      "11111111........11111111........\n" +
+      "11111111........11111111........\n" +
+      "11111111........11111111........\n" +
+      "11111111........11111111........\n" +
+      "11111111........11111111........\n" +
+      "11111111........11111111........\n" +
+      "11111111........11111111........\n" +
+      "11111111........11111111........\n" +
+      "................................\n" +
+      "................................\n" +
+      "................................\n" +
+      "................................\n" +
+      "................................\n" +
+      "................................\n" +
+      "................................\n" +
+      "................................\n" +
+      "11111111........11111111........\n" +
+      "11111111........11111111........\n" +
+      "11111111........11111111........\n" +
+      "11111111........11111111........\n" +
+      "11111111........11111111........\n" +
+      "11111111........11111111........\n" +
+      "11111111........11111111........\n" +
+      "11111111........11111111"
+    )
+
+  });
+
+  it('should return print all kMaskDiag', () => {
+    for (const i in service.kMasksDiag) {
+
+      console.log(printer.printBitBoard(service.kMasksFiles[i], Number(service.size)));
+      // console.log(printer.printBitBoard(service.kMasksRanks[i], Number(service.size)));
+      console.log(printer.printBitBoard(service.kMasksDiag[i], Number(service.size)));
+    }
   });
 
   it('should be created', () => {
@@ -395,4 +530,36 @@ describe('BitBoardService', () => {
     expect(board.red).toEqual(388223232006969213043205017253082681700374879684584243727891987588710400n);
   });
 
+  it('should rotate 90 GameBoard', () => {
+
+    const gb = {
+      id: 5,
+    } as GameBoard;
+    const pl = {
+      type: 0,
+      // map: [5, 6, 7, 8],
+      map: [0, 19, 38, 57, 76],
+      turn: [1, 3],
+      captured: 0,
+      options: {
+        deep: 1
+      }
+    } as Player;
+    const enemy = {
+      type: 1,
+      map: [1],
+      // map: [ 0, 1, 2, 3, ],
+      turn: [2, 4, 6, 8,],
+      captured: 0,
+      options: {
+        deep: 1
+      }
+    } as Player;
+    gb.player = pl;
+    gb.enemy = enemy;
+    const board = service.createFromGameBoard(gb);
+    console.log(printer.printBitBoard(board.blue, Number(service.size)));
+    console.log(printer.printBitBoard(service.flipDiagA1H8(board.blue, service.size), Number(service.size)));
+    expect(board.red).toEqual(388223232006969213043205017253082681700374879684584243727891987588710400n);
+  });
 });

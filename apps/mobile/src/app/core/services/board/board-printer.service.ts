@@ -33,12 +33,21 @@ export class BoardPrinterService {
       .map(v => (v === "0" ? "." : v))
       .reverse()
       .map((value, index) => {
-        if (index > 0 && index % size === 0) {
-          value = '\n' + value
+        if ((index + 1) % size === 0) {
+          value += '\n'
         }
         return value
       })
-    return str.join('');
+    return str.join('') + Array.from({length: size * size - str.length})
+      .fill('.')
+      .map((value, index) => {
+        if (index % size === 0) {
+          value += '\n'
+        }
+        return value;
+      })
+      .reverse()
+      .join('')
   }
 
   print45RotatedBitboard(board: bigint, size: number) {
