@@ -201,7 +201,6 @@ export class PatternService {
     for (const brd of boards) {
       patters.push(...this.findPatterns(brd.blue, brd.red, brd.border));
     }
-    console.log(boards);
     return patters;
   }
 

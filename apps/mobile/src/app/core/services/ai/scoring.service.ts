@@ -23,7 +23,8 @@ export class ScoringService {
       const minCombos = this.patternService.findMinPatters(board);
       const minScore = this.calculateScore(minCombos);
       // return maximising ? this.maxScore : this.minScore;
-      score *= 1.1;
+      //TODO: why 1.1&
+      score *= 6;
       score -= minScore;
     }
     // console.log("updateScore: " + score + ", " + maximising, this.maxCombos, this.minCombos, this.boards.player, this.boards.enemy)
@@ -54,18 +55,19 @@ export class ScoringService {
     }
     if (count[ComboNames.OPENTHREE] > 1
       || count[ComboNames.CLOSEDFOUR] > 1
-      || (count[ComboNames.CLOSEDFOUR] > 0 && count[ComboNames.OPENTHREE] > 1)
+      || (count[ComboNames.CLOSEDFOUR] > 0 && count[ComboNames.OPENTHREE] > 0)
     ) {
       // score += 100000;
-      score += 10000;
+      score += 3000;
     }
     if (count[ComboNames.CLOSEDFOUR] > 0 || count[ComboNames.OPENTHREE] > 0) {
       // score += 100000;
       score += 1000;
     }
-    if (count[ComboNames.CLOSEDTHREE] > 0) {
-      score += 300 * count[ComboNames.CLOSEDTHREE];
+    if (count[ComboNames.CLOSEDTHREE]) {
+      score += 300;
     }
+    // score += 200 * count[ComboNames.CLOSEDTHREE];
     return score;
   }
 

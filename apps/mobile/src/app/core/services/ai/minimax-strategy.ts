@@ -33,7 +33,7 @@ export class MinimaxStrategy {
 
   counter = 0;
   generateBoardTime = 0;
-  private _depth = 2;
+  private _depth = 1;
   private _dilation = 1;
 
   constructor(
@@ -62,7 +62,30 @@ export class MinimaxStrategy {
     this.logger.log("Total time minimax: " + (performance.now() - start));
     this.logger.log("Total time generateBoard: " + this.generateBoardTime + ", " + this.generateBoardTime / (performance.now() - start));
     this.logger.log("Total calls patternService: " + this.patternService.counter);
+    const source = [];
+
     if (board.childBoards.length > 0) {
+      const report: string[] = [];
+      const size = 19;
+      Array.from({length: gameBoard.size}).forEach((_, x) => {
+        Array.from({length: gameBoard.size}).forEach((_, y) => {
+          report.push(".....");
+        })
+        // report.push('\n');
+      })
+      board.childBoards.forEach(b => {
+        const idx = this.boardService.getFieldIndex(b.border, b.red ^ board.red)
+        b.indexScore[idx] = b.score;
+        source.push(b.indexScore);
+        report[idx] = (b.score / 1000).toFixed(1).padStart(5, ' ');
+      })
+      this.logger.log(
+        Array.from({length: gameBoard.size}).reduce((acc: string[], cur) => {
+          const str = report.splice(0, gameBoard.size).join('\t') + '\n\n';
+          acc.push(str);
+          return acc;
+        }, []).join('')
+      );
       const best = board.childBoards.reduce(
         ((previousValue, currentValue) => {
           return previousValue.score < currentValue.score ? previousValue : currentValue;

@@ -21,6 +21,7 @@ export class BoardBits {
   private _border = 0n;
   possibleActions: BoardAction[] = [];
   childBoards: BoardBits[] = [];
+  indexScore: {[index: number]: number} = {};
   orientation = Orientation.LEFR;
   firstCell = 1n;
   score = Number.NaN;
