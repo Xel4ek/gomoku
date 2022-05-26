@@ -9,6 +9,7 @@ import {logger} from "@nrwl/tao/src/shared/logger";
 import {Num} from "pts";
 import {max} from "rxjs/operators";
 import {PatternService} from "../board/pattern.service";
+import memoize from "../../tools/memoize";
 
 @Injectable({
   providedIn: 'root',
@@ -33,7 +34,7 @@ export class MinimaxStrategy {
 
   counter = 0;
   generateBoardTime = 0;
-  private _depth = 1;
+  private _depth = 3;
   private _dilation = 1;
 
   constructor(
@@ -99,6 +100,7 @@ export class MinimaxStrategy {
     return -1;
   }
 
+  @memoize()
   minimax(
     board: BoardBits,
     depth: number,

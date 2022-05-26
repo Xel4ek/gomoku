@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { BoardBits } from "../board/boardBits";
 import { Pattern } from "../board/pattern";
-import { ComboNames } from "../board/combination";
+import {Combo, ComboNames} from "../board/combination";
 import { PatternService } from "../board/pattern.service";
+import memoize from "../../tools/memoize";
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +17,7 @@ export class ScoringService {
     return false;
   }
 
+  @memoize()
   calculate(board: BoardBits): number {
     const maxCombos = this.patternService.findMaxPatters(board);
     let score = this.calculateScore(maxCombos);
@@ -24,23 +26,25 @@ export class ScoringService {
       const minScore = this.calculateScore(minCombos);
       // return maximising ? this.maxScore : this.minScore;
       //TODO: why 1.1&
+      // console.log("MAX: ", score, maxCombos, "MIN:", minScore, minCombos);
       score *= 6;
       score -= minScore;
     }
-    // console.log("updateScore: " + score + ", " + maximising, this.maxCombos, this.minCombos, this.boards.player, this.boards.enemy)
     return score;
   }
 
   private calculateScore(combos: Pattern[]): number {
     type Scores = {
-      [key: number]: number;
+      [key in ComboNames]: number;
     };
     const count: Scores = {
+      [ComboNames.DUMMY]: 0,
       [ComboNames.FIVE]: 0,
       [ComboNames.OPENFOUR]: 0,
       [ComboNames.CLOSEDFOUR]: 0,
       [ComboNames.OPENTHREE]: 0,
       [ComboNames.CLOSEDTHREE]: 0,
+      [ComboNames.OPENTWO]: 0,
     };
     combos.forEach((value) => {
       count[value.type] += 1;
@@ -66,6 +70,9 @@ export class ScoringService {
     }
     if (count[ComboNames.CLOSEDTHREE]) {
       score += 300;
+    }
+    if (count[ComboNames.OPENTWO]) {
+      score += 100;
     }
     // score += 200 * count[ComboNames.CLOSEDTHREE];
     return score;

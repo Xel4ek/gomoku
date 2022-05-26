@@ -34,6 +34,7 @@ export class PatternService {
       empty: 0b100000n,
       enemy: 1n,
     },
+    //TODO: Этот паттерн не будет искаться при скипе, т.к. не проверяется скип border
     {
       name: "Closed Four 11",
       type: ComboNames.CLOSEDFOUR,
@@ -111,23 +112,32 @@ export class PatternService {
       empty: 0b11n,
       enemy: 0b100000n,
     },
+    {
+      name: "Open Two 1",
+      type: ComboNames.OPENTWO,
+      player: 0b0110n,
+      empty: 0b1001n,
+      enemy: 0b0n,
+    },
+    {
+      name: "Open Two 2",
+      type: ComboNames.OPENTWO,
+      player: 0b01010n,
+      empty: 0b10101n,
+      enemy: 0b0n,
+    },
   ];
 
   counter = 0;
 
   constructor(private readonly bitBoardService: BitBoardService) {
-    this.templatePatterns.forEach(t => {
-      const p = new Pattern(
+    this.patterns = this.templatePatterns.map(t => new Pattern(
         t.name,
         t.type,
         t.player,
         t.enemy,
         t.empty,
-      );
-      this.patterns.push(p);
-      // this.rotatePattern(p);
-    });
-    this.patterns.sort(p => p.type);
+      ));
   }
 
 
@@ -178,13 +188,13 @@ export class PatternService {
     const boards = [board];
     const board45CW = board.clone();
     board45CW.red = this.bitBoardService.pseudoRotate45clockwiseAnySize(board45CW.red, board.sizeNumber * board.sizeNumber);
-    board45CW.blue = this.bitBoardService.pseudoRotate45clockwiseAnySize(board45CW.blue, board.sizeNumber *  board.sizeNumber);
-    board45CW.border = this.bitBoardService.pseudoRotate45clockwiseAnySize(board45CW.border, board.sizeNumber *  board.sizeNumber);
+    board45CW.blue = this.bitBoardService.pseudoRotate45clockwiseAnySize(board45CW.blue, board.sizeNumber * board.sizeNumber);
+    board45CW.border = this.bitBoardService.pseudoRotate45clockwiseAnySize(board45CW.border, board.sizeNumber * board.sizeNumber);
 
     const board45ACW = board.clone();
-    board45ACW.red = this.bitBoardService.pseudoRotate45AnticlockwiseAnySize(board45ACW.red, board.sizeNumber *  board.sizeNumber);
-    board45ACW.blue = this.bitBoardService.pseudoRotate45AnticlockwiseAnySize(board45ACW.blue, board.sizeNumber *  board.sizeNumber);
-    board45ACW.border = this.bitBoardService.pseudoRotate45AnticlockwiseAnySize(board45ACW.border, board.sizeNumber *  board.sizeNumber);
+    board45ACW.red = this.bitBoardService.pseudoRotate45AnticlockwiseAnySize(board45ACW.red, board.sizeNumber * board.sizeNumber);
+    board45ACW.blue = this.bitBoardService.pseudoRotate45AnticlockwiseAnySize(board45ACW.blue, board.sizeNumber * board.sizeNumber);
+    board45ACW.border = this.bitBoardService.pseudoRotate45AnticlockwiseAnySize(board45ACW.border, board.sizeNumber * board.sizeNumber);
 
     const board90 = board.clone();
     board90.red = this.bitBoardService.rotate90antiClockwise(board90.red);
@@ -198,6 +208,7 @@ export class PatternService {
   findMaxPatters(board: BoardBits): Pattern[] {
     const patters = [];
     const boards = this.rotateBoard(board);
+    // console.log("MAX")
     for (const brd of boards) {
       patters.push(...this.findPatterns(brd.blue, brd.red, brd.border));
     }
@@ -207,6 +218,7 @@ export class PatternService {
   findMinPatters(board: BoardBits): Pattern[] {
     const patters = [];
     const boards = this.rotateBoard(board);
+    // console.log("MIN")
     for (const brd of boards) {
       patters.push(...this.findPatterns(brd.red, brd.blue, brd.border));
     }
@@ -215,29 +227,29 @@ export class PatternService {
 
   findPatterns(player: bigint, enemy: bigint, border: bigint): Pattern[] {
     const selected = [];
-    // while (((player | enemy) & 1n) === 0n) {
-    //   player >>= 1n;
-    //   enemy >>= 1n;
-    //   border >>= 1n;
-    // }
+    // console.log((player | enemy).toString(2));
+    // console.log((player | enemy).toString(2));
     while (player) {
+      while (((player | enemy) & 10n) === 0n && ((player | enemy) & 1n) === 0n) {
+        player >>= 1n;
+        enemy >>= 1n;
+        border >>= 1n;
+      }
       const pattern = this.patterns.find(p => {
         this.counter++;
         if ((player & p.player) === p.player
           && ((player | enemy) & p.empty) === 0n
           && ((enemy & p.enemy) === p.enemy
             || (border & p.enemy) === p.enemy)) {
-          //TODO: incorrect shift for rotated patterns -
-          if (!(p instanceof RotatedPattern)) {
-            player >>= BigInt(p.length);
-            enemy >>= BigInt(p.length);
-            border >>= BigInt(p.length);
-          }
+          player >>= BigInt(p.length);
+          enemy >>= BigInt(p.length);
+          border >>= BigInt(p.length);
           return true;
         }
         return false;
       });
       if (pattern) {
+        // console.log(pattern);
         selected.push(pattern);
       }
       player >>= 1n;

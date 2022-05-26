@@ -25,6 +25,7 @@ export class BoardBits {
   orientation = Orientation.LEFR;
   firstCell = 1n;
   score = Number.NaN;
+  _str: string;
 
   get red() {
     return this._red;
@@ -59,6 +60,11 @@ export class BoardBits {
     this._blue = BigInt(enemy);
     this._border = BigInt(border);
     this._setFistCell()
+    this._str = this._red.toString(32) + this._blue.toString(32)
+  }
+
+  toString() {
+    return this._red.toString(32) + this._blue.toString(32);
   }
 
   _setFistCell() {

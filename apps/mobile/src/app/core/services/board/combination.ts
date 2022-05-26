@@ -12,6 +12,7 @@ export enum ComboNames {
   CLOSEDFOUR,
   OPENTHREE,
   CLOSEDTHREE,
+  OPENTWO,
 }
 
 export enum BitComparer {
