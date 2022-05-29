@@ -15,7 +15,11 @@ import memoize from "../../tools/memoize";
   providedIn: 'root',
 })
 
+//TODO: сделать поиск решений по битборду только на 5 клеток влево и вправо
+
 export class MinimaxStrategy {
+  private calculateBoardTime = 0;
+
   get dilation(): number {
     return this._dilation;
   }
@@ -61,6 +65,7 @@ export class MinimaxStrategy {
     );
     this.logger.log("counter: " + this.counter + " by " + (performance.now() - start) / this.counter);
     this.logger.log("Total time minimax: " + (performance.now() - start));
+    this.logger.log("Total time calculateBoard: " + this.calculateBoardTime + ", " + this.calculateBoardTime / (performance.now() - start));
     this.logger.log("Total time generateBoard: " + this.generateBoardTime + ", " + this.generateBoardTime / (performance.now() - start));
     this.logger.log("Total calls patternService: " + this.patternService.counter);
     const source = [];
@@ -100,7 +105,7 @@ export class MinimaxStrategy {
     return -1;
   }
 
-  @memoize()
+  // @memoize()
   minimax(
     board: BoardBits,
     depth: number,
@@ -110,9 +115,13 @@ export class MinimaxStrategy {
   ): number {
     this.counter++;
     if (depth === 0) {
-      return this.scoringService.calculate(board);
+      const start = performance.now();
+      const score = this.scoringService.calculate(board);
+      this.calculateBoardTime += (performance.now() - start);
+      return score;
     }
     // TODO: stop of first win action
+    //TODO: Check player color for checkWin()
     const start = performance.now();
     this.boardService.generateBoards(board, this.dilation, maximizing ? 'red' : 'blue');
     this.generateBoardTime += (performance.now() - start);
