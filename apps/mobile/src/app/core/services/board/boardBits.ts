@@ -63,6 +63,13 @@ export class BoardBits {
     this._str = this._red.toString(32) + this._blue.toString(32)
   }
 
+  shiftAll(size: number) {
+    const s = BigInt(size);
+    this._blue >>= s;
+    this._red >>= s;
+    this._border >>= s;
+  }
+
   toString() {
     return this._red.toString(32) + this._blue.toString(32);
   }
