@@ -63,10 +63,11 @@ export class MinimaxStrategy {
       Number.NEGATIVE_INFINITY,
       Number.POSITIVE_INFINITY
     );
-    this.logger.log("counter: " + this.counter + " by " + (performance.now() - start) / this.counter);
-    this.logger.log("Total time minimax: " + (performance.now() - start));
-    this.logger.log("Total time calculateBoard: " + this.calculateBoardTime + ", " + this.calculateBoardTime / (performance.now() - start));
-    this.logger.log("Total time generateBoard: " + this.generateBoardTime + ", " + this.generateBoardTime / (performance.now() - start));
+    const time = performance.now() - start;
+    this.logger.log("Total time minimax: " + time);
+    this.logger.log("counter: " + this.counter + " by " + time / this.counter);
+    this.logger.log("Total time calculateBoard: " + this.calculateBoardTime + ", " + this.calculateBoardTime / time);
+    this.logger.log("Total time generateBoard: " + this.generateBoardTime + ", " + this.generateBoardTime / time);
     this.logger.log("Total calls patternService: " + this.patternService.counter);
     const source = [];
 
