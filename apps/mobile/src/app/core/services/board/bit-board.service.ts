@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {BoardBits} from "./boardBits";
-import {InvalidMoveError} from "./bit-board";
+import {DirectionNew, InvalidMoveError} from "./bit-board";
 import {GameBoard} from "../ai/ai.service";
 import {BoardAction} from "../ai/action";
 import {BoardPrinterService} from "./board-printer.service";
@@ -110,10 +110,6 @@ export class BitBoardService {
 
   createEmpty(): BoardBits {
     return new BoardBits(this.size, 0n, 0n, 0n);
-  }
-
-  clone(board: BoardBits): BoardBits {
-    return new BoardBits(board.size, board.red, board.blue, board.border);
   }
 
   setMask(board: bigint, mask: bigint): bigint {
@@ -367,6 +363,7 @@ export class BitBoardService {
     }
     return x;
   }
+
   _flipDiagA1H8(z: bigint, size: bigint): bigint {
     let x = BigInt(z);
     const pow = Math.log2(Number(size));
@@ -500,7 +497,27 @@ export class BitBoardService {
     return actions;
   }
 
+  checkWin(board: bigint) {
+    const len: number[] = [];
+    [DirectionNew.E, DirectionNew.S, DirectionNew.SE, DirectionNew.SW].forEach((value) => {
+      let length = 0;
+      let bits = board;
+      while (bits) {
+        bits &= bits >> this.shift[value];
+        length++;
+      }
+      len.push(length);
+    });
+    return Math.max(...len) >= 5;
+  }
+
   generateBoards(board: BoardBits, dilation: number = 1, side: 'red' | 'blue'): void {
+    //TODO: checkwin() должен работать на повернуты бордах
+    // TODO: после нахождения checkWin() должны генериться новые childBoards c capture движениями
+    if (this.checkWin(board[side === 'red' ? 'blue' : 'red']) && this.nonCapture(board)) {
+      console.log('CHECKWIN!', side);
+      return;
+    }
     const occupied = board.red | board.blue;
     let moves = occupied;
     for (let i = dilation; i > 0; i--) {
@@ -514,10 +531,11 @@ export class BitBoardService {
         | (moves >> this.shift.SW)
         | (moves >> this.shift.W);
     }
+    //TODO: do not generate illegal moves
     moves = (moves | board.border) ^ board.border ^ board.red ^ board.blue;
     while (moves) {
       const lsb = moves & -moves;
-      const newBoard = this.clone(board);
+      const newBoard = board.clone();
       newBoard[side] |= lsb;
       board.childBoards.push(newBoard);
       moves &= ~lsb // clear LSB
@@ -536,4 +554,12 @@ export class BitBoardService {
   }
 
 
+  //TODO: make nonCapture() - findPattern
+  private nonCapture(board: BoardBits) {
+    //TODO: Запрещенные ходы:
+    //   1. Противник уже выиграл
+    // 2. Запрещенная комбинация
+    // 3. Захват фишек игрока.
+    return true;
+  }
 }
