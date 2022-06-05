@@ -96,6 +96,14 @@ export class BoardBits {
     return new BoardBits(this.size, this.red, this.blue, this.border);
   }
 
+  print(board: 'red' | 'blue' | 'border') {
+    return BoardPrinterService.printBitBoard(this[board], Number(this.size));
+  }
+
+  printScores() {
+    return BoardPrinterService.printChildScores(this);
+  }
+
   printBitBoard(board: 'red' | 'blue' | 'border') {
     const str = this[board].toString(2)
       .replaceAll("0", ".")

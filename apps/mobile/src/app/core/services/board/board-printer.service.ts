@@ -1,10 +1,38 @@
 import { Injectable } from '@angular/core';
 import { Orientation } from "./bit-board.service";
+import {BoardBits} from "./boardBits";
 
 @Injectable({
   providedIn: 'root'
 })
 export class BoardPrinterService {
+
+  static printBitBoard(board: bigint, size: number) {
+    const str = board.toString(2)
+      .split('')
+      .map(v => (v === "0" ? "." : v))
+      .reverse()
+      .map((value, index) => {
+        if ((index + 1) % size === 0) {
+          value += '\n'
+        }
+        return value
+      })
+    return str.join('') + Array.from({length: size * size - str.length})
+      .fill('.')
+      .map((value, index) => {
+        if (index % size === 0) {
+          value += '\n'
+        }
+        return value;
+      })
+      .reverse()
+      .join('')
+  }
+
+  static printChildScores(board: BoardBits) {
+    return board.childBoards.reduce((acc, cur) => acc + ", " + cur.score, "")
+  }
 
   constructor() {
   }
@@ -27,28 +55,6 @@ export class BoardPrinterService {
     return '';
   }
 
-  printBitBoard(board: bigint, size: number) {
-    const str = board.toString(2)
-      .split('')
-      .map(v => (v === "0" ? "." : v))
-      .reverse()
-      .map((value, index) => {
-        if ((index + 1) % size === 0) {
-          value += '\n'
-        }
-        return value
-      })
-    return str.join('') + Array.from({length: size * size - str.length})
-      .fill('.')
-      .map((value, index) => {
-        if (index % size === 0) {
-          value += '\n'
-        }
-        return value;
-      })
-      .reverse()
-      .join('')
-  }
 
   print45RotatedBitboard(board: bigint, size: number) {
     const rows = size * 2 - 1;
