@@ -70,7 +70,8 @@ describe('ScoringService', () => {
       gameBoard.player.map = blue;
       gameBoard.enemy.map = red ?? [];
       const board = bitBoardService.createFromGameBoard(gameBoard);
-      expect(service.calculate(board)).toEqual(score * 1.1);
+      const calcScore = service.calculate(board);
+      expect(calcScore).toEqual(score < 15000 ? score * service.maxScoreMultiple : score);
     }
   );
 
