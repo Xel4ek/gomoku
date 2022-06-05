@@ -6,7 +6,7 @@ function memoize() {
     const originalMethod = descriptor.value;
     descriptor.value = function (...args: any[]) {
       let result;
-      const key = args.map(a => a.toString()).join('');
+      const key = args[0].toString();
       if (cache.has(key)) {
         result = cache.get(key);
         // console.log("get from cache", key);
