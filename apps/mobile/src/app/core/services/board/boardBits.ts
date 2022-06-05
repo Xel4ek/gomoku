@@ -1,5 +1,7 @@
-import { Orientation } from "./bit-board.service";
-import { Action, BoardAction } from "../ai/action";
+import {Orientation} from "./bit-board.service";
+import {Action, BoardAction} from "../ai/action";
+import {BoardPrinterService} from "./board-printer.service";
+import {Pattern} from "./pattern";
 
 export enum Field {
   RED = "red",
@@ -21,11 +23,13 @@ export class BoardBits {
   private _border = 0n;
   possibleActions: BoardAction[] = [];
   childBoards: BoardBits[] = [];
-  indexScore: {[index: number]: number} = {};
+  indexScore: { [index: number]: number } = {};
   orientation = Orientation.LEFR;
   firstCell = 1n;
   score = Number.NaN;
   _str: string;
+  patternsBlue: Pattern[] = [];
+  patternsRed: Pattern[] = [];
 
   get red() {
     return this._red;
@@ -93,7 +97,10 @@ export class BoardBits {
   }
 
   clone() {
-    return new BoardBits(this.size, this.red, this.blue, this.border);
+    const board = new BoardBits(this.size, this.red, this.blue, this.border);
+    board.patternsBlue = this.patternsBlue;
+    board.patternsRed = this.patternsRed;
+    return board;
   }
 
   print(board: 'red' | 'blue' | 'border') {

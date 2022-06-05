@@ -1,34 +1,49 @@
-import { Injectable } from '@angular/core';
-import { BoardBits } from "../board/boardBits";
-import { Pattern } from "../board/pattern";
-import {Combo, ComboNames} from "../board/combination";
-import { PatternService } from "../board/pattern.service";
-import memoize from "../../tools/memoize";
+import {Injectable} from '@angular/core';
+import {BoardBits} from "../board/boardBits";
+import {Pattern} from "../board/pattern";
+import {ComboNames} from "../board/combination";
+import {PatternService} from "../board/pattern.service";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ScoringService {
 
+  findMax;
+  findMin;
+  findWin;
+  findIllegal;
+  maxScoreMultiple = 6;
+
   constructor(private readonly patternService: PatternService) {
+    const findPatternsFunc = this.patternService._findPatternsFactory(this.patternService.patterns);
+    this.findMax = this.patternService.findMaxPatterns(findPatternsFunc);
+    this.findMin = this.patternService.findMinPatterns(findPatternsFunc);
+    this.findWin = this.patternService._findPatternsFactory(this.patternService.winPatterns);
+    this.findIllegal = this.patternService._findPatternsFactory(this.patternService.capturePatters);
   }
 
   checkWin(board: BoardBits) {
     return false;
   }
 
-  @memoize()
+  // @memoize()
   calculate(board: BoardBits): number {
-    const maxCombos = this.patternService.findMaxPatters(board);
+    const maxCombos = this.findMax(board);
+    board.patternsBlue = [...maxCombos];
     let score = this.calculateScore(maxCombos);
     if (score < 15000) {
-      const minCombos = this.patternService.findMinPatters(board);
+      const minCombos = this.findMin(board);
+      board.patternsRed = [...minCombos];
       const minScore = this.calculateScore(minCombos);
       // return maximising ? this.maxScore : this.minScore;
       //TODO: why 1.1&
       // console.log("MAX: ", score, maxCombos, "MIN:", minScore, minCombos);
-      score *= 6;
+      score *= this.maxScoreMultiple;
       score -= minScore;
+      // console.log(BoardPrinterService.printBitBoard(board.blue, Number(board.size)));
+      // console.log(BoardPrinterService.printBitBoard(board.red, Number(board.size)));
+      // console.log(score, maxCombos, minCombos)
     }
     return score;
   }
