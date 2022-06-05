@@ -70,17 +70,6 @@ export class ActionService {
     return actions;
   }
 
-  updateScore(board: BoardBits, side: Side) {
-    const maxCombos = this.patternService.findMaxPatters(board);
-    const minCombos = this.patternService.findMinPatters(board);
-    const minScore = this.calculateScore(minCombos);
-    const maxScore = this.calculateScore(maxCombos);
-    // return maximising ? this.maxScore : this.minScore;
-    const score = 1.1 * maxScore - minScore;
-    // console.log("updateScore: " + score + ", " + maximising, this.maxCombos, this.minCombos, this.boards.player, this.boards.enemy)
-    return score;
-  }
-
   private calculateScore(combos: Pattern[]): number {
     type Scores = {
       [key: number]: number;
