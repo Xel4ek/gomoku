@@ -1,5 +1,7 @@
 import { ComboNames } from "./combination";
 
+export type TemplatePattern = Pick<Pattern, "name" | "type" | "player" | "empty" | "enemy">
+
 export class Pattern {
   name: string;
   type: ComboNames;
@@ -8,7 +10,7 @@ export class Pattern {
   empty = 0n;
   length = 0;
 
-  constructor(name: string, type: ComboNames, player: bigint, enemy: bigint, empty: bigint) {
+  constructor({name, type, player, enemy, empty}: TemplatePattern) {
     this.name = name;
     this.type = type;
     this.player = player;

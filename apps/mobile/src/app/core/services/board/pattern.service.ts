@@ -1,18 +1,25 @@
-import {Inject, Injectable} from '@angular/core';
-import {Pattern} from "./pattern";
-import {ComboNames, Dir} from "./combination";
-import {RotatedPattern} from "./rotated-pattern";
-import {BoardBits, Field} from "./boardBits";
-import {Side} from "../ai/action.service";
-import counter from "@nrwl/workspace/src/executors/counter/counter.impl";
+import {Injectable} from '@angular/core';
+import {Pattern, TemplatePattern} from "./pattern";
+import {ComboNames} from "./combination";
+import {BoardBits} from "./boardBits";
 import {BitBoardService} from "./bit-board.service";
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class PatternService {
-  patterns: Pattern[] = [];
-  templatePatterns = [
+  winPatterns: TemplatePattern[] = [];
+  capturePatters: TemplatePattern[] = [
+    {
+      name: "Capture one",
+      type: ComboNames.FIVE,
+      player: 0b1n,
+      empty: 0n,
+      enemy: 0n,
+    },
+  ]
+  patterns: TemplatePattern[] = [
     {
       name: "Open Five",
       type: ComboNames.FIVE,
@@ -131,13 +138,6 @@ export class PatternService {
   counter = 0;
 
   constructor(private readonly bitBoardService: BitBoardService) {
-    this.patterns = this.templatePatterns.map(t => new Pattern(
-        t.name,
-        t.type,
-        t.player,
-        t.enemy,
-        t.empty,
-      ));
   }
 
 
@@ -205,88 +205,73 @@ export class PatternService {
     return boards;
   }
 
-  findMaxPatters(board: BoardBits): Pattern[] {
-    const patters = [];
-    const boards = this.rotateBoard(board);
-    // console.log("MAX")
-    for (const brd of boards) {
-      patters.push(...this.findPatterns(brd.blue, brd.red, brd.border));
-    }
-    return patters;
-  }
-
-  findMinPatters(board: BoardBits): Pattern[] {
-    const patters = [];
-    const boards = this.rotateBoard(board);
-    // console.log("MIN")
-    for (const brd of boards) {
-      patters.push(...this.findPatterns(brd.red, brd.blue, brd.border));
-    }
-    return patters;
-  }
-
-  findPatterns(player: bigint, enemy: bigint, border: bigint): Pattern[] {
-    const selected = [];
-    // console.log((player | enemy).toString(2));
-    // console.log((player | enemy).toString(2));
-    while (player) {
-      while (((player | enemy) & 10n) === 0n && ((player | enemy) & 1n) === 0n) {
-        player >>= 1n;
-        enemy >>= 1n;
-        border >>= 1n;
+  findMaxPatterns(findFunction: (board: BoardBits) => Pattern[] ) {
+    return (board: BoardBits) => {
+      const patters = [];
+      const brd = board.clone();
+      const boards = this.rotateBoard(brd);
+      // console.log("MIN")
+      for (const tmpBrd of boards) {
+        patters.push(...findFunction(tmpBrd));
+        // patters.push(...this.findPatterns(tmpBrd.red, brd.blue, brd.border));
       }
-      const pattern = this.patterns.find(p => {
-        this.counter++;
-        if ((player & p.player) === p.player
-          && ((player | enemy) & p.empty) === 0n
-          && ((enemy & p.enemy) === p.enemy
-            || (border & p.enemy) === p.enemy)) {
-          player >>= BigInt(p.length);
-          enemy >>= BigInt(p.length);
-          border >>= BigInt(p.length);
-          return true;
+      return patters;
+    }
+  }
+
+  findMinPatterns(findFunction: (board: BoardBits) => Pattern[]) {
+    return (board: BoardBits) => {
+      const patters = [];
+      const brd = board.clone();
+      brd.red = BigInt(board.blue);
+      brd.blue = BigInt(board.red);
+      const boards = this.rotateBoard(brd);
+      // console.log("MIN")
+      for (const tmpBrd of boards) {
+        patters.push(...findFunction(tmpBrd));
+        // patters.push(...this.findPatterns(tmpBrd.red, brd.blue, brd.border));
+      }
+      return patters;
+    }
+  }
+
+  _findPatternsFactory(templates: TemplatePattern[]) {
+    const patterns: Readonly<Pattern>[] = templates.map(t => new Pattern(t));
+    return (board: BoardBits) => {
+      const selected =  [];
+      // console.log((player | enemy).toString(2));
+      // console.log((player | enemy).toString(2));
+      const brd = board.clone();
+      while (brd.blue) {
+        this.shift(brd);
+        const pattern = this.searchPattern(patterns, brd);
+        if (pattern) {
+          // console.log(pattern);
+          selected.push(pattern);
+          brd.shiftAll(pattern.length);
+        } else {
+          brd.shiftAll(1);
         }
-        return false;
-      });
-      if (pattern) {
-        // console.log(pattern);
-        selected.push(pattern);
       }
-      player >>= 1n;
-      enemy >>= 1n;
-      border >>= 1n;
+      return selected;
     }
-    return selected;
   }
 
-  _findPatterns(player: bigint, enemy: bigint, border: bigint): Pattern[] {
-    const selected: Pattern[] = [];
-    console.log(player);
-    console.log(enemy);
-    console.log(border);
-    while (player) {
-      selected.push(...this.patterns.filter(p => {
-          if ((player & p.player) === p.player
-            && ((player | enemy) & p.empty) === 0n
-            && ((enemy & p.enemy) === p.enemy
-              || (border & p.enemy) === p.enemy)) {
-            //TODO: incorrect shift for rotated patterns -
-            if (!(p instanceof RotatedPattern)) {
-              player >>= BigInt(p.length);
-              enemy >>= BigInt(p.length);
-              border >>= BigInt(p.length);
-            }
-            return true;
-          }
-          return false;
-        })
-      );
-      player >>= 1n;
-      enemy >>= 1n;
-      border >>= 1n;
-    }
-    console.log(selected);
-    return selected;
+  private shift(brd: BoardBits) {
+    const mask = brd.blue | brd.red;
+    const lsb = mask & -mask;
+    const index = lsb.toString(2).length;
+    brd.shiftAll(index > 1 ? index - 2 : 0);
   }
+
+  private searchPattern(patters: Pattern[], brd: BoardBits) {
+    return patters.find(p => {
+      this.counter++;
+      return (brd.blue & p.player) === p.player
+        && ((brd.blue | brd.red) & p.empty) === 0n
+        && ((brd.red & p.enemy) === p.enemy || (brd.border & p.enemy) === p.enemy);
+    });
+  }
+
 
 }
