@@ -10,6 +10,7 @@ import {Num} from "pts";
 import {max} from "rxjs/operators";
 import {PatternService} from "../board/pattern.service";
 import memoize from "../../tools/memoize";
+import {BoardPrinterService} from "../board/board-printer.service";
 
 @Injectable({
   providedIn: 'root',
@@ -93,12 +94,8 @@ export class MinimaxStrategy {
           return acc;
         }, []).join('')
       );
-      const best = board.childBoards.reduce(
-        ((previousValue, currentValue) => {
-          return previousValue.score < currentValue.score ? previousValue : currentValue;
-        })
-      );
-      const redMoveMask = best.red ^ board.red;
+      console.log("Selected boards: " + BoardPrinterService.printBitBoardSelectedBoards(board));
+      const redMoveMask = board.childBoards[board.selectedBoardIndex].red ^ board.red;
       console.log(board);
       this.logger.log("Total time getNextTurn: " + (performance.now() - start));
       return this.boardService.getFieldIndex(board.border, redMoveMask);
@@ -128,13 +125,20 @@ export class MinimaxStrategy {
     this.generateBoardTime += (performance.now() - start);
     if (board.childBoards.length === 0) {
       // TODO: replace with board score
-      return this.scoringService.calculate(board);
+      const score = this.scoringService.calculate(board);
+      console.log("ALARM:" + score);
+      //TODO: Почему алгоритм считает небольшое количество очков по явно проигрышным ходам и не показывает напр. 99,1
+      return score;
     }
+    let best: number = maximizing ? -Infinity : Infinity
     if (maximizing) {
       let value = Number.NEGATIVE_INFINITY;
-      for (const brd of board.childBoards) {
+      for (const [idx, brd] of board.childBoards.entries()) {
         brd.score = this.minimax(brd, depth - 1, !maximizing, alpha, beta);
-        value = Math.max(value, brd.score);
+        if (value < brd.score) {
+          value = brd.score;
+          board.selectedBoardIndex = idx;
+        }
         beta = Math.min(beta, value);
         if (value <= alpha) {
           break;
@@ -143,9 +147,12 @@ export class MinimaxStrategy {
       return value;
     } else {
       let value = Number.POSITIVE_INFINITY;
-      for (const brd of board.childBoards) {
+      for (const [idx, brd] of board.childBoards.entries()) {
         brd.score = this.minimax(brd, depth - 1, !maximizing, alpha, beta);
-        value = Math.min(value, brd.score);
+        if (value > brd.score) {
+          value = brd.score
+          board.selectedBoardIndex = idx;
+        }
         alpha = Math.max(alpha, value);
         if (value >= beta) {
           break;
