@@ -28,24 +28,24 @@ export class ScoringService {
   }
 
   // @memoize()
+  //TODO: разделить расчет очков на синие и красные, а формулу расчета очков борда вынести отдельно - она дожлна зависеть, у какой стороны был первый ход
   calculate(board: BoardBits): number {
     const maxCombos = this.findMax(board);
     board.patternsBlue = [...maxCombos];
-    let score = this.calculateScore(maxCombos);
-    if (score < 15000) {
-      const minCombos = this.findMin(board);
-      board.patternsRed = [...minCombos];
-      const minScore = this.calculateScore(minCombos);
+    board.scores.blue = this.calculateScore(maxCombos);
+    const minCombos = this.findMin(board);
+    board.patternsRed = [...minCombos];
+    board.scores.red = this.calculateScore(minCombos);
       // return maximising ? this.maxScore : this.minScore;
       //TODO: why 1.1&
       // console.log("MAX: ", score, maxCombos, "MIN:", minScore, minCombos);
-      score *= this.maxScoreMultiple;
-      score -= minScore;
+      // score *= this.maxScoreMultiple;
       // console.log(BoardPrinterService.printBitBoard(board.blue, Number(board.size)));
       // console.log(BoardPrinterService.printBitBoard(board.red, Number(board.size)));
       // console.log(score, maxCombos, minCombos)
-    }
-    return score;
+    // }
+    board.scores[board.firstMove] *= this.maxScoreMultiple;
+    return board.scores.blue - board.scores.red;
   }
 
   private calculateScore(combos: Pattern[]): number {
