@@ -1,11 +1,46 @@
 import { Injectable } from '@angular/core';
 import { Orientation } from "./bit-board.service";
 import {BoardBits} from "./boardBits";
+import {Num} from "pts";
 
 @Injectable({
   providedIn: 'root'
 })
 export class BoardPrinterService {
+
+  static printBitBoardSelectedBoards(board: BoardBits): number[] {
+    let idx = board.selectedBoardIndex;
+    const arr = [];
+    while (!Number.isNaN(idx)) {
+      arr.push(idx);
+      board = board.childBoards[board.selectedBoardIndex];
+      idx = board.selectedBoardIndex;
+    }
+    return arr;
+  }
+
+  static joinBitBoard(board: BoardBits) {
+    return BoardPrinterService.joinBoards(
+      BoardPrinterService.printBitBoard(board.blue, Number(board.size)),
+      BoardPrinterService.printBitBoard(board.red, Number(board.size)),
+    );
+  }
+
+  static joinBoards(blue: string, red: string): string {
+    const arrRed = red.split("")
+    return blue.split("")
+      .map((value, index) => {
+      if (value === "1") {
+        return "*";
+      }
+      if (arrRed[index] === "1") {
+        return "o";
+      }
+      return value;
+      }
+    )
+      .join("");
+  }
 
   static printBitBoard(board: bigint, size: number) {
     const str = board.toString(2)
