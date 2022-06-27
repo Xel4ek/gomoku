@@ -11,6 +11,7 @@ export enum Field {
 
 export class BoardBits {
   //Little-Endian File-Rank mapping => A1, A2, A3...
+  score = NaN;
   selectedBoardIndex = NaN;
 
   get sizeNumber() {
@@ -27,11 +28,9 @@ export class BoardBits {
   indexScore: { [index: number]: number } = {};
   orientation = Orientation.LEFR;
   firstCell = 1n;
-  score = NaN;
   _str: string;
-  patternsBlue: Pattern[] = [];
-  patternsRed: Pattern[] = [];
-  scores = {red: NaN, blue: NaN};
+  patterns: { max: Pattern[], min: Pattern[] } = {max: [], min: []};
+  scores = {min: NaN, max: NaN};
   firstMove: "red" | "blue" = "blue";
 
   get red() {
@@ -101,8 +100,7 @@ export class BoardBits {
 
   clone() {
     const board = new BoardBits(this.size, this.red, this.blue, this.border);
-    board.patternsBlue = this.patternsBlue;
-    board.patternsRed = this.patternsRed;
+    board.patterns = this.patterns;
     return board;
   }
 

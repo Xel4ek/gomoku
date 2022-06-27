@@ -62,7 +62,7 @@ export class MinimaxStrategy {
       this.depth,
       true,
       Number.NEGATIVE_INFINITY,
-      Number.POSITIVE_INFINITY
+      Number.POSITIVE_INFINITY,
     );
     const time = performance.now() - start;
     this.logger.log("Total time minimax: " + time);
@@ -131,35 +131,35 @@ export class MinimaxStrategy {
       return score;
     }
     let best: number = maximizing ? -Infinity : Infinity
-    if (maximizing) {
-      let value = Number.NEGATIVE_INFINITY;
-      for (const [idx, brd] of board.childBoards.entries()) {
-        brd.score = this.minimax(brd, depth - 1, !maximizing, alpha, beta);
-        if (value < brd.score) {
-          value = brd.score;
+
+    for (const [idx, brd] of board.childBoards.entries()) {
+      brd.score = this.minimax(brd, depth - 1, !maximizing, alpha, beta)
+
+      if (maximizing) {
+        if (brd.score > best) {
+          best = brd.score
           board.selectedBoardIndex = idx;
         }
-        beta = Math.min(beta, value);
-        if (value <= alpha) {
-          break;
+        if (brd.score >= beta) {
+          break
         }
-      }
-      return value;
-    } else {
-      let value = Number.POSITIVE_INFINITY;
-      for (const [idx, brd] of board.childBoards.entries()) {
-        brd.score = this.minimax(brd, depth - 1, !maximizing, alpha, beta);
-        if (value > brd.score) {
-          value = brd.score
+        if (brd.score > alpha) {
+          alpha = brd.score
+        }
+      } else {
+        if (brd.score < best) {
+          best = brd.score
           board.selectedBoardIndex = idx;
         }
-        alpha = Math.max(alpha, value);
-        if (value >= beta) {
-          break;
+        if (brd.score <= alpha) {
+          break
+        }
+        if (brd.score < beta) {
+          beta = brd.score
         }
       }
-      return value;
     }
+    return best;
   }
 
   _minimax(

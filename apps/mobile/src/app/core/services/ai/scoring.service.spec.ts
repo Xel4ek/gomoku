@@ -10,19 +10,19 @@ describe('ScoringService', () => {
   let gameBoard: GameBoard;
   let bitBoardService: BitBoardService;
   const maps: { score: number, blue: number[], red?: number[], check?: boolean }[] = [
-    { score: 100000, blue: [1, 2, 3, 4, 5] },
-    { score: 100000, blue: [21, 22, 23, 24, 25] },
-    { score: 100000, blue: [51, 52, 53, 54, 55] },
-    { score: 100000, blue: [51, 52, 53, 54, 55], red: [1, 2, 3, 4, 5] },
-    { score: 100000, blue: [51, 52, 53, 54,], red: [1, 2, 3, 4,] },
-    { score: 15000, blue: [51, 52, 53, 54,] },
-    { score: 15000, blue: [51, 52, 53, 54,] },
-    { score: 15000, blue: [51, 52, 53, 54,] },
-    { score: 100, blue: [51, 52, 53,], red: [1, 2, 3,] },
-    { score: 0, blue: [2, 3, 4, 5], red: [6, 22, 24, 44] },
-    { score: 0, blue: [2, 3, 4, 1, 8], red: [22, 20, 5, 0, 19]},
-    { score: 100, blue: [1,2,3,4,8,9,10], red: [21,0,41,5,42,43,63], check: true },
-    { score: 100, blue: [1,2,3,4,8,9,10], red: [21,0,41,5,42,43,63], check: true },
+    { score: 100000, max: [1, 2, 3, 4, 5] },
+    { score: 100000, max: [21, 22, 23, 24, 25] },
+    { score: 100000, max: [51, 52, 53, 54, 55] },
+    { score: 100000, max: [51, 52, 53, 54, 55], min: [1, 2, 3, 4, 5] },
+    { score: 100000, max: [51, 52, 53, 54,], min: [1, 2, 3, 4,] },
+    { score: 15000, max: [51, 52, 53, 54,] },
+    { score: 15000, max: [51, 52, 53, 54,] },
+    { score: 15000, max: [51, 52, 53, 54,] },
+    { score: 100, max: [51, 52, 53,], min: [1, 2, 3,] },
+    { score: 0, max: [2, 3, 4, 5], min: [6, 22, 24, 44] },
+    { score: 0, max: [2, 3, 4, 1, 8], min: [22, 20, 5, 0, 19]},
+    { score: 100, max: [1,2,3,4,8,9,10], min: [21,0,41,5,42,43,63], check: true },
+    { score: 100, max: [1,2,3,4,8,9,10], min: [21,0,41,5,42,43,63], check: true },
 
   ];
 
@@ -79,8 +79,8 @@ describe('ScoringService', () => {
   );
 
   it.each([
-    { red: 1, b: 2, expected: 3 },
-    { red: 2, b: 5, expected: 7 },
+    { min: 1, b: 2, expected: 3 },
+    { min: 2, b: 5, expected: 7 },
   ])(
     'add($expected, $b,)',
     ({ red, b, expected }) => {

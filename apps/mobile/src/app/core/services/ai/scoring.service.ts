@@ -11,16 +11,16 @@ export class ScoringService {
 
   findMax;
   findMin;
-  findWin;
-  findIllegal;
+  // findWin;
+  // findIllegal;
   maxScoreMultiple = 6;
 
   constructor(private readonly patternService: PatternService) {
-    const findPatternsFunc = this.patternService._findPatternsFactory(this.patternService.patterns);
-    this.findMax = this.patternService.findMaxPatterns(findPatternsFunc);
-    this.findMin = this.patternService.findMinPatterns(findPatternsFunc);
-    this.findWin = this.patternService._findPatternsFactory(this.patternService.winPatterns);
-    this.findIllegal = this.patternService._findPatternsFactory(this.patternService.capturePatters);
+    // const findPatternsFunc = this.patternService._findPatternsFactory(this.patternService.patterns);
+    this.findMax = this.patternService.findMaxPatterns(this.patternService._findPatternsFactory(this.patternService.patterns, "red"));
+    this.findMin = this.patternService.findMaxPatterns(this.patternService._findPatternsFactory(this.patternService.patterns, "blue"));
+    // this.findWin = this.patternService._findPatternsFactory(this.patternService.winPatterns);
+    // this.findIllegal = this.patternService._findPatternsFactory(this.patternService.capturePatters);
   }
 
   checkWin(board: BoardBits) {
@@ -31,11 +31,11 @@ export class ScoringService {
   //TODO: разделить расчет очков на синие и красные, а формулу расчета очков борда вынести отдельно - она дожлна зависеть, у какой стороны был первый ход
   calculate(board: BoardBits): number {
     const maxCombos = this.findMax(board);
-    board.patternsBlue = [...maxCombos];
-    board.scores.blue = this.calculateScore(maxCombos);
+    board.patterns.max = [...maxCombos];
+    board.scores.max = this.calculateScore(maxCombos);
     const minCombos = this.findMin(board);
-    board.patternsRed = [...minCombos];
-    board.scores.red = this.calculateScore(minCombos);
+    board.patterns.min = [...minCombos];
+    board.scores.min = this.calculateScore(minCombos);
       // return maximising ? this.maxScore : this.minScore;
       //TODO: why 1.1&
       // console.log("MAX: ", score, maxCombos, "MIN:", minScore, minCombos);
@@ -44,8 +44,8 @@ export class ScoringService {
       // console.log(BoardPrinterService.printBitBoard(board.red, Number(board.size)));
       // console.log(score, maxCombos, minCombos)
     // }
-    board.scores[board.firstMove] *= this.maxScoreMultiple;
-    return board.scores.blue - board.scores.red;
+    board.scores.min *= this.maxScoreMultiple;
+    return board.scores.max - board.scores.min;
   }
 
   private calculateScore(combos: Pattern[]): number {
