@@ -3,14 +3,11 @@ import {ActionService} from "./action.service";
 import {BoardBits} from "../board/boardBits";
 import {GameBoard} from "./ai.service";
 import {BitBoardService} from "../board/bit-board.service";
-import {Injectable, NgZone} from "@angular/core";
+import {Injectable} from "@angular/core";
 import {LoggerService} from "../logger/logger.service";
-import {logger} from "@nrwl/tao/src/shared/logger";
-import {Num} from "pts";
-import {max} from "rxjs/operators";
 import {PatternService} from "../board/pattern.service";
-import memoize from "../../tools/memoize";
 import {BoardPrinterService} from "../board/board-printer.service";
+import {Strategy} from "./strategy";
 
 @Injectable({
   providedIn: 'root',
@@ -18,7 +15,7 @@ import {BoardPrinterService} from "../board/board-printer.service";
 
 //TODO: сделать поиск решений по битборду только на 5 клеток влево и вправо
 
-export class MinimaxStrategy {
+export class MinimaxStrategy implements Strategy{
   private calculateBoardTime = 0;
 
   get dilation(): number {

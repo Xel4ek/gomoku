@@ -1,10 +1,8 @@
 import {Injectable, NgZone} from '@angular/core';
 import { GameService, PlayerType } from '../game/game.service';
 import { filter, tap } from "rxjs/operators";
-import { BoardService } from "../board/board.service";
 import { ActionService } from "./action.service";
-import { MinimaxStrategy } from "./minimax-strategy";
-import { BitBoardService } from "../board/bit-board.service";
+import {Strategy} from "./strategy";
 
 //TODO: Check score calculation (may be wrong shift to N, NW, NE)
 //TODO: place AI to worker
@@ -54,7 +52,7 @@ export class AiService {
   constructor(
     private readonly gameService: GameService,
     private readonly actionService: ActionService,
-    private readonly strategy: MinimaxStrategy,
+    private readonly strategy: Strategy,
     private readonly ngZone: NgZone,
   ) {
     const worker = new Worker('');
