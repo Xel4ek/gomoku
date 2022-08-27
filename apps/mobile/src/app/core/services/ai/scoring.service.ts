@@ -17,6 +17,7 @@ export class ScoringService {
 
   constructor(private readonly patternService: PatternService) {
     // const findPatternsFunc = this.patternService._findPatternsFactory(this.patternService.patterns);
+    //TODO: заменить явные параметры red|blue на свойства BoardBits
     this.findMax = this.patternService.findMaxPatterns(this.patternService._findPatternsFactory(this.patternService.patterns, "red"));
     this.findMin = this.patternService.findMaxPatterns(this.patternService._findPatternsFactory(this.patternService.patterns, "blue"));
     // this.findWin = this.patternService._findPatternsFactory(this.patternService.winPatterns);
@@ -44,6 +45,7 @@ export class ScoringService {
       // console.log(BoardPrinterService.printBitBoard(board.red, Number(board.size)));
       // console.log(score, maxCombos, minCombos)
     // }
+    //TODO: maxScoreMultipe должно применяться к игроку, который ходил первым.
     board.scores.min *= this.maxScoreMultiple;
     return board.scores.max - board.scores.min;
   }

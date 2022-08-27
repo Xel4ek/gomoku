@@ -103,6 +103,8 @@ export class MinimaxStrategy {
     return -1;
   }
 
+  //TODO: implement move ordering https://www.chessprogramming.org/Move_Ordering to speed up pruning
+  //TODO: implement time constraint https://stackoverflow.com/questions/66493812/implementing-iterative-deepening-with-minimax-algorithm-with-alpha-beta-pruning
   // @memoize()
   minimax(
     board: BoardBits,
