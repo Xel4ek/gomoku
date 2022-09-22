@@ -38,22 +38,27 @@ export class NegamaxStrategy implements Strategy {
   }
 
   @accDecorator
-  negamax(node: BoardBits, depth: number, color: number) {
+  negamax(node: BoardBits, depth: number, alpha: number, beta: number, color: number) {
     this.boardService.generateBoards(node, 1, color === 1 ? "red" : "blue");
     if (depth === 0 || node.childBoards.length === 0) {
       node.score = color * this.scoringService.calculate(node)
       return node;
     }
     let value = Number.NEGATIVE_INFINITY;
-    node.childBoards.forEach((v, idx) => {
-      const childNode = this.negamax(v, depth - 1, -color);
+
+    for (let i = 0; i < node.childBoards.length; i++) {
+      const childNode = this.negamax(node.childBoards[i], depth - 1, -beta, -alpha, -color);
       const score = isNaN(childNode.score) ? childNode.childBoards[childNode.selectedBoardIndex].score : childNode.score;
       childNode.score = score;
       if (score > value) {
         value = childNode.score;
-        node.selectedBoardIndex = idx;
+        node.selectedBoardIndex = i;
       }
-    })
+      alpha = alpha >= value ? alpha : value;
+      if (alpha >= beta) {
+        break;
+      }
+    }
     return node;
   }
 
@@ -61,7 +66,7 @@ export class NegamaxStrategy implements Strategy {
     const board = this.boardService.createFromGameBoard(gameBoard);
     const start = performance.now();
     this.patternService.counter = 0;
-    this.negamax(board, this.depth, 1);
+    this.negamax(board, this.depth, 0, 0, 1);
     const time = performance.now() - start;
     this.logger.log("Total time minimax: " + time);
     this.logger.log("Total calls patternService: " + this.patternService.counter);
