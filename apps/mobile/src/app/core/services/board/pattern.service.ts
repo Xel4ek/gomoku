@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Pattern, TemplatePattern} from "./pattern";
 import {ComboNames} from "./combination";
-import {BoardBits} from "./boardBits";
+import {BoardBits, Field} from "./boardBits";
 import {BitBoardService} from "./bit-board.service";
 
 
@@ -205,7 +205,7 @@ export class PatternService {
     return boards;
   }
 
-  findMaxPatterns(findFunction: (board: BoardBits) => Pattern[] ) {
+  findPatterns(findFunction: (board: BoardBits) => Pattern[] ) {
     return (board: BoardBits) => {
       const patters = [];
       const brd = board.clone();
@@ -235,7 +235,7 @@ export class PatternService {
     }
   }
 
-  _findPatternsFactory(templates: TemplatePattern[], side: "red" | "blue") {
+  _findPatternsFactory(templates: TemplatePattern[], side: Field) {
     const patterns: Readonly<Pattern>[] = templates.map(t => new Pattern(t));
     return (board: BoardBits) => {
       const selected =  [];

@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {BoardBits} from "../board/boardBits";
+import {BoardBits, Field} from "../board/boardBits";
 import {Pattern} from "../board/pattern";
 import {ComboNames} from "../board/combination";
 import {PatternService} from "../board/pattern.service";
@@ -9,8 +9,8 @@ import {PatternService} from "../board/pattern.service";
 })
 export class ScoringService {
 
-  findMax;
-  findMin;
+  findRed;
+  findBlue;
   // findWin;
   // findIllegal;
   maxScoreMultiple = 6;
@@ -18,8 +18,8 @@ export class ScoringService {
   constructor(private readonly patternService: PatternService) {
     // const findPatternsFunc = this.patternService._findPatternsFactory(this.patternService.patterns);
     //TODO: заменить явные параметры red|blue на свойства BoardBits
-    this.findMax = this.patternService.findMaxPatterns(this.patternService._findPatternsFactory(this.patternService.patterns, "red"));
-    this.findMin = this.patternService.findMaxPatterns(this.patternService._findPatternsFactory(this.patternService.patterns, "blue"));
+    this.findRed = this.patternService.findPatterns(this.patternService._findPatternsFactory(this.patternService.patterns, Field.RED));
+    this.findBlue = this.patternService.findPatterns(this.patternService._findPatternsFactory(this.patternService.patterns, Field.BLUE));
     // this.findWin = this.patternService._findPatternsFactory(this.patternService.winPatterns);
     // this.findIllegal = this.patternService._findPatternsFactory(this.patternService.capturePatters);
   }
@@ -31,19 +31,19 @@ export class ScoringService {
   // @memoize()
   //TODO: разделить расчет очков на синие и красные, а формулу расчета очков борда вынести отдельно - она дожлна зависеть, у какой стороны был первый ход
   calculate(board: BoardBits): number {
-    const maxCombos = this.findMax(board);
-    board.patterns.max = [...maxCombos];
-    board.scores.max = this.calculateScore(maxCombos);
-    const minCombos = this.findMin(board);
-    board.patterns.min = [...minCombos];
-    board.scores.min = this.calculateScore(minCombos);
+    const redCombos = this.findRed(board);
+    board.patterns.blue = [...redCombos];
+    board.scores.max = this.calculateScore(redCombos);
+    const blueCombos = this.findBlue(board);
+    board.patterns.min = [...blueCombos];
+    board.scores.min = this.calculateScore(blueCombos);
       // return maximising ? this.maxScore : this.minScore;
       //TODO: why 1.1&
-      // console.log("MAX: ", score, maxCombos, "MIN:", minScore, minCombos);
+      // console.log("MAX: ", score, redCombos, "MIN:", minScore, blueCombos);
       // score *= this.maxScoreMultiple;
       // console.log(BoardPrinterService.printBitBoard(board.blue, Number(board.size)));
       // console.log(BoardPrinterService.printBitBoard(board.red, Number(board.size)));
-      // console.log(score, maxCombos, minCombos)
+      // console.log(score, redCombos, blueCombos)
     // }
     //TODO: maxScoreMultipe должно применяться к игроку, который ходил первым.
     board.scores.min *= this.maxScoreMultiple;

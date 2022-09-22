@@ -7,6 +7,18 @@ import {LoggerService} from "../logger/logger.service";
 import {PatternService} from "../board/pattern.service";
 import {BoardBits} from "../board/boardBits";
 import {Injectable} from "@angular/core";
+import memoize from "../../tools/memoize";
+
+const acc: number[] = [];
+
+const accDecorator = (target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<any>): any => {
+  console.log(acc);
+  console.log(target);
+  console.log(propertyKey);
+  console.log(descriptor);
+  acc.push(1);
+  return descriptor;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -25,6 +37,7 @@ export class NegamaxStrategy implements Strategy{
   ) {
   }
 
+  @accDecorator
   negamax(node: BoardBits, depth: number, color: number): number {
     this.boardService.generateBoards(node, 1, color === 1 ? "red" : "blue");
     if (depth === 0 || node.childBoards.length === 0) {
