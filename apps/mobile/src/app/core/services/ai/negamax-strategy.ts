@@ -24,7 +24,7 @@ const accDecorator = (target: any, propertyKey: string, descriptor: TypedPropert
   providedIn: 'root',
 })
 
-export class NegamaxStrategy implements Strategy{
+export class NegamaxStrategy implements Strategy {
 
   depth = 3;
 
@@ -38,16 +38,23 @@ export class NegamaxStrategy implements Strategy{
   }
 
   @accDecorator
-  negamax(node: BoardBits, depth: number, color: number): number {
+  negamax(node: BoardBits, depth: number, color: number) {
     this.boardService.generateBoards(node, 1, color === 1 ? "red" : "blue");
     if (depth === 0 || node.childBoards.length === 0) {
-      return color * this.scoringService.calculate(node)
+      node.score = color * this.scoringService.calculate(node)
+      return node;
     }
     let value = Number.NEGATIVE_INFINITY;
-    node.childBoards.forEach(v => {
-      value = Math.max(value, -this.negamax(v, depth - 1, -color))
+    node.childBoards.forEach((v, idx) => {
+      const childNode = this.negamax(v, depth - 1, -color);
+      const score = isNaN(childNode.score) ? childNode.childBoards[childNode.selectedBoardIndex].score : childNode.score;
+      childNode.score = score;
+      if (score > value) {
+        value = childNode.score;
+        node.selectedBoardIndex = idx;
+      }
     })
-    return value;
+    return node;
   }
 
   getNextTurn(gameBoard: GameBoard): number {
