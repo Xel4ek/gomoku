@@ -1,8 +1,8 @@
 import {Injectable, NgZone} from '@angular/core';
-import { GameService, PlayerType } from '../game/game.service';
-import { filter, tap } from "rxjs/operators";
-import { ActionService } from "./action.service";
-import {Strategy} from "./strategy";
+import {GameService, PlayerType} from '../game/game.service';
+import {filter, tap} from "rxjs/operators";
+import {ActionService} from "./action.service";
+import {StrategyFactoryService} from "./strategy-factory.service";
 
 //TODO: Check score calculation (may be wrong shift to N, NW, NE)
 //TODO: place AI to worker
@@ -52,7 +52,7 @@ export class AiService {
   constructor(
     private readonly gameService: GameService,
     private readonly actionService: ActionService,
-    private readonly strategy: Strategy,
+    private readonly strategyFactoryService: StrategyFactoryService,
     private readonly ngZone: NgZone,
   ) {
     const worker = new Worker('');
@@ -82,7 +82,7 @@ export class AiService {
 
   getNextAction(board: GameBoard, callback: (turn: number) => void): void {
     this.ngZone.runOutsideAngular(() => {
-      callback(this.strategy.getNextTurn(board));
+      callback(this.strategyFactoryService.get("").getNextTurn(board));
     })
   }
 }

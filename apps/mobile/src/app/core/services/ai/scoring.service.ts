@@ -32,11 +32,11 @@ export class ScoringService {
   //TODO: разделить расчет очков на синие и красные, а формулу расчета очков борда вынести отдельно - она дожлна зависеть, у какой стороны был первый ход
   calculate(board: BoardBits): number {
     const redCombos = this.findRed(board);
-    board.patterns.blue = [...redCombos];
-    board.scores.max = this.calculateScore(redCombos);
+    board.patterns.red = [...redCombos];
+    board.scores.min = this.calculateScore(redCombos);
     const blueCombos = this.findBlue(board);
-    board.patterns.min = [...blueCombos];
-    board.scores.min = this.calculateScore(blueCombos);
+    board.patterns.blue = [...blueCombos];
+    board.scores.max = this.calculateScore(blueCombos);
       // return maximising ? this.maxScore : this.minScore;
       //TODO: why 1.1&
       // console.log("MAX: ", score, redCombos, "MIN:", minScore, blueCombos);

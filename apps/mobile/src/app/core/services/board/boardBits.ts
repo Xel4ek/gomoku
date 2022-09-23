@@ -29,7 +29,7 @@ export class BoardBits {
   orientation = Orientation.LEFR;
   firstCell = 1n;
   _str: string;
-  patterns: { blue: Pattern[], min: Pattern[] } = {blue: [], min: []};
+  patterns: { blue: Pattern[], red: Pattern[] } = {blue: [], red: []};
   scores = {min: NaN, max: NaN};
   firstMove: "red" | "blue" = "blue";
 
