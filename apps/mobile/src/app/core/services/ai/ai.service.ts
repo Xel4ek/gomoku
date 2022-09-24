@@ -3,6 +3,7 @@ import {GameService, PlayerType} from '../game/game.service';
 import {filter, tap} from "rxjs/operators";
 import {ActionService} from "./action.service";
 import {StrategyFactoryService} from "./strategy-factory.service";
+import { IAi } from "../../interfaces/ai";
 
 //TODO: Check score calculation (may be wrong shift to N, NW, NE)
 //TODO: place AI to worker
@@ -43,7 +44,7 @@ export interface GameBoard {
 })
 // TODO: move this services to worker
 
-export class AiService {
+export class AiService implements IAi {
   depth = 3;
   //TODO: add time limit
   timeLimit = 500; //milliseconds

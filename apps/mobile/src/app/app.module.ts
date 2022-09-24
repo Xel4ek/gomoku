@@ -18,8 +18,8 @@ import { WelcomeModule } from './core/components/welcome/welcome.module';
 import { SettingsModule } from './core/components/settings/settings.module';
 import { GameModule } from './core/components/game/game.module';
 import { AboutModule } from './core/components/about/about.module';
-import { BoardService } from './core/services/board/board.service';
 import { AiService } from "./core/services/ai/ai.service";
+import { MatrixAIService } from "./core/services/matrix-ai/matrix-ai.service";
 
 @NgModule({
   declarations: [AppComponent],
@@ -44,6 +44,10 @@ import { AiService } from "./core/services/ai/ai.service";
       provide: LocationStrategy,
       useClass: HashLocationStrategy,
     },
+    // {
+    //   provide: AiService,
+    //   useClass: MatrixAIService,
+    // }
   ],
   bootstrap: [AppComponent],
 })
