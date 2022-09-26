@@ -1,6 +1,6 @@
 import { NegamaxStrategy } from './negamax-strategy';
-import { GameBoard } from './ai.service';
 import { TestBed } from '@angular/core/testing';
+import { GameBoard } from "../../interfaces/gameBoard";
 
 describe('NegamaxStrategy', () => {
   let gameBoard: GameBoard;

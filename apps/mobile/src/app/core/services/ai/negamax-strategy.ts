@@ -1,5 +1,4 @@
 import { Strategy } from './strategy';
-import { GameBoard } from './ai.service';
 import { BitBoardService } from '../board/bit-board.service';
 import { ActionService } from './action.service';
 import { LoggerService } from '../logger/logger.service';
@@ -7,6 +6,7 @@ import { PatternService } from '../board/pattern.service';
 import { BoardBits } from '../board/boardBits';
 import { Injectable } from '@angular/core';
 import { ScoringService } from "./scoring.service";
+import { GameBoard } from "../../interfaces/gameBoard";
 
 const acc: number[] = [];
 

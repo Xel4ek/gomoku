@@ -1,8 +1,8 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { GameBoard } from '../ai/ai.service';
 import { UntypedFormGroup } from '@angular/forms';
 import { ReplaySubject, Subject } from 'rxjs';
 import { map, takeUntil, tap } from 'rxjs/operators';
+import { GameBoard } from "../../interfaces/gameBoard";
 
 export enum PlayerType {
   HUMAN,

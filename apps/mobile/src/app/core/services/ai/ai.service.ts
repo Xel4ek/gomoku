@@ -4,30 +4,12 @@ import { filter, tap } from 'rxjs/operators';
 import { ActionService } from './action.service';
 import { StrategyFactoryService } from './strategy-factory.service';
 import { IAi } from '../../interfaces/ai';
-import { Player } from '../../interfaces/player';
+import { GameBoard } from "../../interfaces/gameBoard";
 
 //TODO: Check score calculation (may be wrong shift to N, NW, NE)
 //TODO: place AI to worker
 //TODO: remove forbidden moves
 //TODO: add scoring of capture moves, or may be not (static eval will be enough)
-
-interface AiStatistics {
-  [key: string]: unknown;
-}
-
-export interface GameBoard {
-  id: number;
-  timestamp: number;
-  player: Player;
-  enemy: Player;
-  blocked: number[];
-  size: number;
-  stat?: AiStatistics;
-  winner?: {
-    color: (opacity?: number) => string;
-    combination: number[];
-  };
-}
 
 @Injectable({
   providedIn: 'root',

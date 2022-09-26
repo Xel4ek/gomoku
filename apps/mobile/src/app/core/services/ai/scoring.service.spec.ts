@@ -1,9 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 
 import { ScoringService } from './scoring.service';
-import { GameBoard } from "./ai.service";
 import { BitBoardService } from "../board/bit-board.service";
 import {BoardBits} from "../board/boardBits";
+import { GameBoard } from "../../interfaces/gameBoard";
 
 describe('ScoringService', () => {
   let service: ScoringService;

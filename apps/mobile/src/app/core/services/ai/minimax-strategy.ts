@@ -1,13 +1,13 @@
 import { ScoringService } from './scoring.service';
 import { ActionService } from './action.service';
 import { BoardBits } from '../board/boardBits';
-import { GameBoard } from './ai.service';
 import { BitBoardService } from '../board/bit-board.service';
 import { Injectable } from '@angular/core';
 import { LoggerService } from '../logger/logger.service';
 import { PatternService } from '../board/pattern.service';
 import { BoardPrinterService } from '../board/board-printer.service';
 import { Strategy } from './strategy';
+import { GameBoard } from "../../interfaces/gameBoard";
 
 @Injectable({
   providedIn: 'root',

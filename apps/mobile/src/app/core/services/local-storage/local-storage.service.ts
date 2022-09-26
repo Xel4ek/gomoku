@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
-import { AiService, GameBoard } from '../ai/ai.service';
+import { AiService} from '../ai/ai.service';
 import { BitBoard } from '../board/bit-board';
 import { Combination } from '../board/combination';
+import { GameBoard } from "../../interfaces/gameBoard";
 
 @Injectable({
   providedIn: 'root',

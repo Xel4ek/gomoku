@@ -1,11 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 
-import { AiService, GameBoard } from './ai.service';
+import { AiService} from './ai.service';
 import { BitBoard } from '../board/bit-board';
 import { BoardService } from '../board/board.service';
 import mock = jest.mock;
 import { Combination } from '../board/combination';
 import { Player } from '../../interfaces/player';
+import { GameBoard } from "../../interfaces/gameBoard";
 
 describe('AiService', () => {
   let service: AiService;

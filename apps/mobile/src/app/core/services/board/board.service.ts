@@ -1,11 +1,11 @@
 import { Injectable, OnDestroy, OnInit } from '@angular/core';
 import { BitBoard, InvalidMoveError } from './bit-board';
 import { Combination } from './combination';
-import { GameBoard } from '../ai/ai.service';
 import { GameService, PlayerType } from '../game/game.service';
 import { Subject } from 'rxjs';
 import { filter, takeUntil, tap } from 'rxjs/operators';
 import { BoardBits } from "./boardBits";
+import { GameBoard } from "../../interfaces/gameBoard";
 
 @Injectable({
   providedIn: 'root',

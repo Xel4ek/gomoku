@@ -1,10 +1,10 @@
 import { Injectable, NgZone } from '@angular/core';
 import { IAi } from '../../interfaces/ai';
-import { GameBoard } from '../ai/ai.service';
 import { GameService, PlayerType } from '../game/game.service';
 import { ActionService } from '../ai/action.service';
 import { StrategyFactoryService } from '../ai/strategy-factory.service';
 import { filter, tap } from 'rxjs/operators';
+import { GameBoard } from "../../interfaces/gameBoard";
 
 @Injectable({
   providedIn: 'root',

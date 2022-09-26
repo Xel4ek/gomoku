@@ -1,11 +1,11 @@
 import {Injectable} from '@angular/core';
 import {BoardBits} from "./boardBits";
 import {DirectionNew, InvalidMoveError} from "./bit-board";
-import {GameBoard} from "../ai/ai.service";
 import {BoardAction} from "../ai/action";
 import {BoardPrinterService} from "./board-printer.service";
 import {LoggerService} from "../logger/logger.service";
 import {Mat, Num} from "pts";
+import { GameBoard } from "../../interfaces/gameBoard";
 
 export enum Orientation {
   // https://www.chessprogramming.org/Bibob

@@ -1,4 +1,4 @@
-import { GameBoard } from "../services/ai/ai.service";
+import { GameBoard } from "./gameBoard";
 
 export interface IAi {
 

@@ -2,9 +2,10 @@ import {TestBed} from '@angular/core/testing';
 
 import {BitBoardService} from './bit-board.service';
 import {BoardPrinterService} from "./board-printer.service";
-import {GameBoard, Player} from "../ai/ai.service";
+import {Player} from "../ai/ai.service";
 import {LoggerService} from "../logger/logger.service";
 import {exitCodeFromResult} from "@angular/compiler-cli";
+import { GameBoard } from "../../interfaces/gameBoard";
 
 describe('BitBoardService', () => {
   let service: BitBoardService;

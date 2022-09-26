@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { IAi } from '../../interfaces/ai';
-import { GameBoard } from '../ai/ai.service';
+import { GameBoard } from "../../interfaces/gameBoard";
 
 @Injectable({
   providedIn: 'root',

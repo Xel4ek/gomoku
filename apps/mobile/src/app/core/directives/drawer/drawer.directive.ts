@@ -1,11 +1,11 @@
 import { AfterViewInit, Directive, ElementRef, OnDestroy } from '@angular/core';
 import { CanvasSpace, Create, Group, Line, Pt, Rectangle } from 'pts';
-import { GameBoard } from '../../services/ai/ai.service';
 import { Subject } from 'rxjs';
 import { LocalStorageService } from '../../services/local-storage/local-storage.service';
 import { takeUntil, tap } from 'rxjs/operators';
 import { GameService, PlayerType } from '../../services/game/game.service';
 import { Player } from '../../interfaces/player';
+import { GameBoard } from "../../interfaces/gameBoard";
 
 @Directive({
   selector: '[gomokuDrawer]',
