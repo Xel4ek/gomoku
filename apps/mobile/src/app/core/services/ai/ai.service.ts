@@ -1,9 +1,10 @@
-import {Injectable, NgZone} from '@angular/core';
-import {GameService, PlayerType} from '../game/game.service';
-import {filter, tap} from "rxjs/operators";
-import {ActionService} from "./action.service";
-import {StrategyFactoryService} from "./strategy-factory.service";
-import { IAi } from "../../interfaces/ai";
+import { Injectable, NgZone } from '@angular/core';
+import { GameService, PlayerType } from '../game/game.service';
+import { filter, tap } from 'rxjs/operators';
+import { ActionService } from './action.service';
+import { StrategyFactoryService } from './strategy-factory.service';
+import { IAi } from '../../interfaces/ai';
+import { Player } from '../../interfaces/player';
 
 //TODO: Check score calculation (may be wrong shift to N, NW, NE)
 //TODO: place AI to worker
@@ -12,17 +13,6 @@ import { IAi } from "../../interfaces/ai";
 
 interface AiStatistics {
   [key: string]: unknown;
-}
-
-export interface Player {
-  type: PlayerType;
-  map: number[];
-  turn: number[];
-  captured: number;
-  options: {
-    color: (opacity?: number) => string;
-    deep: number;
-  };
 }
 
 export interface GameBoard {

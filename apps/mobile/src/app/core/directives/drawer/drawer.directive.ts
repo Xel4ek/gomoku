@@ -5,7 +5,7 @@ import { Subject } from 'rxjs';
 import { LocalStorageService } from '../../services/local-storage/local-storage.service';
 import { takeUntil, tap } from 'rxjs/operators';
 import { GameService, PlayerType } from '../../services/game/game.service';
-import { Player } from '../../services/ai/ai.service';
+import { Player } from '../../interfaces/player';
 
 @Directive({
   selector: '[gomokuDrawer]',
