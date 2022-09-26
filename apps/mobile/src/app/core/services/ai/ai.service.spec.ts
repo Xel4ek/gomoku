@@ -1,10 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 
-import { AiService, GameBoard, Player } from './ai.service';
-import { BitBoard } from "../board/bit-board";
-import { BoardService } from "../board/board.service";
+import { AiService, GameBoard } from './ai.service';
+import { BitBoard } from '../board/bit-board';
+import { BoardService } from '../board/board.service';
 import mock = jest.mock;
-import { Combination } from "../board/combination";
+import { Combination } from '../board/combination';
+import { Player } from '../../interfaces/player';
 
 describe('AiService', () => {
   let service: AiService;
@@ -33,76 +34,8 @@ describe('AiService', () => {
     expect(service).toBeDefined();
   });
 
-  it('should minimax', () => {
-    expect(service.minimax(board, 1, true, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY)).toBeDefined();
-  });
-
   it('should return best Action', () => {
     board.generateRandomMoves(25);
     service.depth = 2;
-  });
-
-  it('should test mimimax', () => {
-    const gb = {
-      id: 5,
-    } as GameBoard;
-    const pl = {
-      type: 0,
-      // map: [5, 6, 7, 8],
-      map: [5, 6, 7],
-      turn: [1, 3],
-      captured: 0,
-      options: {
-        deep: 1
-      }
-    } as Player;
-    const enemy = {
-      type: 1,
-      map: [ 0 ],
-      // map: [ 0, 1, 2, 3, ],
-      turn: [2, 4, 6, 8,],
-      captured: 0,
-      options: {
-        deep: 1
-      }
-    } as Player;
-    const data = {
-      id: 5,
-      timestamp: 1639599954006,
-      player: pl,
-      enemy: enemy,
-      size: 19,
-      blocked: []
-    } as GameBoard;
-    const combos = new Combination(size);
-    const board = new BitBoard(combos.combinations, undefined, data);
-    const score = service.minimax(
-      board,
-      service.depth,
-      false,
-      Number.NEGATIVE_INFINITY,
-      Number.POSITIVE_INFINITY
-    );
-    console.log(board.possibleActions);
-    expect(score).toBeGreaterThan(1000);
-
-  });
-
-  it('should test wrong board', () => {
-    board = new BitBoard(combination.combinations, size);
-    board.boards.player = 527765581332480n;
-    board.boards.enemy = 154742578697930304177307648n;
-    service.getNextAction(board, console.log);
-
-
-  });
-
-  it('should test wrong board 2', () => {
-    board = new BitBoard(combination.combinations, size);
-    board.boards.player = 48n;
-    board.boards.enemy = 33554432n;
-    service.getNextAction(board, console.log);
-
-
   });
 });
