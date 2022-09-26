@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { GameService, PlayerType } from '../../services/game/game.service';
 import { Router } from '@angular/router';
 
@@ -13,7 +13,7 @@ class Player {
   styleUrls: ['./settings.component.scss'],
 })
 export class SettingsComponent {
-  settingsForm: FormGroup;
+  settingsForm: UntypedFormGroup;
   playerType = PlayerType;
   players = [
     new Player(PlayerType.AI, 'Ai'),
@@ -22,7 +22,7 @@ export class SettingsComponent {
   deep = [0, 1, 2, 3];
 
   constructor(
-    private readonly formBuilder: FormBuilder,
+    private readonly formBuilder: UntypedFormBuilder,
     private readonly gameService: GameService,
     private readonly router: Router
   ) {
