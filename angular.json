@@ -9,7 +9,9 @@
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
-          "outputs": ["{options.outputPath}"],
+          "outputs": [
+            "{options.outputPath}"
+          ],
           "options": {
             "outputPath": "dist/apps/mobile",
             "index": "apps/mobile/src/index.html",
@@ -96,15 +98,16 @@
         },
         "test": {
           "builder": "@nrwl/jest:jest",
-          "outputs": ["coverage/apps/mobile"],
+          "outputs": [
+            "coverage/apps/mobile"
+          ],
           "options": {
-            "jestConfig": "apps/mobile/jest.config.ts",
+            "jestConfig": "apps/mobile/jest.config.js",
             "passWithNoTests": true,
             "webWorkerTsConfig": "apps/mobile/tsconfig.worker.json"
           }
         }
-      },
-      "tags": []
+      }
     },
     "mobile-e2e": {
       "root": "apps/mobile-e2e",
@@ -126,14 +129,48 @@
         },
         "lint": {
           "builder": "@nrwl/linter:eslint",
-          "outputs": ["{options.outputFile}"],
+          "outputs": [
+            "{options.outputFile}"
+          ],
           "options": {
-            "lintFilePatterns": ["apps/mobile-e2e/**/*.{js,ts}"]
+            "lintFilePatterns": [
+              "apps/mobile-e2e/**/*.{js,ts}"
+            ]
           }
         }
-      },
-      "tags": [],
-      "implicitDependencies": ["mobile"]
+      }
     }
-  }
+  },
+  "cli": {
+    "defaultCollection": "@nrwl/angular",
+    "packageManager": "npm"
+  },
+  "schematics": {
+    "@nrwl/angular": {
+      "application": {
+        "linter": "eslint"
+      },
+      "library": {
+        "linter": "eslint"
+      },
+      "storybook-configuration": {
+        "linter": "eslint"
+      }
+    },
+    "@nrwl/angular:application": {
+      "style": "scss",
+      "linter": "eslint",
+      "unitTestRunner": "jest",
+      "e2eTestRunner": "cypress"
+    },
+    "@nrwl/angular:library": {
+      "style": "scss",
+      "linter": "eslint",
+      "unitTestRunner": "jest"
+    },
+    "@nrwl/angular:component": {
+      "style": "scss"
+    }
+  },
+  "defaultProject": "mobile"
 }

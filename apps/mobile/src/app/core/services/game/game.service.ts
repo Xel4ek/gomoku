@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { UntypedFormGroup } from '@angular/forms';
+import { FormGroup } from '@angular/forms';
 import { ReplaySubject, Subject } from 'rxjs';
 import { map, takeUntil, tap } from 'rxjs/operators';
 import { GameBoard } from "../../interfaces/gameBoard";
@@ -108,7 +108,7 @@ export class GameService implements OnDestroy {
   private findFreeThrees(gameBoard: GameBoard): GameBoard {
     return gameBoard;
   }
-  initGame(settings: UntypedFormGroup) {
+  initGame(settings: FormGroup) {
     this.size = settings.get('size')?.value ?? 19;
     this._sequence$.next({
       id: 0,
