@@ -1,31 +1,32 @@
-import {Strategy} from "./strategy";
-import {GameBoard} from "./ai.service";
-import {ScoringService} from "./scoring.service";
-import {BitBoardService} from "../board/bit-board.service";
-import {ActionService} from "./action.service";
-import {LoggerService} from "../logger/logger.service";
-import {PatternService} from "../board/pattern.service";
-import {BoardBits} from "../board/boardBits";
-import {Injectable} from "@angular/core";
-import memoize from "../../tools/memoize";
+import { Strategy } from './strategy';
+import { GameBoard } from './ai.service';
+import { BitBoardService } from '../board/bit-board.service';
+import { ActionService } from './action.service';
+import { LoggerService } from '../logger/logger.service';
+import { PatternService } from '../board/pattern.service';
+import { BoardBits } from '../board/boardBits';
+import { Injectable } from '@angular/core';
+import { ScoringService } from "./scoring.service";
 
 const acc: number[] = [];
 
-const accDecorator = (target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<any>): any => {
+const accDecorator = (
+  target: any,
+  propertyKey: string,
+  descriptor: TypedPropertyDescriptor<any>
+): any => {
   console.log(acc);
   console.log(target);
   console.log(propertyKey);
   console.log(descriptor);
   acc.push(1);
   return descriptor;
-}
+};
 
 @Injectable({
   providedIn: 'root',
 })
-
 export class NegamaxStrategy implements Strategy {
-
   depth = 3;
 
   constructor(
@@ -33,29 +34,41 @@ export class NegamaxStrategy implements Strategy {
     private readonly boardService: BitBoardService,
     private readonly actionService: ActionService,
     private readonly logger: LoggerService,
-    private readonly patternService: PatternService,
-  ) {
-  }
+    private readonly patternService: PatternService
+  ) {}
 
   // @accDecorator
-  negamax(node: BoardBits, depth: number, alpha: number, beta: number, color: number) {
-    this.boardService.generateBoards(node, 1, color === 1 ? "red" : "blue");
+  negamax(
+    node: BoardBits,
+    depth: number,
+    alpha: number,
+    beta: number,
+    color: number
+  ) {
+    this.boardService.generateBoards(node, 1, color === 1 ? 'red' : 'blue');
     if (depth === 0 || node.childBoards.length === 0) {
-      node.score = color * this.scoringService.calculate(node)
+      node.score = color * this.scoringService.getScore(node, 'red', 'red');
       return node;
     }
     let value = Number.NEGATIVE_INFINITY;
 
     for (let i = 0; i < node.childBoards.length; i++) {
-      const childNode = this.negamax(node.childBoards[i], depth - 1, -beta, -alpha, -color);
-      childNode.score = -(isNaN(childNode.score) ? childNode.childBoards[childNode.selectedBoardIndex].score : childNode.score);
+      const childNode = this.negamax(
+        node.childBoards[i],
+        depth - 1,
+        -beta,
+        -alpha,
+        -color
+      );
+      childNode.score = -(isNaN(childNode.score)
+        ? childNode.childBoards[childNode.selectedBoardIndex].score
+        : childNode.score);
       if (childNode.score > value) {
         value = childNode.score;
         node.selectedBoardIndex = i;
       }
       alpha = alpha >= value ? alpha : value;
-      if (alpha >= beta || i === node.childBoards.length - 1) {
-        console.log("Pruned!: " + (node.childBoards.length - i - 1));
+      if (alpha >= beta) {
         break;
       }
     }
@@ -66,18 +79,26 @@ export class NegamaxStrategy implements Strategy {
     const board = this.boardService.createFromGameBoard(gameBoard);
     const start = performance.now();
     this.patternService.counter = 0;
-    this.negamax(board, this.depth, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, 1);
+    this.negamax(
+      board,
+      this.depth,
+      Number.NEGATIVE_INFINITY,
+      Number.POSITIVE_INFINITY,
+      1
+    );
     const time = performance.now() - start;
-    this.logger.log("Total time minimax: " + time);
-    this.logger.log("Total calls patternService: " + this.patternService.counter);
+    this.logger.log('Total time minimax: ' + time);
+    this.logger.log(
+      'Total calls patternService: ' + this.patternService.counter
+    );
 
     if (board.childBoards.length > 0) {
-      const redMoveMask = board.childBoards[board.selectedBoardIndex].red ^ board.red;
+      const redMoveMask =
+        board.childBoards[board.selectedBoardIndex].red ^ board.red;
       console.log(board);
-      this.logger.log("Total time getNextTurn: " + (performance.now() - start));
+      this.logger.log('Total time getNextTurn: ' + (performance.now() - start));
       return this.boardService.getFieldIndex(board.border, redMoveMask);
     }
     return -1;
   }
-
 }
