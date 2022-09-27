@@ -73,7 +73,7 @@ describe('ScoringService', () => {
       gameBoard.player.map = blue;
       gameBoard.enemy.map = red ?? [];
       const board = bitBoardService.createFromGameBoard(gameBoard);
-      const calcScore = service.calculate(board);
+      const calcScore = service.getScore(board, "red", "red");
       expect(calcScore).toEqual(score < 15000 ? score * service.maxScoreMultiple : score);
     }
   );
@@ -84,7 +84,7 @@ describe('ScoringService', () => {
       109836762715529940208659114270979683881108177037635771777132500367517985840995585972934236060860072527342960382522507825405428740833740282133848052173908213760n,
       179769313486231590772930519078902473361797697894230657273429857416722513549807456439521370524398016313747864138576501143761788526132752112794635304368249493456807085762422823135099751306398720293598418473628815745346865403688608154084369737106872856864305097429232224688701578133204645972143338320850776489983n
       )
-    expect(service.calculate(board)).toEqual(600);
+    expect(service.getScore(board, "red", "red")).toEqual(600);
   });
 
   //TODO: некоторые поля (окруженные?) не попадают в оценку
