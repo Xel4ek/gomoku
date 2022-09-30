@@ -519,18 +519,7 @@ export class BitBoardService {
       return;
     }
     const occupied = board.red | board.blue;
-    let moves = occupied;
-    for (let i = dilation; i > 0; i--) {
-      moves = moves
-        | (moves >> this.shift.S)
-        | (moves >> this.shift.N)
-        | (moves >> this.shift.E)
-        | (moves >> this.shift.NE)
-        | (moves >> this.shift.SE)
-        | (moves >> this.shift.NW)
-        | (moves >> this.shift.SW)
-        | (moves >> this.shift.W);
-    }
+    let moves = this.dilateBoard(dilation, occupied);
     //TODO: do not generate illegal moves
     moves = (moves | board.border) ^ board.border ^ board.red ^ board.blue;
     while (moves) {
@@ -540,6 +529,21 @@ export class BitBoardService {
       board.childBoards.push(newBoard);
       moves &= ~lsb // clear LSB
     }
+  }
+
+  private dilateBoard(dilation: number, board: bigint) {
+    for (let i = dilation; i > 0; i--) {
+      board = board
+        | (board >> this.shift.S)
+        | (board >> this.shift.N)
+        | (board >> this.shift.E)
+        | (board >> this.shift.NE)
+        | (board >> this.shift.SE)
+        | (board >> this.shift.NW)
+        | (board >> this.shift.SW)
+        | (board >> this.shift.W);
+    }
+    return board;
   }
 
   getFieldIndex(border: bigint, mask: bigint): number {
