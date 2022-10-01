@@ -497,18 +497,19 @@ export class BitBoardService {
     return actions;
   }
 
-  checkWin(board: bigint) {
-    const len: number[] = [];
-    [DirectionNew.E, DirectionNew.S, DirectionNew.SE, DirectionNew.SW].forEach((value) => {
+  checkWin(board: bigint): boolean {
+    for (let dir of [DirectionNew.E, DirectionNew.S, DirectionNew.SE, DirectionNew.SW]) {
       let length = 0;
       let bits = board;
       while (bits) {
-        bits &= bits >> this.shift[value];
         length++;
+        if (length >= 5) {
+          return true;
+        }
+        bits &= bits >> this.shift[dir];
       }
-      len.push(length);
-    });
-    return Math.max(...len) >= 5;
+    }
+    return false;
   }
 
   generateBoards(board: BoardBits, dilation: number = 1, side: 'red' | 'blue'): void {
