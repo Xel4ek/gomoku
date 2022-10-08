@@ -2,6 +2,7 @@ import {Orientation} from "./bit-board.service";
 import {Action, BoardAction} from "../ai/action";
 import {BoardPrinterService} from "./board-printer.service";
 import {Pattern} from "./pattern";
+import { Color } from "../../color";
 
 export enum Field {
   RED = "red",
@@ -10,21 +11,34 @@ export enum Field {
 }
 
 export class BoardBits {
+  get childBoards(): BoardBits[] {
+    return this._childBoards;
+  }
+
+  set childBoards(value: BoardBits[]) {
+    this._childBoards = value;
+  }
   //Little-Endian File-Rank mapping => A1, A2, A3...
-  score = NaN;
-  selectedBoardIndex = NaN;
 
   get sizeNumber() {
     return Number(this.size);
   }
-
+  moveRed = NaN;
+  moveBlue = NaN
+  // lastMove: {[K in Color]?: number} = {};
+  score = NaN;
+  scoreTime = NaN;
+  scoreRed = NaN;
+  scoreBlue = NaN;
   size: bigint;
 
   private _red = 0n;
   private _blue = 0n;
   private _border = 0n;
   possibleActions: BoardAction[] = [];
-  childBoards: BoardBits[] = [];
+  selectedBoardIndex = NaN;
+  private _childBoards: BoardBits[] = [];
+  indexedChildBoards: {number: BoardBits}[] = [];
   indexScore: { [index: number]: number } = {};
   orientation = Orientation.LEFR;
   firstCell = 1n;

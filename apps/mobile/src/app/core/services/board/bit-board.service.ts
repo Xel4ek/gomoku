@@ -527,6 +527,8 @@ export class BitBoardService {
       const lsb = moves & -moves;
       const newBoard = board.clone();
       newBoard[side] |= lsb;
+      const moveIndex = this.getFieldIndex(board.border, lsb);
+      side === "red" ? newBoard.moveRed = moveIndex : newBoard.moveBlue = moveIndex;
       board.childBoards.push(newBoard);
       moves &= ~lsb // clear LSB
     }
