@@ -1,11 +1,11 @@
-import {Injectable} from '@angular/core';
-import {BoardBits} from "./boardBits";
-import {DirectionNew, InvalidMoveError} from "./bit-board";
-import {BoardAction} from "../ai/action";
-import {BoardPrinterService} from "./board-printer.service";
-import {LoggerService} from "../logger/logger.service";
-import {Mat, Num} from "pts";
+import { Injectable } from '@angular/core';
+import { BoardBits } from "./boardBits";
+import { DirectionNew, InvalidMoveError } from "./bit-board";
+import { BoardAction } from "../ai/action";
+import { BoardPrinterService } from "./board-printer.service";
+import { LoggerService } from "../logger/logger.service";
 import { GameBoard } from "../../interfaces/gameBoard";
+import { Color } from "../../color";
 
 export enum Orientation {
   // https://www.chessprogramming.org/Bibob
@@ -47,6 +47,17 @@ export class BitBoardService {
   kMasksFiles: { [key: number]: bigint } = {};
   kMasksRanks: { [key: number]: bigint } = {};
   kMasksDiag: { [key: number]: bigint } = {};
+
+  static getFieldIndex(border: bigint, mask: bigint): number {
+    let i = 0;
+    for (mask; mask > 1n; mask >>= 1n) {
+      if ((border & 1n) === 0n) {
+        i++;
+      }
+      border >>= 1n;
+    }
+    return i;
+  }
 
   constructor(private readonly boardPrinterService: BoardPrinterService,
               private readonly logger: LoggerService,
@@ -512,11 +523,10 @@ export class BitBoardService {
     return false;
   }
 
-  generateBoards(board: BoardBits, dilation: number = 1, side: 'red' | 'blue'): void {
-    //TODO: checkwin() должен работать на повернуты бордах
+  generateBoards(board: BoardBits, dilation: number = 1, side: Color): void {
     // TODO: после нахождения checkWin() должны генериться новые childBoards c capture движениями
-    if (this.checkWin(board[side === 'red' ? 'blue' : 'red']) && this.nonCapture(board)) {
-      console.log('CHECKWIN!', side);
+    if ((this.checkWin(board.red) || this.checkWin(board.blue)) && this.nonCapture(board)) {
+      this.logger.log(`Checkwin!`);
       return;
     }
     const occupied = board.red | board.blue;
@@ -535,18 +545,19 @@ export class BitBoardService {
   }
 
   private dilateBoard(dilation: number, board: bigint) {
+    let tempBoard = board;
     for (let i = dilation; i > 0; i--) {
-      board = board
-        | (board >> this.shift.S)
-        | (board >> this.shift.N)
-        | (board >> this.shift.E)
-        | (board >> this.shift.NE)
-        | (board >> this.shift.SE)
-        | (board >> this.shift.NW)
-        | (board >> this.shift.SW)
-        | (board >> this.shift.W);
+      tempBoard = tempBoard
+        | (tempBoard >> this.shift.S)
+        | (tempBoard >> this.shift.N)
+        | (tempBoard >> this.shift.E)
+        | (tempBoard >> this.shift.NE)
+        | (tempBoard >> this.shift.SE)
+        | (tempBoard >> this.shift.NW)
+        | (tempBoard >> this.shift.SW)
+        | (tempBoard >> this.shift.W);
     }
-    return board;
+    return tempBoard;
   }
 
   getFieldIndex(border: bigint, mask: bigint): number {
@@ -559,7 +570,6 @@ export class BitBoardService {
     }
     return i;
   }
-
 
   //TODO: make nonCapture() - findPattern
   private nonCapture(board: BoardBits) {
