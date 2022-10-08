@@ -77,35 +77,8 @@ export class MinimaxStrategy implements Strategy {
     this.logger.log(
       'Total calls patternService: ' + this.patternService.counter
     );
-    const source = [];
 
     if (board.childBoards.length > 0) {
-      const report: string[] = [];
-      const size = 19;
-      Array.from({ length: gameBoard.size }).forEach((_, x) => {
-        Array.from({ length: gameBoard.size }).forEach((_, y) => {
-          report.push('.....');
-        });
-        // report.push('\n');
-      });
-      board.childBoards.forEach((b) => {
-        const idx = this.boardService.getFieldIndex(
-          b.border,
-          b.red ^ board.red
-        );
-        b.indexScore[idx] = b.score;
-        source.push(b.indexScore);
-        report[idx] = (b.score / 1000).toFixed(1).padStart(5, ' ');
-      });
-      this.logger.log(
-        Array.from({ length: gameBoard.size })
-          .reduce((acc: string[], cur) => {
-            const str = report.splice(0, gameBoard.size).join('\t') + '\n\n';
-            acc.push(str);
-            return acc;
-          }, [])
-          .join('')
-      );
       console.log(
         'Selected boards: ' +
           BoardPrinterService.printBitBoardSelectedBoards(board)
@@ -119,7 +92,8 @@ export class MinimaxStrategy implements Strategy {
     return -1;
   }
 
-  //TODO: implement move ordering https://www.chessprogramming.org/Move_Ordering to speed up pruning
+
+//TODO: implement move ordering https://www.chessprogramming.org/Move_Ordering to speed up pruning
   //TODO: implement time constraint https://stackoverflow.com/questions/66493812/implementing-iterative-deepening-with-minimax-algorithm-with-alpha-beta-pruning
   // @memoize()
   minimax(
@@ -130,6 +104,9 @@ export class MinimaxStrategy implements Strategy {
     beta: number
   ): number {
     this.counter++;
+    if (this.boardService.checkWin(board[maximizing ? 'red' : 'blue']) && this.boardService.nonCapture(board)) {
+      return 1000000;
+    }
     if (depth === 0) {
       const start = performance.now();
       const score = this.scoringService.getScore(board, 'red', 'red');
