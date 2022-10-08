@@ -1,12 +1,15 @@
 import { Injectable } from '@angular/core';
-import { Orientation } from "./bit-board.service";
-import {BoardBits} from "./boardBits";
-import {Num} from "pts";
+import { BitBoardService, Orientation } from "./bit-board.service";
+import { BoardBits } from "./boardBits";
+import { GameBoard } from "../../interfaces/gameBoard";
 
 @Injectable({
   providedIn: 'root'
 })
 export class BoardPrinterService {
+
+  constructor() {
+  }
 
   static printBitBoardSelectedBoards(board: BoardBits): number[] {
     let idx = board.selectedBoardIndex;
@@ -30,15 +33,15 @@ export class BoardPrinterService {
     const arrRed = red.split("")
     return blue.split("")
       .map((value, index) => {
-      if (value === "1") {
-        return "*";
-      }
-      if (arrRed[index] === "1") {
-        return "o";
-      }
-      return value;
-      }
-    )
+          if (value === "1") {
+            return "*";
+          }
+          if (arrRed[index] === "1") {
+            return "o";
+          }
+          return value;
+        }
+      )
       .join("");
   }
 
@@ -65,13 +68,30 @@ export class BoardPrinterService {
       .join('')
   }
 
+  static printBoardScoresNegamax(gameBoard: GameBoard, board: BoardBits) {
+    const report: string[] = [];
+    Array.from({length: gameBoard.size}).forEach((_) => {
+      Array.from({length: gameBoard.size}).forEach((_) => {
+        report.push('.....');
+      });
+    });
+    board.childBoards.forEach((b) => {
+      const idx = BitBoardService.getFieldIndex(b.border, b.red ^ board.red);
+      b.indexScore[idx] = b.score;
+      report[idx] = (b.score).toFixed(3).padStart(5, ' ');
+    });
+    return Array.from({length: gameBoard.size})
+      .reduce((acc: string[]) => {
+        const str = report.splice(0, gameBoard.size).join('\t') + '\n\n';
+        acc.push(str);
+        return acc;
+      }, [])
+      .join('');
+  }
+
   static printChildScores(board: BoardBits) {
     return board.childBoards.reduce((acc, cur) => acc + ", " + cur.score, "")
   }
-
-  constructor() {
-  }
-
 
   printBitBoardOriented(board: bigint, size: number, orientation: Orientation) {
     if (orientation === Orientation.LEFR) {
@@ -90,9 +110,7 @@ export class BoardPrinterService {
     return '';
   }
 
-
   print45RotatedBitboard(board: bigint, size: number) {
-    const rows = size * 2 - 1;
     const str = board.toString(2)
       .replaceAll("0", ".")
       .split('')
