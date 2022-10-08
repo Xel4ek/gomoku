@@ -45,9 +45,13 @@ export class NegamaxStrategy implements Strategy {
     beta: number,
     color: number
   ) {
+    if (depth === 0) {
+      node.score = color * this.scoringService.evaluateBoard(node, color === 1 ? "red" : "blue");
+      return node;
+    }
     this.boardService.generateBoards(node, 1, color === 1 ? 'red' : 'blue');
-    if (depth === 0 || node.childBoards.length === 0) {
-      node.score = color * this.scoringService.getScore(node, 'red', 'red');
+    if (node.childBoards.length === 0) {
+      node.score = color * this.scoringService.evaluateBoard(node, color === 1 ? "red" : "blue");
       return node;
     }
     let value = Number.NEGATIVE_INFINITY;

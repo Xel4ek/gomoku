@@ -108,4 +108,11 @@ export class ScoringService implements Scoring {
     // score += 200 * count[ComboNames.CLOSEDTHREE];
     return score;
   }
+
+  evaluateBoard(board: BoardBits, turn: Color): number {
+    // TODO: replace side literal
+    this.getScore(board, 'red', turn)
+    return 0;
+  }
 }
+

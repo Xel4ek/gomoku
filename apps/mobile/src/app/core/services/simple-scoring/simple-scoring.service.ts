@@ -148,4 +148,20 @@ export class SimpleScoringService implements Scoring {
       this.evaluate(boards[3], side, turn)
     );
   }
+
+  // This function calculates the relative score of the white player against the black.
+  // (i.e. how likely is white player to win the game before the black player)
+  // This value will be used as the score in the Minimax algorithm.
+  evaluateBoard(board: BoardBits, turn: Color): number {
+
+    // Get board score of both players.
+    board.scoreRed = this.getScore(board, 'red', turn);
+    board.scoreBlue = this.getScore(board, 'blue', turn);
+
+    if (board.scoreRed === 0) {
+      board.scoreRed = 1.0;
+    }
+    // Calculate relative score of white against black
+    return board.scoreRed / board.scoreBlue;
+  }
 }
