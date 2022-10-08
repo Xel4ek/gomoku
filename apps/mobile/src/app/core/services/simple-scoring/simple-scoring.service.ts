@@ -73,6 +73,7 @@ export class SimpleScoringService implements Scoring {
     // More than 5 consecutive stones?
     return this.winScore * 2;
   }
+
   evaluate(board: BoardBits, side: Color, turn: Color) {
     let consecutive = 0;
     let blocks = 2;
@@ -89,13 +90,13 @@ export class SimpleScoringService implements Scoring {
           consecutive++;
         }
         // Check if cell is empty
-        else if (((tempBoard.red & tempBoard.blue) & 1n) === 0n) {
+        else if ((tempBoard.red & 1n) === 0n && (tempBoard.blue & 1n) === 0n) {
           // Check if there were any consecutive stones before this empty cell
           if (consecutive > 0) {
             // Consecutive set is not blocked by opponent, decrement block count
             blocks--;
             // Get consecutive set score
-            score += this.getConsecutiveSetScore(consecutive, blocks, turn == side);
+            score += this.getConsecutiveSetScore(consecutive, blocks, turn === side);
             // Reset consecutive stone count
             consecutive = 0;
             // Current cell is empty, next consecutive set will have at most 1 blocked side.
@@ -105,9 +106,12 @@ export class SimpleScoringService implements Scoring {
             // Current cell is empty, next consecutive set will have at most 1 blocked side.
             blocks = 1;
           }
-        } else if (consecutive > 0) {
+        }
+        // Cell is occupied by opponent
+        // Check if there were any consecutive stones before this empty cell
+        else if (consecutive > 0) {
           // Get consecutive set score
-          score += this.getConsecutiveSetScore(consecutive, blocks, turn == side);
+          score += this.getConsecutiveSetScore(consecutive, blocks, turn === side);
           // Reset consecutive stone count
           consecutive = 0;
           // Current cell is occupied by opponent, next consecutive set may have 2 blocked sides
@@ -120,7 +124,7 @@ export class SimpleScoringService implements Scoring {
       // End of row, check if there were any consecutive stones before we reached right border
       else {
         if (consecutive > 0) {
-          score += this.getConsecutiveSetScore(consecutive, blocks, turn == side);
+          score += this.getConsecutiveSetScore(consecutive, blocks, turn === side);
           console.log(score);
         }
         consecutive = 0;
