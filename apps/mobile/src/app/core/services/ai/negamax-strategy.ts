@@ -7,6 +7,7 @@ import { BoardBits } from '../board/boardBits';
 import { Injectable } from '@angular/core';
 import { ScoringService } from "./scoring.service";
 import { GameBoard } from "../../interfaces/gameBoard";
+import { BoardPrinterService } from "../board/board-printer.service";
 
 const acc: number[] = [];
 
@@ -54,6 +55,7 @@ export class NegamaxStrategy implements Strategy {
       node.score = color * this.scoringService.evaluateBoard(node, color === 1 ? "red" : "blue");
       return node;
     }
+    //TODO: implement moves ordering here
     let value = Number.NEGATIVE_INFINITY;
 
     for (let i = 0; i < node.childBoards.length; i++) {
@@ -83,6 +85,7 @@ export class NegamaxStrategy implements Strategy {
     const board = this.boardService.createFromGameBoard(gameBoard);
     const start = performance.now();
     this.patternService.counter = 0;
+    // TODO: replace side literal with option
     this.negamax(
       board,
       this.depth,
@@ -91,16 +94,17 @@ export class NegamaxStrategy implements Strategy {
       1
     );
     const time = performance.now() - start;
-    this.logger.log('Total time minimax: ' + time);
-    this.logger.log(
-      'Total calls patternService: ' + this.patternService.counter
-    );
-
-    if (board.childBoards.length > 0) {
+    this.logger.log(`
+     Depth: ${this.depth}
+     Total time negamax: ${time}
+     Total calls patternService: ${this.patternService.counter}
+    `);
+    if (board.childBoards.length > 0 && !isNaN(board.selectedBoardIndex)) {
       const redMoveMask =
         board.childBoards[board.selectedBoardIndex].red ^ board.red;
-      console.log(board);
+      // this.logger.log(board);
       this.logger.log('Total time getNextTurn: ' + (performance.now() - start));
+      this.logger.log(BoardPrinterService.printBoardScoresNegamax(gameBoard, board));
       return this.boardService.getFieldIndex(board.border, redMoveMask);
     }
     return -1;
