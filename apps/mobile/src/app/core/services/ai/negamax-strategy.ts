@@ -8,21 +8,8 @@ import { Injectable } from '@angular/core';
 import { ScoringService } from "./scoring.service";
 import { GameBoard } from "../../interfaces/gameBoard";
 import { BoardPrinterService } from "../board/board-printer.service";
+import { accDecorator, counterReporter } from "../../tools/performance.decorator";
 
-const acc: number[] = [];
-
-const accDecorator = (
-  target: any,
-  propertyKey: string,
-  descriptor: TypedPropertyDescriptor<any>
-): any => {
-  console.log(acc);
-  console.log(target);
-  console.log(propertyKey);
-  console.log(descriptor);
-  acc.push(1);
-  return descriptor;
-};
 
 @Injectable({
   providedIn: 'root',
@@ -36,16 +23,11 @@ export class NegamaxStrategy implements Strategy {
     private readonly actionService: ActionService,
     private readonly logger: LoggerService,
     private readonly patternService: PatternService
-  ) {}
-
-  // @accDecorator
-  negamax(
-    node: BoardBits,
-    depth: number,
-    alpha: number,
-    beta: number,
-    color: number
   ) {
+  }
+
+  @accDecorator()
+  negamax(node: BoardBits, depth: number, alpha: number, beta: number, color: number) {
     if (depth === 0) {
       node.score = color * this.scoringService.evaluateBoard(node, color === 1 ? "red" : "blue");
       return node;
@@ -66,9 +48,9 @@ export class NegamaxStrategy implements Strategy {
         -alpha,
         -color
       );
-      childNode.score = -(isNaN(childNode.score)
-        ? childNode.childBoards[childNode.selectedBoardIndex].score
-        : childNode.score);
+      childNode.score = -(isNaN(childNode.score) ? childNode.childBoards[childNode.selectedBoardIndex].score : childNode.score);
+      childNode.scoreRed = -(isNaN(childNode.scoreRed) ? childNode.childBoards[childNode.selectedBoardIndex].scoreRed : childNode.scoreRed);
+      childNode.scoreBlue = -(isNaN(childNode.scoreBlue) ? childNode.childBoards[childNode.selectedBoardIndex].scoreBlue : childNode.scoreBlue);
       if (childNode.score > value) {
         value = childNode.score;
         node.selectedBoardIndex = i;
@@ -81,6 +63,7 @@ export class NegamaxStrategy implements Strategy {
     return node;
   }
 
+  @counterReporter(console.log)
   getNextTurn(gameBoard: GameBoard): number {
     const board = this.boardService.createFromGameBoard(gameBoard);
     const start = performance.now();
