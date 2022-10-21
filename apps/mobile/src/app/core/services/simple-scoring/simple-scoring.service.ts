@@ -3,6 +3,7 @@ import { Scoring } from '../../interfaces/scoring';
 import { BoardBits } from '../board/boardBits';
 import { Color } from '../../color';
 import { PatternService } from '../board/pattern.service';
+import { accDecorator, counterReporter } from "../../tools/performance.decorator";
 
 @Injectable({
   providedIn: 'root',
@@ -81,8 +82,13 @@ export class SimpleScoringService implements Scoring {
 
     const tempBoard = board.clone();
 
-    // Iterate over all cells
-    while (tempBoard.border > 0n) {
+    function extractedShift() {
+      tempBoard.border >>= 1n;
+      tempBoard.red >>= 1n;
+      tempBoard.blue >>= 1n;
+    }
+
+    function extractedCompare() {
       // Check only non-border cells
       if ((tempBoard.border & 1n) != 1n) {
         // Check if the selected player has a stone in the current cell
@@ -96,6 +102,7 @@ export class SimpleScoringService implements Scoring {
             // Consecutive set is not blocked by opponent, decrement block count
             blocks--;
             // Get consecutive set score
+            // @ts-ignore
             score += this.getConsecutiveSetScore(consecutive, blocks, turn === side);
             // Reset consecutive stone count
             consecutive = 0;
@@ -107,10 +114,11 @@ export class SimpleScoringService implements Scoring {
             blocks = 1;
           }
         }
-        // Cell is occupied by opponent
+          // Cell is occupied by opponent
         // Check if there were any consecutive stones before this empty cell
         else if (consecutive > 0) {
           // Get consecutive set score
+          // @ts-ignore
           score += this.getConsecutiveSetScore(consecutive, blocks, turn === side);
           // Reset consecutive stone count
           consecutive = 0;
@@ -124,16 +132,19 @@ export class SimpleScoringService implements Scoring {
       // End of row, check if there were any consecutive stones before we reached right border
       else {
         if (consecutive > 0) {
+          // @ts-ignore
           score += this.getConsecutiveSetScore(consecutive, blocks, turn === side);
-          console.log(score);
         }
         consecutive = 0;
         blocks = 2;
       }
+    }
+
+// Iterate over all cells
+    while (tempBoard.border > 0n) {
+      extractedCompare.call(this);
       // Reset consecutive stone and blocks count at the end of row
-      tempBoard.border >>= 1n;
-      tempBoard.red >>= 1n;
-      tempBoard.blue >>= 1n;
+      extractedShift();
     }
     return score;
   }
@@ -143,6 +154,7 @@ export class SimpleScoringService implements Scoring {
    * @count: Number of consecutive stones in the set
    * @blocks: Number of blocked sides of the set (2: both sides blocked, 1: single side blocked, 0: both sides free)
    */
+  @accDecorator()
   getScore(board: BoardBits, side: Color, turn: Color) {
     const boards = this.patternService.rotateBoard(board);
     return (
@@ -156,6 +168,7 @@ export class SimpleScoringService implements Scoring {
   // This function calculates the relative score of the white player against the black.
   // (i.e. how likely is white player to win the game before the black player)
   // This value will be used as the score in the Minimax algorithm.
+  @counterReporter(console.log)
   evaluateBoard(board: BoardBits, turn: Color): number {
 
     // Get board score of both players.
