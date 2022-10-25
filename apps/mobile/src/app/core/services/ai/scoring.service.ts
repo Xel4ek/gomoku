@@ -5,6 +5,7 @@ import { ComboNames } from '../board/combination';
 import { PatternService } from '../board/pattern.service';
 import { Color } from '../../color';
 import { Scoring } from '../../interfaces/scoring';
+import { TypedTree } from "../../tools/typed-tree";
 
 @Injectable({
   providedIn: 'root',
@@ -112,6 +113,10 @@ export class ScoringService implements Scoring {
   evaluateBoard(board: BoardBits, turn: Color): number {
     // TODO: replace side literal
     this.getScore(board, 'red', turn)
+    return 0;
+  }
+
+  evaluateNode(board: TypedTree<any>, turn: Color): number {
     return 0;
   }
 }
