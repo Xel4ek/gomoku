@@ -4,6 +4,7 @@ import { ScoringService } from './scoring.service';
 import { BitBoardService } from "../board/bit-board.service";
 import {BoardBits} from "../board/boardBits";
 import { GameBoard } from "../../interfaces/gameBoard";
+import { GAMEBOARD } from "../../tools/constants";
 
 describe('ScoringService', () => {
   let service: ScoringService;
@@ -27,37 +28,7 @@ describe('ScoringService', () => {
   ];
 
   beforeEach(() => {
-    gameBoard =
-      {
-        "id": 1,
-        "timestamp": 1649655174300,
-        "player": {
-          "type": 0,
-          "map": [
-            101
-          ],
-          "turn": [
-            1
-          ],
-          "captured": 0,
-          "options": {
-            "color": () => "",
-            "deep": 1
-          }
-        },
-        "enemy": {
-          "type": 1,
-          "map": [],
-          "turn": [],
-          "captured": 0,
-          "options": {
-            "color": () => "",
-            "deep": 1
-          }
-        },
-        "size": 19,
-        "blocked": []
-      };
+    gameBoard = GAMEBOARD;
     TestBed.configureTestingModule({});
     bitBoardService = TestBed.inject(BitBoardService);
     service = TestBed.inject(ScoringService);

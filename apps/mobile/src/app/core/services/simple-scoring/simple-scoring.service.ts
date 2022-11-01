@@ -4,6 +4,7 @@ import { BoardBits } from '../board/boardBits';
 import { Color } from '../../color';
 import { PatternService } from '../board/pattern.service';
 import { accDecorator, counterReporter } from "../../tools/performance.decorator";
+import { TypedTree } from "../../tools/typed-tree";
 
 @Injectable({
   providedIn: 'root',
@@ -180,5 +181,9 @@ export class SimpleScoringService implements Scoring {
     }
     // Calculate relative score of white against black
     return board.scoreRed / board.scoreBlue;
+  }
+
+  evaluateNode(board: TypedTree<any>, turn: Color): number {
+    throw Error("Not implemented");
   }
 }
