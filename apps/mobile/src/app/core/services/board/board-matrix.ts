@@ -12,19 +12,12 @@ export class BoardMatrix extends Board implements IBoard {
     super();
     if (gameBoard) {
       this.createEmptyBoard();
-      gameBoard.player.map.forEach(v => this.addStoneNoGUI(this.col(v), this.row(v), "blue"));
-      gameBoard.enemy.map.forEach(v => this.addStoneNoGUI(this.col(v), this.row(v), "red"));
-      // for (let i: number = 0; i < this.size; i++) {
-      //   this.board[i] = [];
-      //   for (let j: number = 0; j < this.size; j++) {
-      //     this.board[i][j] = 0;
-      //   }
-      //   this.gameBoardToMatrix(gameBoard);
-      // }
+      gameBoard.player.map.forEach(v => this.move(this.col(v), this.row(v), "blue"));
+      gameBoard.enemy.map.forEach(v => this.move(this.col(v), this.row(v), "red"));
     }
     if (boardMatrix instanceof BoardMatrix) {
-      this.board = Array(this.size);
-      boardMatrix.board.forEach((value, index) => this.board[index] = Array.from(value))
+      this.board = []
+      boardMatrix.board.forEach(v => this.board.push(Object.assign({}, v)))
     }
   }
 
@@ -97,8 +90,12 @@ export class BoardMatrix extends Board implements IBoard {
     return moveList;
   }
 
-  addStoneNoGUI(posX: number, posY: number, color: Color) {
+  move(posX: number, posY: number, color: Color) {
     this.board[posY][posX] = color === "red" ? 2 : 1;
+  }
+
+  unmove(posX: number, posY: number) {
+    this.board[posY][posX] = 0;
   }
 
   private createEmptyBoard() {

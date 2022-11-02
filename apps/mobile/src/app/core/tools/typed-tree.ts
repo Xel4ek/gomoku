@@ -1,7 +1,6 @@
 import { Tree } from "ts-tree";
 
 export class TypedTree<T> extends Tree {
-  selectedMove?: number;
   selectedChild = NaN;
   private _value: T;
 

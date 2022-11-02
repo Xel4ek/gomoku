@@ -30,17 +30,11 @@ export class NegamaxGenericStrategy<T extends IBoard> implements Strategy {
     let value = Number.NEGATIVE_INFINITY;
     for (let i in moves) {
       const tempBoard = new BoardMatrix(undefined, node.value);
-      tempBoard.addStoneNoGUI(moves[i].j, moves[i].i, color === 1 ? "red" : "blue");
+      tempBoard.move(moves[i].j, moves[i].i, color === 1 ? "red" : "blue");
       tempBoard.lastMove = moves[i];
       const childNode = new TypedTree<IBoard>(tempBoard);
       node.appendChild(childNode);
       this.negamax(childNode, depth - 1, -beta, -alpha, -color);
-      // if (node.selectedChild) {
-      //   childNode.value.score = childNode.children[node.selectedChild].value.score;
-      // }
-      // childNode.value.score = -(isNaN(childNode.value.score) ? childNode.children[node.selectedChild].value.score : childNode.value.score);
-      // childNode.value.scoreRed = -(isNaN(childNode.value.scoreRed) ? childNode.children[node.selectedChild].value.scoreRed : childNode.value.scoreRed);
-      // childNode.value.scoreBlue = -(isNaN(childNode.value.scoreBlue) ? childNode.children[node.selectedChild].value.scoreBlue : childNode.value.scoreBlue);
       if (childNode.value.score > value) {
         value = childNode.value.score;
         node.selectedChild = Number(i);
