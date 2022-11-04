@@ -1,9 +1,9 @@
 export class Move {
-  i: number;
-  j: number;
+  row: number;
+  col: number;
 
-  constructor(i: number, j: number) {
-    this.i = i;
-    this.j = j;
+  constructor(row: number, col: number) {
+    this.row = row;
+    this.col = col;
   }
 }

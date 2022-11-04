@@ -28,7 +28,7 @@ const maps: TestCase[] = [
   {score: 150000, blue: [51, 52, 53, 54,]},
   {score: 150000, blue: [51, 52, 53, 54,]},
   {score: 1000, blue: [51, 52, 53,], red: [1, 2, 3,]},
-  {score: 0, blue: [2, 3, 4, 5], red: [6, 22, 24, 44]},
+  {score: 0, blue: [2, 3, 4, 5], red: [1, 6]},
   {score: 0, blue: [2, 3, 4, 1, 8], red: [22, 20, 5, 0, 19]},
   {score: 100, blue: [1, 2, 3, 4, 8, 9, 10], red: [21, 0, 41, 5, 42, 43, 63], check: false},
   {score: 100, blue: [1, 2, 3, 4, 8, 9, 10], red: [21, 0, 41, 5, 42, 43, 63], check: true},

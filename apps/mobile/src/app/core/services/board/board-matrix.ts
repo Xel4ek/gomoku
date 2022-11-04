@@ -1,6 +1,6 @@
 import { Board } from "./board";
 import { GameBoard } from "../../interfaces/gameBoard";
-import { Color } from "../../color";
+import { Color, EColor } from "../../color";
 import { Move } from "./move";
 import { IBoard } from "../../interfaces/IBoard";
 
@@ -12,12 +12,12 @@ export class BoardMatrix extends Board implements IBoard {
     super();
     if (gameBoard) {
       this.createEmptyBoard();
-      gameBoard.player.map.forEach(v => this.move(this.col(v), this.row(v), "blue"));
-      gameBoard.enemy.map.forEach(v => this.move(this.col(v), this.row(v), "red"));
+      gameBoard.player.map.forEach(v => this.move(this.col(v), this.row(v), EColor.BLUE));
+      gameBoard.enemy.map.forEach(v => this.move(this.col(v), this.row(v), EColor.RED));
     }
     if (boardMatrix instanceof BoardMatrix) {
       this.board = []
-      boardMatrix.board.forEach(v => this.board.push(Object.assign({}, v)))
+      boardMatrix.board.forEach(v => this.board.push(Object.assign([], v)))
     }
   }
 
@@ -90,12 +90,12 @@ export class BoardMatrix extends Board implements IBoard {
     return moveList;
   }
 
-  move(posX: number, posY: number, color: Color) {
-    this.board[posY][posX] = color === "red" ? 2 : 1;
+  move(posX: number, posY: number, color: EColor) {
+    this.board[posY][posX] = color;
   }
 
   unmove(posX: number, posY: number) {
-    this.board[posY][posX] = 0;
+    this.board[posY][posX] = EColor.EMPTY;
   }
 
   private createEmptyBoard() {

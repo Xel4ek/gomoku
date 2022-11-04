@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BoardMatrix } from "../board/board-matrix";
-import { Color } from "../../color";
+import { EColor } from "../../color";
 import { IBoard } from "../../interfaces/IBoard";
 
 @Injectable({
@@ -14,15 +14,15 @@ export class MatrixScoringService {
     this.evaluationCount++;
 
     // Get board score of both players.
-    let blackScore = this.getScore(board, true, bluesTurn);
-    const whiteScore = this.getScore(board, false, bluesTurn);
+    board.scoreBlue = this.getScore(board, true, bluesTurn);
+    board.scoreRed  = this.getScore(board, false, bluesTurn);
 
-    if (blackScore == 0) {
-      blackScore = 1.0;
+    if (board.scoreBlue == 0) {
+      board.scoreBlue = 1.0;
     }
 
     // Calculate relative score of white against black
-    return whiteScore / blackScore;
+    return board.scoreRed / board.scoreBlue;
   }
 
 // This function calculates the board score of the specified player.
@@ -105,7 +105,7 @@ export class MatrixScoringService {
   }
 
 
-  evaluateHorizontal(boardMatrix: BoardMatrix, forBlack: boolean, playersTurn: boolean): number {
+  evaluateHorizontal(boardMatrix: BoardMatrix, forBlues: boolean, playersTurn: boolean): number {
 
     let consecutive = 0;
     // blocks variable is used to check if a consecutive stone set is blocked by the opponent or
@@ -124,14 +124,14 @@ export class MatrixScoringService {
       // Iterate over all cells in a row
       for (let j = 0; j < boardMatrix.board[0].length; j++) {
         // Check if the selected player has a stone in the current cell
-        const __ret = this.extracted(boardMatrix, i, j, forBlack, consecutive, blocks, score, playersTurn);
+        const __ret = this.extracted(boardMatrix, i, j, forBlues, consecutive, blocks, score, playersTurn);
         consecutive = __ret.consecutive;
         blocks = __ret.blocks;
         score = __ret.score;
       }
 // End of row, check if there were any consecutive stones before we reached right border
       if (consecutive > 0) {
-        score += this.getConsecutiveSetScore(consecutive, blocks, forBlack == playersTurn);
+        score += this.getConsecutiveSetScore(consecutive, blocks, forBlues == playersTurn);
       }
 // Reset consecutive stone and blocks count
       consecutive = 0;
@@ -141,8 +141,8 @@ export class MatrixScoringService {
     return score;
   }
 
-  private extracted(boardMatrix: BoardMatrix, i: number, j: number, forBlack: boolean, consecutive: number, blocks: number, score: number, playersTurn: boolean) {
-    if (boardMatrix.board[i][j] == (forBlack ? 2 : 1)) {
+  private extracted(boardMatrix: BoardMatrix, i: number, j: number, forBlues: boolean, consecutive: number, blocks: number, score: number, playersTurn: boolean) {
+    if (boardMatrix.board[i][j] == (forBlues ? EColor.BLUE : EColor.RED)) {
       // Increment consecutive stones count
       consecutive++;
     }
@@ -153,7 +153,7 @@ export class MatrixScoringService {
         // Consecutive set is not blocked by opponent, decrement block count
         blocks--;
         // Get consecutive set score
-        score += this.getConsecutiveSetScore(consecutive, blocks, forBlack == playersTurn);
+        score += this.getConsecutiveSetScore(consecutive, blocks, forBlues == playersTurn);
         // Reset consecutive stone count
         consecutive = 0;
         // Current cell is empty, next consecutive set will have at most 1 blocked side.
@@ -168,7 +168,7 @@ export class MatrixScoringService {
 // Check if there were any consecutive stones before this empty cell
     else if (consecutive > 0) {
       // Get consecutive set score
-      score += this.getConsecutiveSetScore(consecutive, blocks, forBlack == playersTurn);
+      score += this.getConsecutiveSetScore(consecutive, blocks, forBlues == playersTurn);
       // Reset consecutive stone count
       consecutive = 0;
       // Current cell is occupied by opponent, next consecutive set may have 2 blocked sides
@@ -190,7 +190,7 @@ export class MatrixScoringService {
 
     for (let j = 0; j < boardMatrix.board[0].length; j++) {
       for (let i = 0; i < boardMatrix.board.length; i++) {
-        if (boardMatrix.board[i][j] === (forBlack ? 2 : 1)) {
+        if (boardMatrix.board[i][j] === (forBlack ? EColor.BLUE : EColor.RED)) {
           consecutive++;
         } else if (boardMatrix.board[i][j] == 0) {
           if (consecutive > 0) {
@@ -273,9 +273,9 @@ export class MatrixScoringService {
   // (i.e. how likely is white player to win the game before the black player)
   // This value will be used as the score in the Minimax algorithm.
 
-  evaluateNode(board: IBoard, turn: Color): number {
+  evaluateNode(board: IBoard, turn: EColor): number {
     if (board instanceof BoardMatrix) {
-      return this.evaluateBoardForWhite(board, turn === "blue")
+      return this.evaluateBoardForWhite(board, turn === EColor.BLUE)
     }
     throw TypeError;
   }
