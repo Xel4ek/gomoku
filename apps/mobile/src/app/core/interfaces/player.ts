@@ -1,17 +1,19 @@
-import { PlayerType } from '../services/game/game.service';
-import { GameBoard } from './gameBoard';
-
+export enum PlayerType {
+  HUMAN = 'human',
+  AI = 'ai',
+}
 export interface Player {
   type: PlayerType;
   map: number[];
   turn: number[];
   captured: number;
+  color: string;
   options: {
-    color: (opacity?: number) => string;
     deep: number;
-    nextTurn?: (
-      board: GameBoard,
-      callback: (board: number) => Promise<void>
-    ) => void;
+    // nextTurn?: (
+    //   board: GameBoard,
+    //   callback: (board: number) => Promise<void>
+    // ) => void;
+    // workerFn?: (board: GameBoard) => number;
   };
 }

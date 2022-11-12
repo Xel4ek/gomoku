@@ -1,71 +1,47 @@
-import { Injectable, NgZone, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ReplaySubject, Subject } from 'rxjs';
-import { map, takeUntil, takeWhile, tap } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs/operators';
 import { GameBoard } from '../../interfaces/gameBoard';
 import { SimpleAiService } from '../simple-ai/simple-ai.service';
-
-export enum PlayerType {
-  HUMAN = 'human',
-  AI = 'ai',
-}
 
 @Injectable({
   providedIn: 'root',
 })
 export class GameService implements OnDestroy {
   size = 19;
-  worker?: Worker;
   readonly destroy$ = new Subject<void>();
   private readonly _sequence$ = new ReplaySubject<GameBoard>(1);
 
   private _turn = 0;
-  private aiService?: SimpleAiService;
-  constructor(private readonly ngZone: NgZone) {
-    // this.aiService = new SimpleAiService(
-    //   this,
-    //   new StrategyFactoryService(),
-    //   this.ngZone
-    // );
-    // console.warn(this.aiService);
-    // this._sequence$
-    //   .pipe(
-    //     takeUntil(this.destroy$),
-    //     tap((data) => {
-    //       console.log('player has win: ', this.hasWin(data.player.map));
-    //       console.log('enemy has win: ', this.hasWin(data.enemy.map));
-    //     })
-    //   )
-    //   .subscribe();
+  private aiService: SimpleAiService;
+  constructor() {
+    this.aiService = new SimpleAiService(this);
   }
   get turn() {
     return Math.ceil(this._turn / 2);
   }
 
   sequence$() {
-    if (!this._sequence$) {
-      throw new Error('NO _sequence$');
-    }
     return this._sequence$.asObservable().pipe(
       takeUntil(this.destroy$),
       map((data) => {
         const playerWin = this.hasWin(data.player.map, data.size);
-        if (playerWin) {
+        if (playerWin || data.enemy.captured >= 5) {
           data.winner = {
-            color: data.player.options.color,
-            combination: playerWin,
+            color: () => data.player.color + '1)',
+            combination: playerWin ?? [],
           };
         }
         const enemyWin = this.hasWin(data.enemy.map, data.size);
-        if (enemyWin) {
+        if (enemyWin || data.player.captured >= 5) {
           data.winner = {
-            color: data.enemy.options.color,
-            combination: enemyWin,
+            color: () => data.enemy.color + '1)',
+            combination: enemyWin ?? [],
           };
         }
         return data;
-      }),
-      takeWhile((data) => !data.winner, true)
+      })
     );
   }
   // TODO we can simplify it
@@ -119,8 +95,8 @@ export class GameService implements OnDestroy {
         map: [],
         turn: [],
         captured: 0,
+        color: 'rgba(3,0,187,', //(alpha: number = 1) => 'rgba(3, 0,187,' + alpha + ')',
         options: {
-          color: (alpha: number = 1) => 'rgba(3, 0,187,' + alpha + ')',
           deep: settings.get('playerDeep')?.value ?? 0,
         },
       },
@@ -129,16 +105,15 @@ export class GameService implements OnDestroy {
         map: [],
         turn: [],
         captured: 0,
+        color: 'rgba(194,6,6,', //(alpha: number = 1) => 'rgba(194,6,6,' + alpha + ')',
         options: {
-          color: (alpha: number = 1) => 'rgba(194,6,6,' + alpha + ')',
           deep: settings.get('enemyDeep')?.value ?? 0,
         },
       },
       size: settings.get('size')?.value ?? 19,
       blocked: [],
     });
-    this.aiService?.destroy();
-    this.aiService = new SimpleAiService(this, this.ngZone);
+    // this.aiService?.destroy();
   }
 
   startGame() {
@@ -172,5 +147,6 @@ export class GameService implements OnDestroy {
     this._sequence$?.complete();
     this.destroy$.next();
     this.destroy$.complete();
+    this.aiService.destroy();
   }
 }

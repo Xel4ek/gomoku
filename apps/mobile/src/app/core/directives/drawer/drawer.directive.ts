@@ -2,8 +2,8 @@ import { AfterViewInit, Directive, ElementRef, OnDestroy } from '@angular/core';
 import { CanvasSpace, Create, Group, Line, Pt, Rectangle } from 'pts';
 import { Subject } from 'rxjs';
 import { takeUntil, tap } from 'rxjs/operators';
-import { GameService, PlayerType } from '../../services/game/game.service';
-import { Player } from '../../interfaces/player';
+import { GameService } from '../../services/game/game.service';
+import { Player, PlayerType } from '../../interfaces/player';
 import { GameBoard } from '../../interfaces/gameBoard';
 
 @Directive({
@@ -82,20 +82,20 @@ export class DrawerDirective implements AfterViewInit, OnDestroy {
         ) {
           form
             .dash()
-            .strokeOnly(current.options.color(), 2)
+            .strokeOnly(current.color + '1)', 2)
             .point(this.pts[0], radius, 'circle');
           form
-            .fillOnly(current.options.color(0.3))
+            .fillOnly(current.color + '0.3)')
             .point(this.pts.p1, radius, 'circle');
         }
-        form.fillOnly(this.board.player.options.color()).points(
+        form.fillOnly(this.board.player.color + '1)').points(
           this.board.player.map.map(
             (id) => this.pts.find((e) => e.id === id.toString()) ?? this.pts.p1
           ),
           radius * 1.1,
           'circle'
         );
-        form.fill(this.board.enemy.options.color()).points(
+        form.fillOnly(this.board.enemy.color + '1)').points(
           this.board.enemy.map.map(
             (id) => this.pts.find((e) => e.id === id.toString()) ?? this.pts.p1
           ),

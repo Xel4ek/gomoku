@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { GameService, PlayerType } from '../../services/game/game.service';
+import { GameService } from '../../services/game/game.service';
 import { Router } from '@angular/router';
+import { PlayerType } from '../../interfaces/player';
 
 class Player {
   constructor(readonly type: PlayerType, readonly title: string) {}
@@ -17,7 +18,7 @@ export class SettingsComponent {
   playerType = PlayerType;
   players = [
     new Player(PlayerType.AI, 'Ai'),
-    new Player(PlayerType.HUMAN, 'Human'),
+    new Player(PlayerType.AI, 'Low Ai'),
   ];
   deep = [1, 3, 5, 7, 9, 11];
 
@@ -28,7 +29,7 @@ export class SettingsComponent {
   ) {
     this.settingsForm = formBuilder.group({
       player: [this.players[1]],
-      playerDeep: [this.deep[1]],
+      playerDeep: [this.deep[0]],
       enemy: [this.players[0]],
       enemyDeep: [this.deep[1]],
       size: [19],
