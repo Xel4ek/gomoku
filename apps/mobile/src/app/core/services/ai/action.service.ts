@@ -1,23 +1,21 @@
 import { Injectable } from '@angular/core';
-import { ComboNames } from "../board/combination";
-import { Action } from "./action";
-import { DirectionNew } from "../board/bit-board";
-import { BoardBits } from "../board/boardBits";
-import { BoardPrinterService } from "../board/board-printer.service";
-import { PatternService } from "../board/pattern.service";
-import { Pattern } from "../board/pattern";
+import { ComboNames } from '../board/combination';
+import { Action } from './action';
+import { DirectionNew } from '../board/bit-board';
+import { BoardBits } from '../board/boardBits';
+import { BoardPrinterService } from '../board/board-printer.service';
+import { PatternService } from '../board/pattern.service';
+import { Pattern } from '../board/pattern';
 
 export enum Side {
   PLAYER,
-  ENEMY
+  ENEMY,
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
-
 export class ActionService {
-
   size = 32n;
 
   //TODO: make function shift with param (border.size)
@@ -32,23 +30,21 @@ export class ActionService {
     W: -1n,
   };
 
-  constructor(private readonly patternService: PatternService, private readonly boardPrinterService: BoardPrinterService) {
-  }
-
   generateActions(board: BoardBits, dilation: number = 1): Action[] {
     const actions: Action[] = [];
     const occupied = board.red | board.blue;
     let moves = occupied;
     for (let i = dilation; i > 0; i--) {
-      moves = moves
-        | (moves >> this.shift.S)
-        | (moves >> this.shift.N)
-        | (moves >> this.shift.E)
-        | (moves >> this.shift.NE)
-        | (moves >> this.shift.SE)
-        | (moves >> this.shift.NW)
-        | (moves >> this.shift.SW)
-        | (moves >> this.shift.W);
+      moves =
+        moves |
+        (moves >> this.shift.S) |
+        (moves >> this.shift.N) |
+        (moves >> this.shift.E) |
+        (moves >> this.shift.NE) |
+        (moves >> this.shift.SE) |
+        (moves >> this.shift.NW) |
+        (moves >> this.shift.SW) |
+        (moves >> this.shift.W);
     }
     moves = (moves | board.border) ^ board.border;
     let i = 0;
@@ -92,9 +88,10 @@ export class ActionService {
       // score += 100000;
       score += 15000;
     }
-    if (count[ComboNames.OPENTHREE] > 1
-      || count[ComboNames.CLOSEDFOUR] > 1
-      || (count[ComboNames.CLOSEDFOUR] > 0 && count[ComboNames.OPENTHREE] > 1)
+    if (
+      count[ComboNames.OPENTHREE] > 1 ||
+      count[ComboNames.CLOSEDFOUR] > 1 ||
+      (count[ComboNames.CLOSEDFOUR] > 0 && count[ComboNames.OPENTHREE] > 1)
     ) {
       // score += 100000;
       score += 10000;
@@ -111,16 +108,17 @@ export class ActionService {
 
   checkWin(board: BoardBits, side: 'red' | 'blue') {
     const len: number[] = [];
-    [DirectionNew.E, DirectionNew.S, DirectionNew.SE, DirectionNew.SW].forEach((value) => {
-      let length = 0;
-      let bits = board[side];
-      while (bits) {
-        bits &= bits >> this.shift[value];
-        length++;
+    [DirectionNew.E, DirectionNew.S, DirectionNew.SE, DirectionNew.SW].forEach(
+      (value) => {
+        let length = 0;
+        let bits = board[side];
+        while (bits) {
+          bits &= bits >> this.shift[value];
+          length++;
+        }
+        len.push(length);
       }
-      len.push(length);
-    });
+    );
     return Math.max(...len) >= 5;
   }
-
 }

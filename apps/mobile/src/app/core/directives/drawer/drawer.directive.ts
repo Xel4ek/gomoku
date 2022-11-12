@@ -1,11 +1,10 @@
 import { AfterViewInit, Directive, ElementRef, OnDestroy } from '@angular/core';
 import { CanvasSpace, Create, Group, Line, Pt, Rectangle } from 'pts';
 import { Subject } from 'rxjs';
-import { LocalStorageService } from '../../services/local-storage/local-storage.service';
 import { takeUntil, tap } from 'rxjs/operators';
 import { GameService, PlayerType } from '../../services/game/game.service';
 import { Player } from '../../interfaces/player';
-import { GameBoard } from "../../interfaces/gameBoard";
+import { GameBoard } from '../../interfaces/gameBoard';
 
 @Directive({
   selector: '[gomokuDrawer]',
@@ -18,7 +17,7 @@ export class DrawerDirective implements AfterViewInit, OnDestroy {
 
   constructor(
     private readonly elementRef: ElementRef<HTMLCanvasElement>,
-    private readonly localStorageService: LocalStorageService,
+    // private readonly localStorageService: LocalStorageService,
     private readonly gameService: GameService
   ) {
     this.space = new CanvasSpace(this.elementRef.nativeElement);

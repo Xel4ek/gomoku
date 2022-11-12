@@ -4,7 +4,7 @@ import { filter, tap } from 'rxjs/operators';
 import { ActionService } from './action.service';
 import { StrategyFactoryService } from './strategy-factory.service';
 import { IAi } from '../../interfaces/ai';
-import { GameBoard } from "../../interfaces/gameBoard";
+import { GameBoard } from '../../interfaces/gameBoard';
 
 //TODO: Check score calculation (may be wrong shift to N, NW, NE)
 //TODO: place AI to worker
@@ -15,7 +15,6 @@ import { GameBoard } from "../../interfaces/gameBoard";
   providedIn: 'root',
 })
 // TODO: move this services to worker
-
 export class AiService implements IAi {
   depth = 3;
   //TODO: add time limit
@@ -24,27 +23,33 @@ export class AiService implements IAi {
 
   constructor(
     private readonly gameService: GameService,
-    private readonly actionService: ActionService,
-    private readonly strategyFactoryService: StrategyFactoryService,
-    private readonly ngZone: NgZone,
+    private readonly strategyFactoryService: StrategyFactoryService
   ) {
-    const worker = new Worker('');
-    const subscriber = gameService.sequence$()
+    // const worker = new Worker();
+    const subscriber = gameService
+      .sequence$()
       .pipe(
-        filter(data => data.id % 2 ? data.enemy.type === PlayerType.AI : data.player.type === PlayerType.AI),
-        tap(data => {
-          //console.debug('From sequence ', data);
+        filter((data) =>
+          data.id % 2
+            ? data.enemy.type === PlayerType.AI
+            : data.player.type === PlayerType.AI
+        ),
+        tap((data) => {
           const onmessage = (turn: number) => {
-            //console.debug('AI moved ', turn);
             const turnsMap = data.id % 2 ? data.enemy.map : data.player.map;
             turnsMap.push(turn);
             this.gameService.makeTurn(data);
-            // worker.onmessage = tu;
           };
-          this.getNextAction({ ...data }, onmessage);
-          // this.getNextAction(this.boardService.createFromGameBoard({ ...data }), onmessage);
-          // this.mockAction('', onmessage);
-        }))
+          if (!(data.id % 2)) {
+            this.getNextAction(
+              { ...data, enemy: data.player, player: data.enemy },
+              onmessage
+            );
+          } else {
+            this.getNextAction({ ...data }, onmessage);
+          }
+        })
+      )
       .subscribe();
     // TODO: Subscribe to messages
   }
@@ -54,8 +59,6 @@ export class AiService implements IAi {
   // }
 
   getNextAction(board: GameBoard, callback: (turn: number) => void): void {
-    this.ngZone.runOutsideAngular(() => {
-      callback(this.strategyFactoryService.get("").getNextTurn(board));
-    })
+    callback(this.strategyFactoryService.get(3).getNextTurn(board));
   }
 }

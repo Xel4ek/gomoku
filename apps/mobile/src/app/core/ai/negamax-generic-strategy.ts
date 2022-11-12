@@ -1,20 +1,28 @@
-import { Strategy } from './strategy';
-import { GameBoard } from '../../interfaces/gameBoard';
-import { TypedTree } from '../../tools/typed-tree';
-import { IBoard } from '../../interfaces/IBoard';
-import { Injectable } from '@angular/core';
-import { BoardMatrix } from '../board/board-matrix';
-import { MatrixScoringService } from '../matrix-service/matrix-scoring.service';
-import { EColor } from '../../color';
+import { IBoard } from '../interfaces/IBoard';
+import { Strategy } from '../services/ai/strategy';
+import { TypedTree } from '../tools/typed-tree';
+import { EColor } from '../color';
+import { BoardMatrix } from '../services/board/board-matrix';
+import { GameBoard } from '../interfaces/gameBoard';
+import { MatrixScoring } from './matrix-scoring-service';
 
-@Injectable({
-  providedIn: 'root',
-})
-class NegamaxGenericStrategy<T extends IBoard> implements Strategy {
-  depth = 3;
+export class NegamaxGenericStrategy<T extends IBoard> implements Strategy {
+  private static instance: Record<number, NegamaxGenericStrategy<any>> = {};
 
-  constructor(private readonly scoringService: MatrixScoringService) {}
+  private readonly scoringService = new MatrixScoring();
+  depth: number;
+  private constructor(depth: number) {
+    this.depth = depth;
+  }
+  static getStrategy<K extends IBoard>(depth: number) {
+    if (!NegamaxGenericStrategy.instance[depth]) {
+      NegamaxGenericStrategy.instance[depth] = new NegamaxGenericStrategy<K>(
+        depth
+      );
+    }
 
+    return NegamaxGenericStrategy.instance[depth] as NegamaxGenericStrategy<K>;
+  }
   negamax(
     node: TypedTree<IBoard>,
     depth: number,

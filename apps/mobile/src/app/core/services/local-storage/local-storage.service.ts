@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
-import { AiService} from '../ai/ai.service';
+import { AiService } from '../ai/ai.service';
 import { BitBoard } from '../board/bit-board';
 import { Combination } from '../board/combination';
-import { GameBoard } from "../../interfaces/gameBoard";
+import { GameBoard } from '../../interfaces/gameBoard';
 
 @Injectable({
   providedIn: 'root',
@@ -12,7 +12,7 @@ export class LocalStorageService {
   // subject = new Subject<GameBoard>();
   boards: BitBoard[] = [];
 
-  constructor(private aiService: AiService) {
+  constructor() {
     // this.subject.subscribe((gameBoard) => this.onEvent(gameBoard));
   }
 

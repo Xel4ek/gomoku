@@ -2,22 +2,22 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ReplaySubject, Subject } from 'rxjs';
 import { map, takeUntil, tap } from 'rxjs/operators';
-import { GameBoard } from "../../interfaces/gameBoard";
+import { GameBoard } from '../../interfaces/gameBoard';
 
 export enum PlayerType {
   HUMAN,
   AI,
 }
 
-export class Player {
-  type: PlayerType;
-  workerOrService: any;
-
-  constructor(type: PlayerType, workerOrService: any) {
-    this.type = type;
-    this.workerOrService = workerOrService;
-  }
-}
+// export class Player {
+//   type: PlayerType;
+//   workerOrService: any;
+//
+//   constructor(type: PlayerType, workerOrService: any) {
+//     this.type = type;
+//     this.workerOrService = workerOrService;
+//   }
+// }
 @Injectable({
   providedIn: 'root',
 })
@@ -25,7 +25,7 @@ export class GameService implements OnDestroy {
   size = 19;
   worker?: Worker;
   private readonly destroy$ = new Subject<void>();
-  private _sequence$ = new ReplaySubject<GameBoard>();
+  private _sequence$ = new ReplaySubject<GameBoard>(1);
 
   private _turn = 0;
   constructor() {

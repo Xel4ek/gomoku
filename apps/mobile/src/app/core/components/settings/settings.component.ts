@@ -19,7 +19,7 @@ export class SettingsComponent {
     new Player(PlayerType.AI, 'Ai'),
     new Player(PlayerType.HUMAN, 'Human'),
   ];
-  deep = [0, 1, 2, 3];
+  deep = [1, 3, 5, 7, 9, 11];
 
   constructor(
     private readonly formBuilder: FormBuilder,

@@ -1,12 +1,8 @@
-import { Injectable } from '@angular/core';
-import { BoardMatrix } from '../board/board-matrix';
-import { EColor } from '../../color';
-import { IBoard } from '../../interfaces/IBoard';
+import { BoardMatrix } from '../services/board/board-matrix';
+import { EColor } from '../color';
+import { IBoard } from '../interfaces/IBoard';
 
-@Injectable({
-  providedIn: 'root',
-})
-export class MatrixScoringService {
+export class MatrixScoring {
   evaluationCount = 0;
   private winScore = 1000000;
 

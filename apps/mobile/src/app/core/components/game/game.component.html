@@ -2,10 +2,10 @@
   <div class="info">
     <div
       class="name"
-      [ngStyle]="{
+      [style]="{
         color: players[0].color
       }"
-      [ngClass]="{ active: !players[0].turn }"
+      [class]="{ active: !players[0].turn }"
     >
       {{ players[0].name | titlecase }}
     </div>
@@ -15,10 +15,10 @@
   <div class="info">
     <div
       class="name"
-      [ngStyle]="{
+      [style]="{
         color: players[1].color
       }"
-      [ngClass]="{ active: players[0].turn }"
+      [class]="{ active: players[0].turn }"
     >
       {{ players[1].name | titlecase }}
     </div>
@@ -26,7 +26,7 @@
   </div>
   <div class="game-message" *ngIf="players[2]">
     <div>
-      Congratulation <span [ngStyle]="{ color: players[2] }">champion</span>!
+      Congratulation <span [style]="{ color: players[2] }">champion</span>!
     </div>
     <div>
       <a

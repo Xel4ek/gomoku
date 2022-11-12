@@ -21,8 +21,8 @@ import { AboutModule } from './core/components/about/about.module';
 import { AiService } from './core/services/ai/ai.service';
 import { MatrixAIService } from './core/services/matrix-ai/matrix-ai.service';
 import { SimpleAiService } from './core/services/simple-ai/simple-ai.service';
-import { ScoringService } from "./core/services/ai/scoring.service";
-import { SimpleScoringService } from "./core/services/simple-scoring/simple-scoring.service";
+import { ScoringService } from './core/services/ai/scoring.service';
+import { SimpleScoringService } from './core/services/simple-scoring/simple-scoring.service';
 
 @NgModule({
   declarations: [AppComponent],
@@ -58,6 +58,4 @@ import { SimpleScoringService } from "./core/services/simple-scoring/simple-scor
   ],
   bootstrap: [AppComponent],
 })
-export class AppModule {
-  constructor() {}
-}
+export class AppModule {}

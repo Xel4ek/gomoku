@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { GameService, PlayerType } from '../../services/game/game.service';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'gomoku-game',
@@ -27,7 +27,7 @@ export class GameComponent {
             name: PlayerType[data.player.type],
             color: data.player.options.color(),
             captured: data.player.captured,
-            turn: Boolean(data.id % 2),
+            turn: !!(data.id % 2),
           },
           {
             name: PlayerType[data.enemy.type],

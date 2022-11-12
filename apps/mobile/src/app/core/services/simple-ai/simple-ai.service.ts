@@ -4,7 +4,7 @@ import { GameService, PlayerType } from '../game/game.service';
 import { ActionService } from '../ai/action.service';
 import { StrategyFactoryService } from '../ai/strategy-factory.service';
 import { filter, tap } from 'rxjs/operators';
-import { GameBoard } from "../../interfaces/gameBoard";
+import { GameBoard } from '../../interfaces/gameBoard';
 
 @Injectable({
   providedIn: 'root',
@@ -21,7 +21,7 @@ export class SimpleAiService implements IAi {
     private readonly strategyFactoryService: StrategyFactoryService,
     private readonly ngZone: NgZone
   ) {
-    const worker = new Worker('');
+    // const worker = new Worker('');
     const subscriber = gameService
       .sequence$()
       .pipe(
@@ -31,7 +31,7 @@ export class SimpleAiService implements IAi {
             : data.player.type === PlayerType.AI
         ),
         tap((data) => {
-          //console.debug('From sequence ', data);
+          console.warn('From sequence ', data);
           const onmessage = (turn: number) => {
             //console.debug('AI moved ', turn);
             const turnsMap = data.id % 2 ? data.enemy.map : data.player.map;
@@ -54,7 +54,7 @@ export class SimpleAiService implements IAi {
 
   getNextAction(board: GameBoard, callback: (turn: number) => void): void {
     this.ngZone.runOutsideAngular(() => {
-      callback(this.strategyFactoryService.get('').getNextTurn(board));
+      callback(this.strategyFactoryService.get(3).getNextTurn(board));
     });
   }
 }
