@@ -1,15 +1,13 @@
 import { Injectable } from '@angular/core';
-import {NegamaxStrategy} from "./negamax-strategy";
-import { NegamaxGenericStrategy } from "./negamax-generic-strategy";
+// import { NegamaxGenericStrategy } from './negamax-generic-strategy';
+import { IBoard } from '../../interfaces/IBoard';
+import { NegamaxGenericStrategy } from '../../ai/negamax-generic-strategy';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class StrategyFactoryService {
-
-  constructor(private readonly negamaxStrategy: NegamaxGenericStrategy<any>) { }
-
-  get(name: string) {
-    return this.negamaxStrategy;
+  get(depth: number) {
+    return NegamaxGenericStrategy.getStrategy<IBoard>(depth);
   }
 }
