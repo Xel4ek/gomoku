@@ -1,8 +1,10 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, NgZone, OnDestroy } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ReplaySubject, Subject } from 'rxjs';
-import { map, takeUntil, tap } from 'rxjs/operators';
+import { map, takeUntil, takeWhile, tap } from 'rxjs/operators';
 import { GameBoard } from '../../interfaces/gameBoard';
+import { SimpleAiService } from '../simple-ai/simple-ai.service';
+import { StrategyFactoryService } from '../ai/strategy-factory.service';
 
 export enum PlayerType {
   HUMAN,
@@ -24,27 +26,38 @@ export enum PlayerType {
 export class GameService implements OnDestroy {
   size = 19;
   worker?: Worker;
-  private readonly destroy$ = new Subject<void>();
-  private _sequence$ = new ReplaySubject<GameBoard>(1);
+  readonly destroy$ = new Subject<void>();
+  private readonly _sequence$ = new ReplaySubject<GameBoard>(1);
 
   private _turn = 0;
-  constructor() {
-    this._sequence$
-      .pipe(
-        takeUntil(this.destroy$),
-        tap((data) => {
-          console.log('player has win: ', this.hasWin(data.player.map));
-          console.log('enemy has win: ', this.hasWin(data.enemy.map));
-        })
-      )
-      .subscribe();
+  private aiService?: SimpleAiService;
+  constructor(private readonly ngZone: NgZone) {
+    // this.aiService = new SimpleAiService(
+    //   this,
+    //   new StrategyFactoryService(),
+    //   this.ngZone
+    // );
+    // console.warn(this.aiService);
+    // this._sequence$
+    //   .pipe(
+    //     takeUntil(this.destroy$),
+    //     tap((data) => {
+    //       console.log('player has win: ', this.hasWin(data.player.map));
+    //       console.log('enemy has win: ', this.hasWin(data.enemy.map));
+    //     })
+    //   )
+    //   .subscribe();
   }
   get turn() {
     return Math.ceil(this._turn / 2);
   }
 
   sequence$() {
+    if (!this._sequence$) {
+      throw new Error('NO _sequence$');
+    }
     return this._sequence$.asObservable().pipe(
+      takeUntil(this.destroy$),
       map((data) => {
         const playerWin = this.hasWin(data.player.map, data.size);
         if (playerWin) {
@@ -61,7 +74,8 @@ export class GameService implements OnDestroy {
           };
         }
         return data;
-      })
+      }),
+      takeWhile((data) => !data.winner, true)
     );
   }
   // TODO we can simplify it
@@ -136,6 +150,12 @@ export class GameService implements OnDestroy {
       size: settings.get('size')?.value ?? 19,
       blocked: [],
     });
+    this.aiService?.destroy();
+    this.aiService = new SimpleAiService(
+      this,
+      new StrategyFactoryService(),
+      this.ngZone
+    );
   }
 
   startGame() {
@@ -160,13 +180,13 @@ export class GameService implements OnDestroy {
       );
       board[key].captured += toRemove.length / 2;
     }
-    console.log(toRemove);
+    // console.log(toRemove);
 
     this._sequence$.next(board);
   }
 
   ngOnDestroy(): void {
-    this._sequence$.complete();
+    this._sequence$?.complete();
     this.destroy$.next();
     this.destroy$.complete();
   }

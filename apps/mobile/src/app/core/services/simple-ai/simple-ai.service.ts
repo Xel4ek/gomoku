@@ -1,60 +1,94 @@
-import { Injectable, NgZone } from '@angular/core';
+import { NgZone } from '@angular/core';
 import { IAi } from '../../interfaces/ai';
 import { GameService, PlayerType } from '../game/game.service';
-import { ActionService } from '../ai/action.service';
 import { StrategyFactoryService } from '../ai/strategy-factory.service';
-import { filter, tap } from 'rxjs/operators';
+import { filter, map, takeUntil, takeWhile } from 'rxjs/operators';
 import { GameBoard } from '../../interfaces/gameBoard';
+import { Subject } from 'rxjs';
 
-@Injectable({
-  providedIn: 'root',
-})
 export class SimpleAiService implements IAi {
-  depth = 3;
-  //TODO: add time limit
-  timeLimit = 500; //milliseconds
-  winCount = 5;
+  private readonly destroy$ = new Subject<void>();
 
   constructor(
     private readonly gameService: GameService,
-    private readonly actionService: ActionService,
+    // private readonly actionService: ActionService,
     private readonly strategyFactoryService: StrategyFactoryService,
     private readonly ngZone: NgZone
   ) {
     // const worker = new Worker('');
-    const subscriber = gameService
+    gameService
       .sequence$()
       .pipe(
+        takeUntil(this.destroy$),
+        takeWhile((data) => !data.winner),
         filter((data) =>
           data.id % 2
             ? data.enemy.type === PlayerType.AI
             : data.player.type === PlayerType.AI
         ),
-        tap((data) => {
-          console.warn('From sequence ', data);
-          const onmessage = (turn: number) => {
-            //console.debug('AI moved ', turn);
-            const turnsMap = data.id % 2 ? data.enemy.map : data.player.map;
-            turnsMap.push(turn);
-            this.gameService.makeTurn(data);
-            // worker.onmessage = tu;
+        map((data) => {
+          if (
+            !data.player.options.nextTurn &&
+            data.player.type === PlayerType.AI
+          ) {
+            data.player.options.nextTurn = async (board, callback) => {
+              const strategy = this.strategyFactoryService.get(
+                data.player.options.deep
+              );
+              callback(
+                strategy.getNextTurn({
+                  ...board,
+                  player: board.enemy,
+                  enemy: board.player,
+                })
+              );
+            };
+          }
+          if (
+            !data.enemy.options.nextTurn &&
+            data.enemy.type === PlayerType.AI
+          ) {
+            data.enemy.options.nextTurn = async (board, callback) => {
+              const strategy = this.strategyFactoryService.get(
+                data.enemy.options.deep
+              );
+              callback(strategy.getNextTurn(board));
+            };
+          }
+          return data;
+        }),
+        map((data) => {
+          const onmessage = async (turn: number) => {
+            setTimeout(() => {
+              const turnsMap = data.id % 2 ? data.enemy.map : data.player.map;
+              turnsMap.push(turn);
+              this.gameService.makeTurn(data);
+            }, 0);
           };
-          this.getNextAction({ ...data }, onmessage);
-          // this.getNextAction(this.boardService.createFromGameBoard({ ...data }), onmessage);
-          // this.mockAction('', onmessage);
+          if (data.id % 2 && data.enemy.type === PlayerType.AI) {
+            this.ngZone.runOutsideAngular(() => {
+              data.enemy.options.nextTurn?.(data, onmessage);
+            });
+          }
+          if (!(data.id % 2) && data.player.type === PlayerType.AI) {
+            this.ngZone.runOutsideAngular(() => {
+              data.player.options.nextTurn?.(data, onmessage);
+            });
+          }
         })
       )
       .subscribe();
     // TODO: Subscribe to messages
   }
 
-  // mockAction(dummy: string, callback: (turn: number) => void) {
-  //   callback(Math.trunc(Math.random() * 19 * 19));
-  // }
-
   getNextAction(board: GameBoard, callback: (turn: number) => void): void {
     this.ngZone.runOutsideAngular(() => {
       callback(this.strategyFactoryService.get(3).getNextTurn(board));
     });
+  }
+
+  destroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

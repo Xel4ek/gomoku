@@ -24,11 +24,20 @@
     transform: scale(1.1);
   }
 
-  .playing-field {
-    aspect-ratio: 1 / 1;
-    touch-action: none;
-    user-select: none;
-    -webkit-user-drag: none;
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  .middle-section {
+    position: relative;
+    .info {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translate(-50%, -2rem);
+    }
+    .playing-field {
+      aspect-ratio: 1 / 1;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-drag: none;
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    }
   }
 }

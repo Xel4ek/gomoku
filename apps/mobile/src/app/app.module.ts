@@ -48,10 +48,6 @@ import { SimpleScoringService } from './core/services/simple-scoring/simple-scor
       useClass: HashLocationStrategy,
     },
     {
-      provide: AiService,
-      useClass: SimpleAiService,
-    },
-    {
       provide: ScoringService,
       useClass: SimpleScoringService,
     },

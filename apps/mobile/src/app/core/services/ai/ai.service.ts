@@ -11,9 +11,9 @@ import { GameBoard } from '../../interfaces/gameBoard';
 //TODO: remove forbidden moves
 //TODO: add scoring of capture moves, or may be not (static eval will be enough)
 
-@Injectable({
-  providedIn: 'root',
-})
+// @Injectable({
+//   providedIn: 'root',
+// })
 // TODO: move this services to worker
 export class AiService implements IAi {
   depth = 3;
@@ -35,19 +35,47 @@ export class AiService implements IAi {
             : data.player.type === PlayerType.AI
         ),
         tap((data) => {
-          const onmessage = (turn: number) => {
+          const onmessage = async (turn: number) => {
             const turnsMap = data.id % 2 ? data.enemy.map : data.player.map;
             turnsMap.push(turn);
+            console.warn('------------------------>', turn);
             this.gameService.makeTurn(data);
           };
-          if (!(data.id % 2)) {
-            this.getNextAction(
-              { ...data, enemy: data.player, player: data.enemy },
-              onmessage
-            );
-          } else {
-            this.getNextAction({ ...data }, onmessage);
+          if (!data.player.options.nextTurn) {
+            data.player.options.nextTurn = (board, callback) => {
+              const strategy = this.strategyFactoryService.get(
+                data.player.options.deep
+              );
+              callback(
+                strategy.getNextTurn({
+                  ...board,
+                  player: board.enemy,
+                  enemy: board.player,
+                })
+              );
+            };
           }
+          if (!data.enemy.options.nextTurn) {
+            data.enemy.options.nextTurn = (board, callback) => {
+              const strategy = this.strategyFactoryService.get(
+                data.enemy.options.deep
+              );
+              callback(strategy.getNextTurn(board));
+            };
+          }
+          if (data.id % 2) {
+            data.player.options.nextTurn(data, onmessage);
+          } else {
+            data.enemy.options.nextTurn(data, onmessage);
+          }
+          // if (!(data.id % 2)) {
+          //   this.getNextAction(
+          //     { ...data, enemy: { ...data.player }, player: { ...data.enemy } },
+          //     onmessage
+          //   );
+          // } else {
+          //   this.getNextAction({ ...data }, onmessage);
+          // }
         })
       )
       .subscribe();

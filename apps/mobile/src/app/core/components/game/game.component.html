@@ -11,7 +11,10 @@
     </div>
     <div *ngIf="players[0].captured">Captured: {{ players[0].captured }}</div>
   </div>
-  <canvas gomokuDrawer class="playing-field"></canvas>
+  <div class="middle-section">
+    <canvas gomokuDrawer class="playing-field"></canvas>
+    <div class="info">{{ players[3] }}</div>
+  </div>
   <div class="info">
     <div
       class="name"
@@ -33,7 +36,7 @@
         tuiButton
         type="button"
         class="tui-space_right-3 tui-space_bottom-3"
-        [routerLink]="['/settings']"
+        [routerLink]="['/welcome']"
       >
         Play again
       </a>

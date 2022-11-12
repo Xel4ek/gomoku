@@ -1,4 +1,5 @@
 import { PlayerType } from '../services/game/game.service';
+import { GameBoard } from './gameBoard';
 
 export interface Player {
   type: PlayerType;
@@ -8,5 +9,9 @@ export interface Player {
   options: {
     color: (opacity?: number) => string;
     deep: number;
+    nextTurn?: (
+      board: GameBoard,
+      callback: (board: number) => Promise<void>
+    ) => void;
   };
 }

@@ -1,25 +1,28 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { GameService, PlayerType } from '../../services/game/game.service';
 import { Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'gomoku-game',
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class GameComponent {
+export class GameComponent implements OnDestroy {
   player?: string;
   enemy?: string;
   players$: Observable<
     [
       { name: string; color: string; turn: boolean; captured: number },
       { name: string; color: string; captured: number },
-      string | undefined
+      string | undefined,
+      number
     ]
   >;
 
   constructor(private readonly gameService: GameService) {
+    console.warn('CREATED');
     this.players$ = this.gameService.sequence$().pipe(
       map((data) => {
         return [
@@ -35,8 +38,11 @@ export class GameComponent {
             captured: data.enemy.captured,
           },
           data.winner ? data.winner.color() : undefined,
+          data.id,
         ];
       })
     );
   }
+
+  ngOnDestroy(): void {}
 }
