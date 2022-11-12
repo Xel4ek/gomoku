@@ -22,18 +22,17 @@ export class GameComponent implements OnDestroy {
   >;
 
   constructor(private readonly gameService: GameService) {
-    console.warn('CREATED');
     this.players$ = this.gameService.sequence$().pipe(
       map((data) => {
         return [
           {
-            name: PlayerType[data.player.type],
+            name: data.player.type,
             color: data.player.options.color(),
             captured: data.player.captured,
             turn: !!(data.id % 2),
           },
           {
-            name: PlayerType[data.enemy.type],
+            name: data.enemy.type,
             color: data.enemy.options.color(),
             captured: data.enemy.captured,
           },

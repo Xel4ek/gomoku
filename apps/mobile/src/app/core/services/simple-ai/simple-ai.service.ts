@@ -1,18 +1,17 @@
 import { NgZone } from '@angular/core';
-import { IAi } from '../../interfaces/ai';
 import { GameService, PlayerType } from '../game/game.service';
-import { StrategyFactoryService } from '../ai/strategy-factory.service';
 import { filter, map, takeUntil, takeWhile } from 'rxjs/operators';
-import { GameBoard } from '../../interfaces/gameBoard';
 import { Subject } from 'rxjs';
+import { NegamaxGenericStrategy } from '../../ai/negamax-generic-strategy';
+import { IBoard } from '../../interfaces/IBoard';
 
-export class SimpleAiService implements IAi {
+export class SimpleAiService {
   private readonly destroy$ = new Subject<void>();
 
   constructor(
     private readonly gameService: GameService,
     // private readonly actionService: ActionService,
-    private readonly strategyFactoryService: StrategyFactoryService,
+
     private readonly ngZone: NgZone
   ) {
     // const worker = new Worker('');
@@ -32,7 +31,7 @@ export class SimpleAiService implements IAi {
             data.player.type === PlayerType.AI
           ) {
             data.player.options.nextTurn = async (board, callback) => {
-              const strategy = this.strategyFactoryService.get(
+              const strategy = NegamaxGenericStrategy.getStrategy<IBoard>(
                 data.player.options.deep
               );
               callback(
@@ -49,7 +48,7 @@ export class SimpleAiService implements IAi {
             data.enemy.type === PlayerType.AI
           ) {
             data.enemy.options.nextTurn = async (board, callback) => {
-              const strategy = this.strategyFactoryService.get(
+              const strategy = NegamaxGenericStrategy.getStrategy<IBoard>(
                 data.enemy.options.deep
               );
               callback(strategy.getNextTurn(board));
@@ -79,12 +78,6 @@ export class SimpleAiService implements IAi {
       )
       .subscribe();
     // TODO: Subscribe to messages
-  }
-
-  getNextAction(board: GameBoard, callback: (turn: number) => void): void {
-    this.ngZone.runOutsideAngular(() => {
-      callback(this.strategyFactoryService.get(3).getNextTurn(board));
-    });
   }
 
   destroy() {

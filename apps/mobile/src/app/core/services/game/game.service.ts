@@ -4,22 +4,12 @@ import { ReplaySubject, Subject } from 'rxjs';
 import { map, takeUntil, takeWhile, tap } from 'rxjs/operators';
 import { GameBoard } from '../../interfaces/gameBoard';
 import { SimpleAiService } from '../simple-ai/simple-ai.service';
-import { StrategyFactoryService } from '../ai/strategy-factory.service';
 
 export enum PlayerType {
-  HUMAN,
-  AI,
+  HUMAN = 'human',
+  AI = 'ai',
 }
 
-// export class Player {
-//   type: PlayerType;
-//   workerOrService: any;
-//
-//   constructor(type: PlayerType, workerOrService: any) {
-//     this.type = type;
-//     this.workerOrService = workerOrService;
-//   }
-// }
 @Injectable({
   providedIn: 'root',
 })
@@ -119,9 +109,6 @@ export class GameService implements OnDestroy {
 
     return toRemove;
   }
-  private findFreeThrees(gameBoard: GameBoard): GameBoard {
-    return gameBoard;
-  }
   initGame(settings: FormGroup) {
     this.size = settings.get('size')?.value ?? 19;
     this._sequence$.next({
@@ -151,11 +138,7 @@ export class GameService implements OnDestroy {
       blocked: [],
     });
     this.aiService?.destroy();
-    this.aiService = new SimpleAiService(
-      this,
-      new StrategyFactoryService(),
-      this.ngZone
-    );
+    this.aiService = new SimpleAiService(this, this.ngZone);
   }
 
   startGame() {
