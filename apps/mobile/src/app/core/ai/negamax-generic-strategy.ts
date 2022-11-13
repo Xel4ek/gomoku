@@ -11,6 +11,9 @@ export class NegamaxGenericStrategy<T extends IBoard> implements Strategy {
   count = 0;
   private readonly scoringService = new MatrixScoring();
   depth: number;
+  private config = {
+    findCaptures: true,
+  };
   private constructor(depth: number) {
     this.depth = depth;
   }
@@ -54,10 +57,11 @@ export class NegamaxGenericStrategy<T extends IBoard> implements Strategy {
     for (const i in moves) {
       ++this.count;
       const tempBoard = new BoardMatrix(undefined, node.value);
-      tempBoard.move(
+      tempBoard.aiMove(
         moves[i].col,
         moves[i].row,
-        color === 1 ? EColor.RED : EColor.BLUE
+        color === 1 ? EColor.RED : EColor.BLUE,
+        this.config.findCaptures,
       );
       tempBoard.lastMove = moves[i];
       const childNode = new TypedTree<IBoard>(tempBoard);
