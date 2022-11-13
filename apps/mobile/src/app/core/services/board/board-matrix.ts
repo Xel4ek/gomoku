@@ -44,12 +44,45 @@ export class BoardMatrix extends Board {
     }
   }
 
-  generateMoves(dilation: number, color: Color): Move[] {
-    let moveList: Move[] = [];
+  indexToMove(index: number): Move {
+    return new Move(Math.floor(index / this.size), index % this.size);
+  }
 
+  adjacentCells(index: number): number[] {
+    const moves: number[] = [];
+    [-1, 1, this.size + 1, this.size, this.size - 1, -this.size - 1, -this.size + 1, -this.size].map(
+      (shift) => {
+        const checkIndex = index + shift;
+        if (checkIndex >= 0
+          && checkIndex <= this.size * this.size
+          && this.board[Math.floor(checkIndex / this.size)][checkIndex % this.size] === 0
+        ) {
+          moves.push(checkIndex);
+        }
+      }
+    );
+    return moves;
+  }
+
+  generateMoves(dilation: number, color: Color): Move[] {
+    const moveList: Move[] = []
+    const moveIndexes: number[] = [];
+    const occupied = this.movesBlue.concat(this.movesRed);
+    occupied.map(value => {
+      moveIndexes.push(...this.adjacentCells(value));
+    });
+
+    // this.olgGenerateMoves(moveList);
+    const unique = new Set(moveIndexes);
+    unique.forEach(v => moveList.push(this.indexToMove(v)));
+    return moveList;
+  }
+
+  private olgGenerateMoves(moveList: Move[]) {
     // Look for cells that has at least one stone in an adjacent cell.
     for (let i = 0; i < this.size; i++) {
       for (let j = 0; j < this.size; j++) {
+        //skip empty
         if (this.board[i][j] > 0) continue;
 
         if (i > 0) {
@@ -94,7 +127,6 @@ export class BoardMatrix extends Board {
 
       }
     }
-    return moveList;
   }
 
   aiMove(posX: number, posY: number, color: EColor, findCaptures: boolean) {
