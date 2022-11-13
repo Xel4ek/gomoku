@@ -11,9 +11,10 @@
       [class]="{ active: !players[0].turn }"
     >
       {{ players[0].name | titlecase }}
+      <span *ngIf="players[0].name === 'ai'"> - {{ players[0].depth }}</span>
     </div>
     <div class="timer" *ngFor="let item of players[0].info">
-      {{ item.turn }} : {{ item.delta | simpleTime }}
+      {{ item.turn }} [{{ item.nodeShow }}]: {{ item.delta | simpleTime }}
     </div>
   </div>
   <div class="middle-section">
@@ -31,10 +32,11 @@
       }"
       [class]="{ active: players[0].turn }"
     >
-      {{ players[1].name | titlecase }}
+      {{ players[1].name | titlecase
+      }}<span *ngIf="players[1].name === 'ai'"> - {{ players[1].depth }}</span>
     </div>
     <div class="timer" *ngFor="let item of players[1].info">
-      {{ item.turn }} : {{ item.delta | simpleTime }}
+      {{ item.turn }} [{{ item.nodeShow }}]: {{ item.delta | simpleTime }}
     </div>
   </div>
   <div class="game-message" *ngIf="players[2]">

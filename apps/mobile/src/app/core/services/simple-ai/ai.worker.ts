@@ -4,7 +4,7 @@ import { PlayerType } from '../../interfaces/player';
 
 addEventListener('message', ({ data }) => {
   const start = performance.now();
-  let turn = -1;
+  let turn = {};
   if (data.id % 2 && data.enemy.type === PlayerType.AI) {
     turn = NegamaxGenericStrategy.getStrategy<IBoard>(
       data.enemy.options.deep
@@ -20,5 +20,5 @@ addEventListener('message', ({ data }) => {
     });
   }
 
-  postMessage({ turn, delta: performance.now() - start });
+  postMessage({ ...turn, delta: performance.now() - start });
 });

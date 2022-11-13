@@ -8,7 +8,7 @@ import { MatrixScoring } from './matrix-scoring-service';
 
 export class NegamaxGenericStrategy<T extends IBoard> implements Strategy {
   private static instance: Record<number, NegamaxGenericStrategy<any>> = {};
-
+  count = 0;
   private readonly scoringService = new MatrixScoring();
   depth: number;
   private constructor(depth: number) {
@@ -52,6 +52,7 @@ export class NegamaxGenericStrategy<T extends IBoard> implements Strategy {
     //TODO: implement moves ordering here
     let value = Number.NEGATIVE_INFINITY;
     for (const i in moves) {
+      ++this.count;
       const tempBoard = new BoardMatrix(undefined, node.value);
       tempBoard.move(
         moves[i].col,
@@ -84,9 +85,10 @@ export class NegamaxGenericStrategy<T extends IBoard> implements Strategy {
     return new c(board);
   }
 
-  getNextTurn(board: GameBoard): number {
+  getNextTurn(board: GameBoard): { turn: number; count: number } {
+    this.count = 0;
     if (!board.player.map.length && !board.enemy.map.length) {
-      return 180;
+      return { turn: 180, count: this.count };
     }
     const concreteBoard = this.createInstance(board, BoardMatrix);
     const node = new TypedTree(concreteBoard);
@@ -99,7 +101,10 @@ export class NegamaxGenericStrategy<T extends IBoard> implements Strategy {
     );
     const selectedMove = node.children[node.selectedChild].value.lastMove;
     return selectedMove
-      ? selectedMove.row * node.value.size + selectedMove.col
-      : -1;
+      ? {
+          turn: selectedMove.row * node.value.size + selectedMove.col,
+          count: this.count,
+        }
+      : { turn: -1, count: this.count };
   }
 }

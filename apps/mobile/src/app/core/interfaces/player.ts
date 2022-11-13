@@ -15,6 +15,7 @@ export interface Player {
     sequence: {
       turn: number;
       delta: number;
+      nodeShow: number;
     }[];
   };
 }

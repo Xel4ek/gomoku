@@ -97,7 +97,7 @@ export class GameService implements OnDestroy {
         captured: 0,
         color: 'rgba(3,0,187,', //(alpha: number = 1) => 'rgba(3, 0,187,' + alpha + ')',
         options: {
-          deep: settings.get('playerDeep')?.value ?? 0,
+          deep: settings.get('playerDeep')?.value,
         },
         info: {
           sequence: [],
@@ -110,7 +110,7 @@ export class GameService implements OnDestroy {
         captured: 0,
         color: 'rgba(194,6,6,', //(alpha: number = 1) => 'rgba(194,6,6,' + alpha + ')',
         options: {
-          deep: settings.get('enemyDeep')?.value ?? 0,
+          deep: settings.get('enemyDeep')?.value,
         },
         info: {
           sequence: [],

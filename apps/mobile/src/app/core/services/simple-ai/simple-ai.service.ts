@@ -26,15 +26,19 @@ export class SimpleAiService {
         ),
         tap((data: GameBoard) => {
           this.worker.onmessage = ({
-            data: { turn, delta },
+            data: { turn, delta, count },
           }: {
-            data: { turn: number; delta: number };
+            data: { turn: number; delta: number; count: number };
           }) => {
             const current = data.id % 2 ? data.enemy : data.player;
             const turnsMap = current.map;
             turnsMap.push(turn);
             if (!data.winner) {
-              current.info.sequence.push({ turn: data.id + 1, delta });
+              current.info.sequence.push({
+                turn: data.id + 1,
+                delta,
+                nodeShow: count,
+              });
               this.gameService.makeTurn(data);
             }
           };

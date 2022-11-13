@@ -19,13 +19,15 @@ export class GameComponent {
         color: string;
         turn: boolean;
         captured: number;
-        info: { turn: number; delta: number }[];
+        info: { turn: number; delta: number; nodeShow: number }[];
+        depth?: number;
       },
       {
         name: string;
         color: string;
         captured: number;
-        info: { turn: number; delta: number }[];
+        info: { turn: number; delta: number; nodeShow: number }[];
+        depth?: number;
       },
       string | undefined,
       number
@@ -42,12 +44,14 @@ export class GameComponent {
             captured: data.player.captured,
             turn: !!(data.id % 2),
             info: data.player.info.sequence,
+            depth: data.player.options.deep,
           },
           {
             name: data.enemy.type,
             color: data.enemy.color + '1)',
             captured: data.enemy.captured,
             info: data.enemy.info.sequence,
+            depth: data.enemy.options.deep,
           },
 
           data.winner ? data.winner.color() : undefined,

@@ -19,9 +19,9 @@ export class SimpleTimePipe implements PipeTransform {
     }
     return (
       Math.trunc(value / 60000) +
-      ': ' +
+      ' m' +
       Math.trunc((value % 60000) / 1000) +
-      ' m'
+      ' s'
     );
   }
 }
