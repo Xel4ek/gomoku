@@ -47,6 +47,6 @@ export class SimpleAiService {
   destroy() {
     this.destroy$.next();
     this.destroy$.complete();
-    this.worker.terinate;
+    this.worker.terminate();
   }
 }
