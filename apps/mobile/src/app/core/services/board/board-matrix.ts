@@ -4,9 +4,11 @@ import { Color, EColor } from "../../color";
 import { Move } from "./move";
 import { IBoard } from "../../interfaces/IBoard";
 
-export class BoardMatrix extends Board implements IBoard {
+export class BoardMatrix extends Board {
 
   board: number[][] = [];
+  movesBlue: number[] = [];
+  movesRed: number[] = [];
 
   constructor(gameBoard?: GameBoard, boardMatrix?: IBoard) {
     super();
@@ -14,10 +16,14 @@ export class BoardMatrix extends Board implements IBoard {
       this.createEmptyBoard();
       gameBoard.player.map.forEach(v => this.move(this.col(v), this.row(v), EColor.BLUE));
       gameBoard.enemy.map.forEach(v => this.move(this.col(v), this.row(v), EColor.RED));
+      Object.assign(this.movesBlue, gameBoard.player.map);
+      Object.assign(this.movesRed, gameBoard.enemy.map);
     }
     if (boardMatrix instanceof BoardMatrix) {
       this.board = []
       boardMatrix.board.forEach(v => this.board.push(Object.assign([], v)))
+      Object.assign(this.movesBlue, boardMatrix.movesBlue);
+      Object.assign(this.movesRed, boardMatrix.movesRed);
     }
   }
 
@@ -91,9 +97,19 @@ export class BoardMatrix extends Board implements IBoard {
     return moveList;
   }
 
-  move(posX: number, posY: number, color: EColor) {
-    // this.capture(color);
+  aiMove(posX: number, posY: number, color: EColor, findCaptures: boolean) {
+    if (findCaptures) {
+      this.capture(color);
+    }
     this.board[posY][posX] = color;
+  }
+
+  move(posX: number, posY: number, color: EColor) {
+    this.board[posY][posX] = color;
+  }
+
+  unmove(posX: number, posY: number) {
+    this.board[posX][posY] = EColor.EMPTY;
   }
 
   private capture(color: EColor) {
@@ -101,10 +117,6 @@ export class BoardMatrix extends Board implements IBoard {
     for (let i of captures) {
       this.unmove(Math.floor(i / this.size), i % this.size);
     }
-  }
-
-  unmove(posX: number, posY: number) {
-    this.board[posX][posY] = EColor.EMPTY;
   }
 
   private findCaptures(side: EColor, delta: number = 3): number[] {
