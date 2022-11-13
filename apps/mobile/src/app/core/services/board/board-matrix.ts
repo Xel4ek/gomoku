@@ -28,6 +28,7 @@ export class BoardMatrix extends Board implements IBoard {
   col(index: number): number {
     return index % this.size;
   }
+
   gameBoardToMatrix(gameBoard: GameBoard) {
     for (let i of gameBoard.player.map) {
       this.board[Math.floor(i / this.size)][i % this.size] = 1;
@@ -91,15 +92,48 @@ export class BoardMatrix extends Board implements IBoard {
   }
 
   move(posX: number, posY: number, color: EColor) {
+    // this.capture(color);
     this.board[posY][posX] = color;
   }
 
+  private capture(color: EColor) {
+    const captures = this.findCaptures(color);
+    for (let i of captures) {
+      this.unmove(Math.floor(i / this.size), i % this.size);
+    }
+  }
+
   unmove(posX: number, posY: number) {
-    this.board[posY][posX] = EColor.EMPTY;
+    this.board[posX][posY] = EColor.EMPTY;
+  }
+
+  private findCaptures(side: EColor, delta: number = 3): number[] {
+    const player: number[] = [];
+    const enemy: number[] = [];
+    this.board.map((x, xi) => {
+      x.map((y, yi) => {
+        y === side ? player.push(xi * this.size + yi) : y != 0 ? enemy.push(xi * this.size + yi) : null;
+      })
+    });
+    const toRemove: number[] = [];
+    const size = 19;
+    const pivot = player[player.length - 1];
+    [-1, 1, size + 1, size, size - 1, -size - 1, -size + 1, -size].map(
+      (coif) => {
+        if (
+          enemy.includes(pivot + coif) &&
+          enemy.includes(pivot + 2 * coif) &&
+          player.includes(pivot + 3 * coif)
+        ) {
+          toRemove.push(pivot + coif);
+          toRemove.push(pivot + 2 * coif);
+        }
+      }
+    );
+    return toRemove;
   }
 
   private createEmptyBoard() {
     this.board = Array.from({length: this.size}, _ => Array.from({length: this.size}, _ => 0));
   }
-
 }
