@@ -14,8 +14,19 @@ export class GameComponent {
   enemy?: string;
   players$: Observable<
     [
-      { name: string; color: string; turn: boolean; captured: number },
-      { name: string; color: string; captured: number },
+      {
+        name: string;
+        color: string;
+        turn: boolean;
+        captured: number;
+        info: { turn: number; delta: number }[];
+      },
+      {
+        name: string;
+        color: string;
+        captured: number;
+        info: { turn: number; delta: number }[];
+      },
       string | undefined,
       number
     ]
@@ -30,12 +41,15 @@ export class GameComponent {
             color: data.player.color + '1)',
             captured: data.player.captured,
             turn: !!(data.id % 2),
+            info: data.player.info.sequence,
           },
           {
             name: data.enemy.type,
             color: data.enemy.color + '1)',
             captured: data.enemy.captured,
+            info: data.enemy.info.sequence,
           },
+
           data.winner ? data.winner.color() : undefined,
           data.id,
         ];

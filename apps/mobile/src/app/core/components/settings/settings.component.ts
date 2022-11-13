@@ -18,7 +18,7 @@ export class SettingsComponent {
   playerType = PlayerType;
   players = [
     new Player(PlayerType.AI, 'Ai'),
-    new Player(PlayerType.AI, 'Low Ai'),
+    new Player(PlayerType.HUMAN, 'Human'),
   ];
   deep = [1, 3, 5, 7, 9, 11];
 
@@ -28,7 +28,7 @@ export class SettingsComponent {
     private readonly router: Router
   ) {
     this.settingsForm = formBuilder.group({
-      player: [this.players[1]],
+      player: [this.players[0]],
       playerDeep: [this.deep[0]],
       enemy: [this.players[0]],
       enemyDeep: [this.deep[1]],

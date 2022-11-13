@@ -1,4 +1,10 @@
-import { AfterViewInit, Directive, ElementRef, OnDestroy } from '@angular/core';
+import {
+  AfterViewInit,
+  Directive,
+  ElementRef,
+  NgZone,
+  OnDestroy,
+} from '@angular/core';
 import { CanvasSpace, Create, Group, Line, Pt, Rectangle } from 'pts';
 import { Subject } from 'rxjs';
 import { takeUntil, tap } from 'rxjs/operators';
@@ -17,7 +23,7 @@ export class DrawerDirective implements AfterViewInit, OnDestroy {
 
   constructor(
     private readonly elementRef: ElementRef<HTMLCanvasElement>,
-    // private readonly localStorageService: LocalStorageService,
+    private readonly ngZone: NgZone,
     private readonly gameService: GameService
   ) {
     this.space = new CanvasSpace(this.elementRef.nativeElement);
@@ -146,14 +152,15 @@ export class DrawerDirective implements AfterViewInit, OnDestroy {
             current.type === PlayerType.HUMAN
           ) {
             current.map.push(+this.pts.p1.id);
-            // this.board.id++;
             this.board.timestamp = new Date().getTime();
             this.gameService.makeTurn(this.board);
           }
         }
       },
     });
-    this.space.bindMouse().bindTouch().play();
+    this.ngZone.runOutsideAngular(() => {
+      this.space.bindMouse().bindTouch().play();
+    });
   }
 
   ngOnDestroy(): void {

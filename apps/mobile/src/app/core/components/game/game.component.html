@@ -1,7 +1,10 @@
 <div class="game" *ngIf="players$ | async as players; else endGame">
   <div class="info">
+    <div class="header" *ngIf="players[0].captured">
+      Captured: {{ players[0].captured }}
+    </div>
     <div
-      class="name"
+      class="name header"
       [style]="{
         color: players[0].color
       }"
@@ -9,15 +12,20 @@
     >
       {{ players[0].name | titlecase }}
     </div>
-    <div *ngIf="players[0].captured">Captured: {{ players[0].captured }}</div>
+    <div class="timer" *ngFor="let item of players[0].info">
+      {{ item.turn }} : {{ item.delta | simpleTime }}
+    </div>
   </div>
   <div class="middle-section">
     <canvas gomokuDrawer class="playing-field"></canvas>
     <div class="info">{{ players[3] }}</div>
   </div>
   <div class="info">
+    <div class="header" *ngIf="players[1].captured">
+      Captured: {{ players[1].captured }}
+    </div>
     <div
-      class="name"
+      class="name header"
       [style]="{
         color: players[1].color
       }"
@@ -25,7 +33,9 @@
     >
       {{ players[1].name | titlecase }}
     </div>
-    <div *ngIf="players[1].captured">Captured: {{ players[1].captured }}</div>
+    <div class="timer" *ngFor="let item of players[1].info">
+      {{ item.turn }} : {{ item.delta | simpleTime }}
+    </div>
   </div>
   <div class="game-message" *ngIf="players[2]">
     <div>

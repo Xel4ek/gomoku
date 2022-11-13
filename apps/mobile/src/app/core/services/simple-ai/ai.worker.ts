@@ -3,6 +3,7 @@ import { IBoard } from '../../interfaces/IBoard';
 import { PlayerType } from '../../interfaces/player';
 
 addEventListener('message', ({ data }) => {
+  const start = performance.now();
   let turn = -1;
   if (data.id % 2 && data.enemy.type === PlayerType.AI) {
     turn = NegamaxGenericStrategy.getStrategy<IBoard>(
@@ -19,5 +20,5 @@ addEventListener('message', ({ data }) => {
     });
   }
 
-  postMessage(turn);
+  postMessage({ turn, delta: performance.now() - start });
 });

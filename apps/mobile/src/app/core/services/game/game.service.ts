@@ -99,6 +99,9 @@ export class GameService implements OnDestroy {
         options: {
           deep: settings.get('playerDeep')?.value ?? 0,
         },
+        info: {
+          sequence: [],
+        },
       },
       enemy: {
         type: settings.get('enemy')?.value.type,
@@ -108,6 +111,9 @@ export class GameService implements OnDestroy {
         color: 'rgba(194,6,6,', //(alpha: number = 1) => 'rgba(194,6,6,' + alpha + ')',
         options: {
           deep: settings.get('enemyDeep')?.value ?? 0,
+        },
+        info: {
+          sequence: [],
         },
       },
       size: settings.get('size')?.value ?? 19,

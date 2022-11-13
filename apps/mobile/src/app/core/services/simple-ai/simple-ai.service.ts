@@ -13,7 +13,6 @@ export class SimpleAiService {
   ) {
     this.worker = new Worker(new URL('./ai.worker', import.meta.url));
 
-    // const worker = new Worker('');
     gameService
       .sequence$()
       .pipe(
@@ -26,63 +25,21 @@ export class SimpleAiService {
             : data.player.type === PlayerType.AI
         ),
         tap((data: GameBoard) => {
-          this.worker.onmessage = ({ data: turn }: { data: number }) => {
-            const turnsMap = data.id % 2 ? data.enemy.map : data.player.map;
+          this.worker.onmessage = ({
+            data: { turn, delta },
+          }: {
+            data: { turn: number; delta: number };
+          }) => {
+            const current = data.id % 2 ? data.enemy : data.player;
+            const turnsMap = current.map;
             turnsMap.push(turn);
-            this.gameService.makeTurn(data);
+            if (!data.winner) {
+              current.info.sequence.push({ turn: data.id + 1, delta });
+              this.gameService.makeTurn(data);
+            }
           };
         }),
         map((data) => this.worker.postMessage(data))
-        // map((data) => {
-        //   if (
-        //     !data.player.options.nextTurn &&
-        //     data.player.type === PlayerType.AI
-        //   ) {
-        //     data.player.options.nextTurn = async (board, callback) => {
-        //       const strategy = NegamaxGenericStrategy.getStrategy<IBoard>(
-        //         data.player.options.deep
-        //       );
-        //       callback(
-        //         strategy.getNextTurn({
-        //           ...board,
-        //           player: board.enemy,
-        //           enemy: board.player,
-        //         })
-        //       );
-        //     };
-        //   }
-        //   if (
-        //     !data.enemy.options.nextTurn &&
-        //     data.enemy.type === PlayerType.AI
-        //   ) {
-        //     data.enemy.options.nextTurn = async (board, callback) => {
-        //       const strategy = NegamaxGenericStrategy.getStrategy<IBoard>(
-        //         data.enemy.options.deep
-        //       );
-        //       callback(strategy.getNextTurn(board));
-        //     };
-        //   }
-        //   return data;
-        // }),
-        // map((data) => {
-        //   // const onmessage = async (turn: number) => {
-        //   //   setTimeout(() => {
-        //   //     const turnsMap = data.id % 2 ? data.enemy.map : data.player.map;
-        //   //     turnsMap.push(turn);
-        //   //     this.gameService.makeTurn(data);
-        //   //   }, 0);
-        //   // };
-        //   // if (data.id % 2 && data.enemy.type === PlayerType.AI) {
-        //   //   this.ngZone.runOutsideAngular(() => {
-        //   //     data.enemy.options.nextTurn?.(data, onmessage);
-        //   //   });
-        //   // }
-        //   // if (!(data.id % 2) && data.player.type === PlayerType.AI) {
-        //   //   this.ngZone.runOutsideAngular(() => {
-        //   //     data.player.options.nextTurn?.(data, onmessage);
-        //   //   });
-        //   // }
-        // })
       )
       .subscribe();
   }
@@ -90,5 +47,6 @@ export class SimpleAiService {
   destroy() {
     this.destroy$.next();
     this.destroy$.complete();
+    this.worker.terinate;
   }
 }

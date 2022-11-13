@@ -10,10 +10,11 @@ export interface Player {
   color: string;
   options: {
     deep: number;
-    // nextTurn?: (
-    //   board: GameBoard,
-    //   callback: (board: number) => Promise<void>
-    // ) => void;
-    // workerFn?: (board: GameBoard) => number;
+  };
+  info: {
+    sequence: {
+      turn: number;
+      delta: number;
+    }[];
   };
 }

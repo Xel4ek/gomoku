@@ -86,7 +86,7 @@ export class NegamaxGenericStrategy<T extends IBoard> implements Strategy {
 
   getNextTurn(board: GameBoard): number {
     if (!board.player.map.length && !board.enemy.map.length) {
-      return 181;
+      return 180;
     }
     const concreteBoard = this.createInstance(board, BoardMatrix);
     const node = new TypedTree(concreteBoard);
