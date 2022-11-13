@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { GameBoard } from "../../interfaces/gameBoard";
 import { ScoringService } from "./scoring.service";
 import { SimpleScoringService } from "../simple-scoring/simple-scoring.service";
+import { PlayerType } from "../../interfaces/player";
 
 const checkAll = true;
 
@@ -39,23 +40,29 @@ describe('NegamaxStrategy', () => {
       id: 1,
       timestamp: 1649655174300,
       player: {
-        type: 0,
+        type: PlayerType.HUMAN,
         map: [101],
         turn: [1],
         captured: 0,
+        color: 'blue',
         options: {
-          color: () => '',
           deep: 1,
+        },
+        info: {
+          sequence: [],
         },
       },
       enemy: {
-        type: 1,
+        type: PlayerType.AI,
         map: [],
         turn: [],
         captured: 0,
+        color: 'red',
         options: {
-          color: () => '',
           deep: 1,
+        },
+        info: {
+          sequence: [],
         },
       },
       size: 19,
