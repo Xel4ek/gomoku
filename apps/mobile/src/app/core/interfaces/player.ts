@@ -1,3 +1,5 @@
+import { WorkerReport } from '../ai/negamax-generic-strategy';
+
 export enum PlayerType {
   HUMAN = 'human',
   AI = 'ai',
@@ -12,10 +14,6 @@ export interface Player {
     deep: number;
   };
   info: {
-    sequence: {
-      turn: number;
-      delta: number;
-      nodeShow: number;
-    }[];
+    sequence: WorkerReport[];
   };
 }

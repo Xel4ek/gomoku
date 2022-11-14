@@ -3,6 +3,7 @@ import { filter, map, takeUntil, tap } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { GameBoard } from '../../interfaces/gameBoard';
 import { PlayerType } from '../../interfaces/player';
+import { WorkerReport } from '../../ai/negamax-generic-strategy';
 
 export class SimpleAiService {
   private worker: Worker;
@@ -26,9 +27,9 @@ export class SimpleAiService {
         ),
         tap((data: GameBoard) => {
           this.worker.onmessage = ({
-            data: { turn, delta, count },
+            data: { turn, delta, count, capacity },
           }: {
-            data: { turn: number; delta: number; count: number };
+            data: WorkerReport;
           }) => {
             const current = data.id % 2 ? data.enemy : data.player;
             const turnsMap = current.map;
@@ -37,7 +38,8 @@ export class SimpleAiService {
               current.info.sequence.push({
                 turn: data.id + 1,
                 delta,
-                nodeShow: count,
+                count,
+                capacity,
               });
               this.gameService.makeTurn(data);
             }

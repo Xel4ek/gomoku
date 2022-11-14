@@ -1,11 +1,10 @@
-import { Board } from "./board";
-import { GameBoard } from "../../interfaces/gameBoard";
-import { Color, EColor } from "../../color";
-import { Move } from "./move";
-import { IBoard } from "../../interfaces/IBoard";
+import { Board } from './board';
+import { GameBoard } from '../../interfaces/gameBoard';
+import { Color, EColor } from '../../color';
+import { Move } from './move';
+import { IBoard } from '../../interfaces/IBoard';
 
 export class BoardMatrix extends Board {
-
   board: number[][] = [];
   movesBlue: number[] = [];
   movesRed: number[] = [];
@@ -14,14 +13,18 @@ export class BoardMatrix extends Board {
     super();
     if (gameBoard) {
       this.createEmptyBoard();
-      gameBoard.player.map.forEach(v => this.move(this.col(v), this.row(v), EColor.BLUE));
-      gameBoard.enemy.map.forEach(v => this.move(this.col(v), this.row(v), EColor.RED));
+      gameBoard.player.map.forEach((v) =>
+        this.move(this.col(v), this.row(v), EColor.BLUE)
+      );
+      gameBoard.enemy.map.forEach((v) =>
+        this.move(this.col(v), this.row(v), EColor.RED)
+      );
       Object.assign(this.movesBlue, gameBoard.player.map);
       Object.assign(this.movesRed, gameBoard.enemy.map);
     }
     if (boardMatrix instanceof BoardMatrix) {
-      this.board = []
-      boardMatrix.board.forEach(v => this.board.push(Object.assign([], v)))
+      this.board = [];
+      boardMatrix.board.forEach((v) => this.board.push(Object.assign([], v)));
       Object.assign(this.movesBlue, boardMatrix.movesBlue);
       Object.assign(this.movesRed, boardMatrix.movesRed);
     }
@@ -36,10 +39,10 @@ export class BoardMatrix extends Board {
   }
 
   gameBoardToMatrix(gameBoard: GameBoard) {
-    for (let i of gameBoard.player.map) {
+    for (const i of gameBoard.player.map) {
       this.board[Math.floor(i / this.size)][i % this.size] = 1;
     }
-    for (let i of gameBoard.enemy.map) {
+    for (const i of gameBoard.enemy.map) {
       this.board[i % this.size][Math.floor(i / this.size)] = 2;
     }
   }
@@ -50,31 +53,43 @@ export class BoardMatrix extends Board {
 
   adjacentCells(index: number): number[] {
     const moves: number[] = [];
-    [-1, 1, this.size + 1, this.size, this.size - 1, -this.size - 1, -this.size + 1, -this.size].map(
-      (shift) => {
-        const checkIndex = index + shift;
-        if (checkIndex >= 0
-          && checkIndex <= this.size * this.size
-          && this.board[Math.floor(checkIndex / this.size)][checkIndex % this.size] === 0
-        ) {
-          moves.push(checkIndex);
-        }
+    [
+      -1,
+      1,
+      this.size + 1,
+      this.size,
+      this.size - 1,
+      -this.size - 1,
+      -this.size + 1,
+      -this.size,
+    ].map((shift) => {
+      const checkIndex = index + shift;
+      if (
+        checkIndex >= 0 &&
+        checkIndex <= this.size * this.size &&
+        Math.abs((index % this.size) - (checkIndex % this.size)) <= 1 &&
+        this.board[Math.floor(checkIndex / this.size)][
+          checkIndex % this.size
+        ] === 0
+      ) {
+        moves.push(checkIndex);
       }
-    );
+    });
     return moves;
   }
 
   generateMoves(dilation: number, color: Color): Move[] {
-    const moveList: Move[] = []
+    throw new Error('mark to remove');
+    const moveList: Move[] = [];
     const moveIndexes: number[] = [];
     const occupied = this.movesBlue.concat(this.movesRed);
-    occupied.map(value => {
+    occupied.map((value) => {
       moveIndexes.push(...this.adjacentCells(value));
     });
 
     // this.olgGenerateMoves(moveList);
     const unique = new Set(moveIndexes);
-    unique.forEach(v => moveList.push(this.indexToMove(v)));
+    unique.forEach((v) => moveList.push(this.indexToMove(v)));
     return moveList;
   }
 
@@ -87,15 +102,13 @@ export class BoardMatrix extends Board {
 
         if (i > 0) {
           if (j > 0) {
-            if (this.board[i - 1][j - 1] > 0 ||
-              this.board[i][j - 1] > 0) {
+            if (this.board[i - 1][j - 1] > 0 || this.board[i][j - 1] > 0) {
               moveList.push(new Move(i, j));
               continue;
             }
           }
           if (j < this.size - 1) {
-            if (this.board[i - 1][j + 1] > 0 ||
-              this.board[i][j + 1] > 0) {
+            if (this.board[i - 1][j + 1] > 0 || this.board[i][j + 1] > 0) {
               moveList.push(new Move(i, j));
               continue;
             }
@@ -107,15 +120,13 @@ export class BoardMatrix extends Board {
         }
         if (i < this.size - 1) {
           if (j > 0) {
-            if (this.board[i + 1][j - 1] > 0 ||
-              this.board[i][j - 1] > 0) {
+            if (this.board[i + 1][j - 1] > 0 || this.board[i][j - 1] > 0) {
               moveList.push(new Move(i, j));
               continue;
             }
           }
           if (j < this.size - 1) {
-            if (this.board[i + 1][j + 1] > 0 ||
-              this.board[i][j + 1] > 0) {
+            if (this.board[i + 1][j + 1] > 0 || this.board[i][j + 1] > 0) {
               moveList.push(new Move(i, j));
               continue;
             }
@@ -124,7 +135,6 @@ export class BoardMatrix extends Board {
             moveList.push(new Move(i, j));
           }
         }
-
       }
     }
   }
@@ -146,7 +156,7 @@ export class BoardMatrix extends Board {
 
   private capture(color: EColor) {
     const captures = this.findCaptures(color);
-    for (let i of captures) {
+    for (const i of captures) {
       this.unmove(Math.floor(i / this.size), i % this.size);
     }
   }
@@ -156,8 +166,12 @@ export class BoardMatrix extends Board {
     const enemy: number[] = [];
     this.board.map((x, xi) => {
       x.map((y, yi) => {
-        y === side ? player.push(xi * this.size + yi) : y != 0 ? enemy.push(xi * this.size + yi) : null;
-      })
+        y === side
+          ? player.push(xi * this.size + yi)
+          : y != 0
+          ? enemy.push(xi * this.size + yi)
+          : null;
+      });
     });
     const toRemove: number[] = [];
     const size = 19;
@@ -178,6 +192,27 @@ export class BoardMatrix extends Board {
   }
 
   private createEmptyBoard() {
-    this.board = Array.from({length: this.size}, _ => Array.from({length: this.size}, _ => 0));
+    this.board = Array.from({ length: this.size }, (_) =>
+      Array.from({ length: this.size }, (_) => 0)
+    );
+  }
+
+  generateBoards(dilation: number, side: Color): IBoard[] {
+    throw new Error('Not implemented');
+  }
+
+  moveList({ useRandomMoveOrder }: { useRandomMoveOrder: boolean }): Move[] {
+    const moveList = [
+      ...new Set<number>(
+        this.movesBlue
+          .concat(this.movesRed)
+          .map((i) => this.adjacentCells(i))
+          .flat()
+      ),
+    ];
+    if (useRandomMoveOrder) {
+      moveList.sort(() => Math.random() - 0.5);
+    }
+    return moveList.map((i) => this.indexToMove(i));
   }
 }

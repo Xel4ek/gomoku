@@ -5,14 +5,21 @@ import { EColor } from '../color';
 import { BoardMatrix } from '../services/board/board-matrix';
 import { GameBoard } from '../interfaces/gameBoard';
 import { MatrixScoring } from './matrix-scoring-service';
-
+export interface WorkerReport {
+  count: number;
+  turn: number;
+  capacity: number;
+  delta: number;
+}
 export class NegamaxGenericStrategy<T extends IBoard> implements Strategy {
   private static instance: Record<number, NegamaxGenericStrategy<any>> = {};
   count = 0;
+  treeCapacity = 0;
   private readonly scoringService = new MatrixScoring();
   depth: number;
   private config = {
     findCaptures: true,
+    useRandomMoveOrder: true,
   };
   private constructor(depth: number) {
     this.depth = depth;
@@ -42,7 +49,7 @@ export class NegamaxGenericStrategy<T extends IBoard> implements Strategy {
         );
       return node;
     }
-    const moves = node.value.generateMoves(1, color === 1 ? 'red' : 'blue');
+    const moves = node.value.moveList(this.config);
     if (moves.length === 0) {
       node.value.score =
         color *
@@ -52,7 +59,7 @@ export class NegamaxGenericStrategy<T extends IBoard> implements Strategy {
         );
       return node;
     }
-    //TODO: implement moves ordering here
+    this.treeCapacity += moves.length;
     let value = Number.NEGATIVE_INFINITY;
     for (const i in moves) {
       ++this.count;
@@ -61,7 +68,7 @@ export class NegamaxGenericStrategy<T extends IBoard> implements Strategy {
         moves[i].col,
         moves[i].row,
         color === 1 ? EColor.RED : EColor.BLUE,
-        this.config.findCaptures,
+        this.config.findCaptures
       );
       tempBoard.lastMove = moves[i];
       const childNode = new TypedTree<IBoard>(tempBoard);
@@ -89,10 +96,11 @@ export class NegamaxGenericStrategy<T extends IBoard> implements Strategy {
     return new c(board);
   }
 
-  getNextTurn(board: GameBoard): { turn: number; count: number } {
+  getNextTurn(board: GameBoard): Omit<WorkerReport, 'delta'> {
     this.count = 0;
+    this.treeCapacity = 0;
     if (!board.player.map.length && !board.enemy.map.length) {
-      return { turn: 180, count: this.count };
+      return { turn: 180, count: this.count, capacity: this.treeCapacity };
     }
     const concreteBoard = this.createInstance(board, BoardMatrix);
     const node = new TypedTree(concreteBoard);
@@ -104,11 +112,12 @@ export class NegamaxGenericStrategy<T extends IBoard> implements Strategy {
       1
     );
     const selectedMove = node.children[node.selectedChild].value.lastMove;
-    return selectedMove
-      ? {
-          turn: selectedMove.row * node.value.size + selectedMove.col,
-          count: this.count,
-        }
-      : { turn: -1, count: this.count };
+    return {
+      count: this.count,
+      capacity: this.treeCapacity,
+      turn: selectedMove
+        ? selectedMove.row * node.value.size + selectedMove.col
+        : -1,
+    };
   }
 }

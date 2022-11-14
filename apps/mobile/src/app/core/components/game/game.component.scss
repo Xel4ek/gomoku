@@ -1,7 +1,6 @@
 .game {
   display: flex;
   height: 100%;
-  justify-content: space-around;
   align-items: center;
   &-message {
     position: fixed;
@@ -9,6 +8,7 @@
     height: 100%;
   }
   .info {
+    flex: 1 1 auto;
     width: 113px;
     text-align: center;
     display: flex;
@@ -17,6 +17,7 @@
       padding-bottom: 1rem;
     }
     .timer {
+      white-space: nowrap;
       padding-bottom: 0.2rem;
     }
     .name {
@@ -36,6 +37,8 @@
       top: 0;
       left: 50%;
       transform: translate(-50%, -2rem);
+      width: min-content;
+      white-space: nowrap;
     }
     .playing-field {
       aspect-ratio: 1 / 1;

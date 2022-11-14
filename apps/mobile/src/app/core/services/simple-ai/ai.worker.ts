@@ -1,7 +1,6 @@
 import { NegamaxGenericStrategy } from '../../ai/negamax-generic-strategy';
 import { IBoard } from '../../interfaces/IBoard';
 import { PlayerType } from '../../interfaces/player';
-
 addEventListener('message', ({ data }) => {
   const start = performance.now();
   let turn = {};
@@ -20,5 +19,5 @@ addEventListener('message', ({ data }) => {
     });
   }
 
-  postMessage({ ...turn, delta: performance.now() - start });
+  self.postMessage({ ...turn, delta: performance.now() - start });
 });

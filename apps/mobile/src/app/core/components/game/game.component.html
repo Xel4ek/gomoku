@@ -1,47 +1,64 @@
 <div class="game" *ngIf="players$ | async as players; else endGame">
   <div class="info">
-    <div class="header" *ngIf="players[0].captured">
-      Captured: {{ players[0].captured }}
+    <div class="header" *ngIf="players.player.captured">
+      Captured: {{ players.player.captured }}
     </div>
     <div
       class="name header"
       [style]="{
-        color: players[0].color
+        color: players.player.color
       }"
-      [class]="{ active: !players[0].turn }"
+      [class]="{ active: !players.player.turn }"
     >
-      {{ players[0].name | titlecase }}
-      <span *ngIf="players[0].name === 'ai'"> - {{ players[0].depth }}</span>
+      {{ players.player.name | titlecase }}
+      <span *ngIf="players.player.name === 'ai'">
+        - {{ players.player.depth }}</span
+      >
     </div>
-    <div class="timer" *ngFor="let item of players[0].info">
-      {{ item.turn }} [{{ item.nodeShow }}]: {{ item.delta | simpleTime }}
+    <div class="timer" *ngFor="let item of players.player.info">
+      {{ item.turn }} [ {{ item.count | number }} /
+      {{ item.capacity | number }} ]:
+      {{ item.delta | simpleTime }}
     </div>
   </div>
   <div class="middle-section">
     <canvas gomokuDrawer class="playing-field"></canvas>
-    <div class="info">{{ players[3] }}</div>
+    <div
+      class="info"
+      style="font-size: 2rem"
+      [style]="{
+        color: players.advance.color
+      }"
+    >
+      Round: {{ players.advance.turn }}
+    </div>
   </div>
   <div class="info">
-    <div class="header" *ngIf="players[1].captured">
-      Captured: {{ players[1].captured }}
+    <div class="header" *ngIf="players.enemy.captured">
+      Captured: {{ players.enemy.captured }}
     </div>
     <div
       class="name header"
       [style]="{
-        color: players[1].color
+        color: players.enemy.color
       }"
-      [class]="{ active: players[0].turn }"
+      [class]="{ active: players.player.turn }"
     >
-      {{ players[1].name | titlecase
-      }}<span *ngIf="players[1].name === 'ai'"> - {{ players[1].depth }}</span>
+      {{ players.enemy.name | titlecase
+      }}<span *ngIf="players.enemy.name === 'ai'">
+        - {{ players.enemy.depth }}</span
+      >
     </div>
-    <div class="timer" *ngFor="let item of players[1].info">
-      {{ item.turn }} [{{ item.nodeShow }}]: {{ item.delta | simpleTime }}
+    <div class="timer" *ngFor="let item of players.enemy.info">
+      {{ item.turn }} [ {{ item.count | number }} /
+      {{ item.capacity | number }} ]:
+      {{ item.delta | simpleTime }}
     </div>
   </div>
-  <div class="game-message" *ngIf="players[2]">
+  <div class="game-message" *ngIf="players.advance.winner">
     <div>
-      Congratulation <span [style]="{ color: players[2] }">champion</span>!
+      Congratulation
+      <span [style]="{ color: players.advance.winner }">champion</span>!
     </div>
     <div>
       <a

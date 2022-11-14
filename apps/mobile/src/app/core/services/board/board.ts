@@ -1,21 +1,17 @@
-import { Color } from "../../color";
-import { IBoard } from "../../interfaces/IBoard";
-import { Move } from "./move";
+import { Color } from '../../color';
+import { IBoard } from '../../interfaces/IBoard';
+import { Move } from './move';
 
-export class Board implements IBoard {
-
+export abstract class Board implements IBoard {
   score = NaN;
   scoreRed = NaN;
   scoreBlue = NaN;
   size = 19;
   lastMove?: Move;
 
-  generateBoards(dilation: number, side: Color): IBoard[] {
-    throw Error("Not implemented");
-  }
+  abstract generateBoards(dilation: number, side: Color): IBoard[];
 
-  generateMoves(dilation: number, side: Color): Move[] {
-    throw Error("Not implemented");
-  }
+  abstract generateMoves(dilation: number, side: Color): Move[];
 
+  abstract moveList(config: { useRandomMoveOrder: boolean }): Move[];
 }
