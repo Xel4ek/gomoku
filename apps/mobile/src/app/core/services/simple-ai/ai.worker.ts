@@ -19,5 +19,5 @@ addEventListener('message', ({ data }) => {
     });
   }
 
-  self.postMessage({ ...turn, delta: performance.now() - start });
+  postMessage({ ...turn, delta: performance.now() - start });
 });
