@@ -5,25 +5,29 @@ import { EColor } from '../color';
 import { BoardMatrix } from '../services/board/board-matrix';
 import { GameBoard } from '../interfaces/gameBoard';
 import { MatrixScoring } from './matrix-scoring-service';
+
 export interface WorkerReport {
   count: number;
   turn: number;
   capacity: number;
   delta: number;
 }
+
 export class NegamaxGenericStrategy<T extends IBoard> implements Strategy {
   private static instance: Record<number, NegamaxGenericStrategy<any>> = {};
   count = 0;
   treeCapacity = 0;
-  private readonly scoringService = new MatrixScoring();
   depth: number;
+  private readonly scoringService = new MatrixScoring();
   private config = {
     findCaptures: true,
     useRandomMoveOrder: true,
   };
-  private constructor(depth: number) {
+
+  private constructor(depth: number = 3) {
     this.depth = depth;
   }
+
   static getStrategy<K extends IBoard>(depth: number) {
     if (!NegamaxGenericStrategy.instance[depth]) {
       NegamaxGenericStrategy.instance[depth] = new NegamaxGenericStrategy<K>(
@@ -33,6 +37,7 @@ export class NegamaxGenericStrategy<T extends IBoard> implements Strategy {
 
     return NegamaxGenericStrategy.instance[depth] as NegamaxGenericStrategy<K>;
   }
+
   negamax(
     node: TypedTree<IBoard>,
     depth: number,
@@ -73,7 +78,11 @@ export class NegamaxGenericStrategy<T extends IBoard> implements Strategy {
       tempBoard.lastMove = moves[i];
       const childNode = new TypedTree<IBoard>(tempBoard);
       node.appendChild(childNode);
-      this.negamax(childNode, depth - 1, -beta, -alpha, -color);
+      if (this.scoringService.checkWin(childNode.value, color === 1 ? EColor.RED : EColor.BLUE)) {
+        childNode.value.score = color * 1000000;
+      } else {
+        this.negamax(childNode, depth - 1, -beta, -alpha, -color);
+      }
       if (-childNode.value.score > value) {
         value = -childNode.value.score;
         node.selectedChild = Number(i);
@@ -100,7 +109,7 @@ export class NegamaxGenericStrategy<T extends IBoard> implements Strategy {
     this.count = 0;
     this.treeCapacity = 0;
     if (!board.player.map.length && !board.enemy.map.length) {
-      return { turn: 180, count: this.count, capacity: this.treeCapacity };
+      return {turn: 180, count: this.count, capacity: this.treeCapacity};
     }
     const concreteBoard = this.createInstance(board, BoardMatrix);
     const node = new TypedTree(concreteBoard);

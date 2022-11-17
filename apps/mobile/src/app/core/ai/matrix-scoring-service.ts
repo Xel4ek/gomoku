@@ -6,7 +6,7 @@ export class MatrixScoring {
   evaluationCount = 0;
   private winScore = 1000000;
 
-  evaluateBoardForWhite(board: BoardMatrix, bluesTurn: boolean): number {
+  evaluateBoardForRed(board: BoardMatrix, bluesTurn: boolean): number {
     this.evaluationCount++;
 
     // Get board score of both players.
@@ -17,7 +17,6 @@ export class MatrixScoring {
       board.scoreBlue = 1.0;
     }
 
-    // Calculate relative score of white against black
     return board.scoreRed / board.scoreBlue;
   }
 
@@ -351,7 +350,14 @@ export class MatrixScoring {
 
   evaluateNode(board: IBoard, turn: EColor): number {
     if (board instanceof BoardMatrix) {
-      return this.evaluateBoardForWhite(board, turn === EColor.BLUE);
+      return this.evaluateBoardForRed(board, turn === EColor.BLUE);
+    }
+    throw TypeError;
+  }
+
+  checkWin(board: IBoard, turn: EColor) {
+    if (board instanceof BoardMatrix) {
+      return this.evaluateBoardForRed(board, turn === EColor.BLUE) >= this.winScore;
     }
     throw TypeError;
   }
