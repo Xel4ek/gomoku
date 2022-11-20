@@ -47,10 +47,6 @@ export class BoardMatrix extends Board {
     }
   }
 
-  indexToMove(index: number): Move {
-    return new Move(Math.floor(index / this.size), index % this.size);
-  }
-
   adjacentCells(index: number): number[] {
     const moves: number[] = [];
     [
@@ -89,7 +85,7 @@ export class BoardMatrix extends Board {
 
     // this.olgGenerateMoves(moveList);
     const unique = new Set(moveIndexes);
-    unique.forEach((v) => moveList.push(this.indexToMove(v)));
+    unique.forEach((v) => moveList.push(new Move(v)));
     return moveList;
   }
 
@@ -103,36 +99,36 @@ export class BoardMatrix extends Board {
         if (i > 0) {
           if (j > 0) {
             if (this.board[i - 1][j - 1] > 0 || this.board[i][j - 1] > 0) {
-              moveList.push(new Move(i, j));
+              moveList.push(new Move({row: i, col: j}));
               continue;
             }
           }
           if (j < this.size - 1) {
             if (this.board[i - 1][j + 1] > 0 || this.board[i][j + 1] > 0) {
-              moveList.push(new Move(i, j));
+              moveList.push(new Move({row: i, col: j}));
               continue;
             }
           }
           if (this.board[i - 1][j] > 0) {
-            moveList.push(new Move(i, j));
+            moveList.push(new Move({row: i, col: j}));
             continue;
           }
         }
         if (i < this.size - 1) {
           if (j > 0) {
             if (this.board[i + 1][j - 1] > 0 || this.board[i][j - 1] > 0) {
-              moveList.push(new Move(i, j));
+              moveList.push(new Move({row: i, col: j}));
               continue;
             }
           }
           if (j < this.size - 1) {
             if (this.board[i + 1][j + 1] > 0 || this.board[i][j + 1] > 0) {
-              moveList.push(new Move(i, j));
+              moveList.push(new Move({row: i, col: j}));
               continue;
             }
           }
           if (this.board[i + 1][j] > 0) {
-            moveList.push(new Move(i, j));
+            moveList.push(new Move({row: i, col: j}));
           }
         }
       }
@@ -213,6 +209,6 @@ export class BoardMatrix extends Board {
     if (useRandomMoveOrder) {
       moveList.sort(() => Math.random() - 0.5);
     }
-    return moveList.map((i) => this.indexToMove(i));
+    return moveList.map((i) => new Move(i));
   }
 }
