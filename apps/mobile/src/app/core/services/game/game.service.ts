@@ -144,7 +144,7 @@ export class GameService implements OnDestroy {
       );
       board[key].captured += toRemove.length / 2;
     }
-    // console.log(toRemove);
+    // 
 
     this._sequence$.next(board);
   }

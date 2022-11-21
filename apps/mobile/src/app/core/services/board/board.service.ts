@@ -27,7 +27,6 @@ export class BoardService implements OnDestroy {
             : data.player.type === PlayerType.AI
         ),
         tap((data) => {
-          console.log(data);
           this.startTime = new Date().getTime();
           // call ai here send data to worker
         })

@@ -7,10 +7,10 @@ import { GameBoard } from "../../interfaces/gameBoard";
 })
 export class MatrixAIService implements IAi {
   constructor() {
-    console.log('MATRIX AI!');
+    
   }
 
   getNextAction(board: GameBoard, callback: (turn: number) => void): void {
-    console.log('not implemented!');
+    
   }
 }

@@ -35,7 +35,7 @@ export class LocalStorageService {
   }
 
   // onEvent(gameBoard: GameBoard) {
-  //   console.log(gameBoard);
+  //   
   //   if (gameBoard.isPlayer) {
   //     const combos = new Combination(gameBoard.size);
   //     const board = new BitBoard(
@@ -43,7 +43,7 @@ export class LocalStorageService {
   //       gameBoard.size,
   //       gameBoard
   //     );
-  //     // console.log(BitBoard.printBitBoard(board.boards.enemy, board.size));
+  //     // 
   //     const move = this.aiService.getNextAction(board);
   //     // gameBoard.lastMove = move;
   //     // gameBoard.opp.push(move);
@@ -52,6 +52,6 @@ export class LocalStorageService {
   //     gameBoard.id += 1;
   //     this.subject.next(gameBoard);
   //   }
-  //   console.log(gameBoard);
+  //   
   // }
 }

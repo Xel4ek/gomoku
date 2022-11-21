@@ -53,10 +53,10 @@ export class ScoringService implements Scoring {
     board.scores.max = this.calculateScore(blueCombos);
     // return maximising ? this.maxScore : this.minScore;
     //TODO: why 1.1&
-    // console.log("MAX: ", score, redCombos, "MIN:", minScore, blueCombos);
+    // 
     // score *= this.maxScoreMultiple;
-    // console.log(BoardPrinterService.printBitBoard(board.blue, Number(board.size)));
-    // console.log(BoardPrinterService.printBitBoard(board.red, Number(board.size)));
+    // 
+    // 
     // console.log(score, redCombos, blueCombos)
     // }
     //TODO: maxScoreMultipe должно применяться к игроку, который ходил первым.

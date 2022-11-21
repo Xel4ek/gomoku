@@ -6,7 +6,7 @@ export class MatrixScoring {
   evaluationCount = 0;
   private winScore = 1000000;
 
-  evaluateBoardForRed(board: BoardMatrix, bluesTurn: boolean): number {
+  evaluateBoardForRed(board: BoardMatrix, bluesTurn: boolean): void {
     this.evaluationCount++;
 
     // Get board score of both players.
@@ -17,7 +17,10 @@ export class MatrixScoring {
       board.scoreBlue = 1.0;
     }
 
-    return board.scoreRed / board.scoreBlue;
+    // if (bluesTurn) {
+    //   return board.scoreBlue / board.scoreRed;
+    // }
+    board.score = board.scoreRed - board.scoreBlue;
   }
 
   // This function calculates the board score of the specified player.
@@ -348,16 +351,18 @@ export class MatrixScoring {
   // (i.e. how likely is white player to win the game before the black player)
   // This value will be used as the score in the Minimax algorithm.
 
-  evaluateNode(board: IBoard, turn: EColor): number {
+  evaluateNode(board: IBoard, turn: EColor): void {
     if (board instanceof BoardMatrix) {
-      return this.evaluateBoardForRed(board, turn === EColor.BLUE);
+      this.evaluateBoardForRed(board, turn === EColor.BLUE);
+      return;
     }
     throw TypeError;
   }
 
   checkWin(board: IBoard, turn: EColor) {
     if (board instanceof BoardMatrix) {
-      return this.evaluateBoardForRed(board, turn === EColor.BLUE) >= this.winScore;
+      this.evaluateBoardForRed(board, turn === EColor.BLUE);
+      return board.score >= this.winScore;
     }
     throw TypeError;
   }

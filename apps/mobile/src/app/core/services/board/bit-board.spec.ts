@@ -55,11 +55,11 @@ describe('BitBoard', () => {
       "00000001" +
       "000000010"
     );
-    console.log(BitBoard.printBitBoard(bb, 7));
+    
     const sq = (((bb >> BigInt(3) | (bb << BigInt(3)) & BigInt(63)))) ^ BigInt(56);
     // bitboard = (bitboard + BigInt(8) * (bitboard&BigInt(7))) & BigInt(63);
     // bitboard = (bitboard + BigInt(8) * ((bitboard&BigInt(7)^BigInt(7)))) & BigInt(63);
-    console.log(BitBoard.printBitBoard(sq, board.size));
+    
   });
 
   it('should checkWin', () => {
@@ -69,12 +69,12 @@ describe('BitBoard', () => {
     expect(board.checkWin(true)).toBeTruthy();
     board.boards.player |= win45;
     expect(board.checkWin(true)).toBeTruthy();
-    console.log(BitBoard.printBitBoard(board.boards.player, board.size));
+    
   });
 
   it('should get score', () => {
-    // console.log(board.updateScore());
-    console.log(BitBoard.printBitBoard(board.boards.player, board.size));
+    // 
+    
   });
 
 
@@ -92,12 +92,12 @@ describe('BitBoard', () => {
   it('should count lines', () => {
     board.player = "max";
     board.boards.enemy = BigInt("0b01110");
-    console.log(BitBoard.printBitBoard(board.boards.player, board.size));
+    
   });
 
   it('should set masks', () => {
-    console.log(board.combinations.forEach(value => value.masksP.forEach(value => console.log(BitBoard.printBitBoard(value, board.size)))));
-    // board.comboMasks.map(value => console.log(BitBoard.printBitBoard(value, board.size)));
+    
+    // board.comboMasks.map(value => 
   });
 
   it('should create empty board', () => {
@@ -131,7 +131,7 @@ describe('BitBoard', () => {
     const fails = score.map((v, i) => v === 0 ? i : null).filter(x => typeof x === "number");
     for (const fail of fails) {
       if (typeof fail === "number") {
-        console.log(BitBoard.printBitBoard(boards[fail], size));
+        
       }
     }
     score.find(((value, index) => value === 0));
@@ -148,7 +148,7 @@ describe('BitBoard', () => {
     board.boards.player = 527765581332480n;
     board.boards.enemy = 154742578697930304177307648n;
 
-    console.log(board.updateScore(false));
+    
   });
 
 });

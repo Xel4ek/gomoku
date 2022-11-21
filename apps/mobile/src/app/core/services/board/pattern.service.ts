@@ -239,14 +239,14 @@ export class PatternService {
     const patterns: Readonly<Pattern>[] = templates.map(t => new Pattern(t));
     return (board: BoardBits) => {
       const selected =  [];
-      // console.log((player | enemy).toString(2));
-      // console.log((player | enemy).toString(2));
+      // 
+      // 
       const brd = board.clone();
       while (brd[side]) {
         this.shift(brd);
         const pattern = this.searchPattern(patterns, brd);
         if (pattern) {
-          // console.log(pattern);
+          // 
           selected.push(pattern);
           brd.shiftAll(pattern.length);
         } else {

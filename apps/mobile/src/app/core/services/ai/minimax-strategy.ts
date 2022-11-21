@@ -85,7 +85,7 @@ export class MinimaxStrategy implements Strategy {
       );
       const redMoveMask =
         board.childBoards[board.selectedBoardIndex].red ^ board.red;
-      console.log(board);
+      
       this.logger.log('Total time getNextTurn: ' + (performance.now() - start));
       return this.boardService.getFieldIndex(board.border, redMoveMask);
     }
@@ -125,7 +125,7 @@ export class MinimaxStrategy implements Strategy {
     if (board.childBoards.length === 0) {
       // TODO: replace with board score
       const score = this.scoringService.getScore(board, 'red', 'red');
-      console.log('ALARM:' + score);
+      
       //TODO: Почему алгоритм считает небольшое количество очков по явно проигрышным ходам и не показывает напр. 99,1
       return score;
     }
@@ -208,7 +208,7 @@ export class MinimaxStrategy implements Strategy {
       if (maximizing)
         if (beta <= alpha) {
           // console.debug(`===${depth}: ${maximizing}, ${action.row} - ${action.col}, score: ${action.score}, alpha: ${alpha}, beta: ${beta}`);
-          console.log(maximizing + ' pruned! ' + beta + '<=' + alpha);
+          
           break;
         }
       if (maximizing) {
@@ -218,7 +218,7 @@ export class MinimaxStrategy implements Strategy {
       }
       // console.debug(`===${depth}: ${maximizing}, ${action.row} - ${action.col}, score: ${action.score}, alpha: ${alpha}, beta: ${beta}`);
     }
-    // console.log(`${depth}:`, board.possibleActions);
+    // 
     return bestScore;
   }
 }

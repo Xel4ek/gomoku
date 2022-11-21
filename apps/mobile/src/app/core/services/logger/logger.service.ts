@@ -11,7 +11,7 @@ export class LoggerService {
 
   log(message: any) {
     if (this.debug) {
-      console.log(message);
+      
     }
   }
 }

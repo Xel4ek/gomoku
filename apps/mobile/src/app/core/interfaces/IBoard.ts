@@ -10,4 +10,6 @@ export interface IBoard {
   generateBoards(dilation: number, side: Color): IBoard[];
   generateMoves(dilation: number, side: Color): Move[];
   moveList(config: { useRandomMoveOrder: boolean }): Move[];
+
+  checkMoves(): Boolean | boolean;
 }

@@ -1,5 +1,24 @@
 //TODO: caching not working fast enough
 
+import { TypedTree } from "./typed-tree";
+import { IBoard } from "../interfaces/IBoard";
+import { Move } from "../services/board/move";
+
+export function listMoves(node: TypedTree<IBoard>): Move[] {
+
+  const moves = [];
+
+  let tmpNode = node;
+
+  while (!isNaN(tmpNode.selectedChild)) {
+    moves.push(tmpNode.moves[tmpNode.selectedChild]);
+    tmpNode = tmpNode.children[tmpNode.selectedChild];
+  }
+
+  return moves;
+
+}
+
 function memoize() {
   const cache = new Map();
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor)  {
@@ -9,7 +28,7 @@ function memoize() {
       const key = args[0].toString();
       if (cache.has(key)) {
         result = cache.get(key);
-        // console.log("get from cache", key);
+        // 
       } else {
         result = originalMethod.apply(this, args);
         cache.set(key, result);

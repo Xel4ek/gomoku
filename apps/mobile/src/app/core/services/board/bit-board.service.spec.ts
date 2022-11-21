@@ -128,7 +128,7 @@ describe('BitBoardService', () => {
   it('should return kMask', () => {
     const size = 64n;
     for (let i = 0n; size >> i; i++) {
-      console.log(service.kMaskFiles(64n, i).toString(2));
+      
     }
   });
 
@@ -298,7 +298,7 @@ describe('BitBoardService', () => {
   });
 
   it('should return kMask 0', () => {
-    // console.log(BoardPrinterService.printBitBoard(service.kMaskRanks(9n, 0n), 9));
+    // 
   });
 
   it('should return kMaskRanks k=3 alternative ', function () {
@@ -330,12 +330,12 @@ describe('BitBoardService', () => {
       "0100000000000010" +
       "0000000000000001"
     );
-    console.log(BoardPrinterService.printBitBoard(board.red, 16));
-    console.log(BoardPrinterService.printBitBoard(service.flipDiagA1H8(board.red, 16n), 16));
+    
+    
   });
 
   it('should print pMask', function () {
-    console.log(BoardPrinterService.printBitBoard(service.pMask(1), 32));
+    
     expect(service.pMask(3)).toEqual(0n);
   });
 
@@ -372,9 +372,9 @@ describe('BitBoardService', () => {
   it('should return print all kMaskDiag', () => {
     for (const i in service.kMasksDiag) {
 
-      console.log(BoardPrinterService.printBitBoard(service.kMasksFiles[i], Number(service.size)));
-      // console.log(BoardPrinterService.printBitBoard(service.kMasksRanks[i], Number(service.size)));
-      console.log(BoardPrinterService.printBitBoard(service.kMasksDiag[i], Number(service.size)));
+      
+      // 
+      
     }
   });
 
@@ -455,17 +455,17 @@ describe('BitBoardService', () => {
       "0000000000000001"
     );
     size = 16;
-    // console.log(service.printBitBoard(BigInt.asUintN(size * size, -1n) / 17n, size));
+    // 
     const k1 = BigInt.asUintN(size * size, 0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAn);
     const k2 = BigInt.asUintN(size * size, 0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCn);
     const k4 = BigInt.asUintN(size * size, 0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0n);
     const k8 = BigInt.asUintN(size * size, 0xFF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00n);
-    console.log(BoardPrinterService.printBitBoard(k1, size));
-    console.log(BoardPrinterService.printBitBoard(k2, size));
-    console.log(BoardPrinterService.printBitBoard(k4, size));
-    console.log(BoardPrinterService.printBitBoard(k8, size));
-    // console.log(BoardPrinterService.printBitBoard(pseudoRotate45antiClockwise(board, size * size), size));
-    console.log(BoardPrinterService.printBitBoard(service.pseudoRotate45clockwise(board, size * size), size));
+    
+    
+    
+    
+    // 
+    
     expect(service).toBeTruthy();
   });
 

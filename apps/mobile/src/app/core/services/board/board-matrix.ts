@@ -19,14 +19,13 @@ export class BoardMatrix extends Board {
       gameBoard.enemy.map.forEach((v) =>
         this.move(this.col(v), this.row(v), EColor.RED)
       );
-      Object.assign(this.movesBlue, gameBoard.player.map);
-      Object.assign(this.movesRed, gameBoard.enemy.map);
+      this.movesBlue = [...gameBoard.player.map];
+      this.movesRed = [...gameBoard.enemy.map];
     }
     if (boardMatrix instanceof BoardMatrix) {
-      this.board = [];
-      boardMatrix.board.forEach((v) => this.board.push(Object.assign([], v)));
-      Object.assign(this.movesBlue, boardMatrix.movesBlue);
-      Object.assign(this.movesRed, boardMatrix.movesRed);
+      this.board = [...boardMatrix.board.map(row => [...row])];
+      this.movesBlue = [...boardMatrix.movesBlue];
+      this.movesRed = [...boardMatrix.movesRed];
     }
   }
 
@@ -209,6 +208,13 @@ export class BoardMatrix extends Board {
     if (useRandomMoveOrder) {
       moveList.sort(() => Math.random() - 0.5);
     }
-    return moveList.map((i) => new Move(i));
+    return moveList.map(v => new Move(v));
+    // this.moves = moveList.map((i) => new Move(i));
+    // return this.moves;
+  }
+
+  checkMoves() {
+    this.moveList({useRandomMoveOrder: true});
+    return this.moves.length > 0;
   }
 }

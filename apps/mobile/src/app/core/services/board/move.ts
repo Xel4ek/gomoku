@@ -9,7 +9,7 @@ class Point {
 }
 
 export class Move {
-  size = 19;
+  score: number = NaN;
   s = '';
   row: number = -1;
   col: number = -1;
@@ -17,10 +17,10 @@ export class Move {
   red: number = NaN;
   blue: number = NaN;
   i = -1;
-  score: number = NaN;
   ch: Move[] = [];
   prun: boolean = false;
   board?: IBoard;
+  size = 19;
 
   constructor(pointOrIndex: { row: number, col: number } | number) {
     if (pointOrIndex instanceof Point) {
