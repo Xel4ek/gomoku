@@ -19,7 +19,6 @@ import { SettingsModule } from './core/components/settings/settings.module';
 import { GameModule } from './core/components/game/game.module';
 import { AboutModule } from './core/components/about/about.module';
 import { ScoringService } from './core/services/ai/scoring.service';
-import { SimpleScoringService } from './core/services/simple-scoring/simple-scoring.service';
 
 @NgModule({
   declarations: [AppComponent],
@@ -43,10 +42,6 @@ import { SimpleScoringService } from './core/services/simple-scoring/simple-scor
     {
       provide: LocationStrategy,
       useClass: HashLocationStrategy,
-    },
-    {
-      provide: ScoringService,
-      useClass: SimpleScoringService,
     },
   ],
   bootstrap: [AppComponent],
