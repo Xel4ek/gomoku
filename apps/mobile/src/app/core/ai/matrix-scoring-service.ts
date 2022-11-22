@@ -1,4 +1,4 @@
-import { BoardMatrix } from '../services/board/board-matrix';
+import { BoardMatrix } from './board/board-matrix';
 import { EColor } from '../color';
 import { IBoard } from '../interfaces/IBoard';
 

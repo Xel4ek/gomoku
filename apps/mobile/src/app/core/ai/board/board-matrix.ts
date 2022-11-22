@@ -1,6 +1,6 @@
 import { Board } from './board';
 import { GameBoard } from '../../interfaces/gameBoard';
-import { Color, EColor } from '../../color';
+import { EColor } from '../../color';
 import { Move } from './move';
 import { IBoard } from '../../interfaces/IBoard';
 
@@ -23,7 +23,7 @@ export class BoardMatrix extends Board {
       this.movesRed = [...gameBoard.enemy.map];
     }
     if (boardMatrix instanceof BoardMatrix) {
-      this.board = [...boardMatrix.board.map(row => [...row])];
+      this.board = [...boardMatrix.board.map((row) => [...row])];
       this.movesBlue = [...boardMatrix.movesBlue];
       this.movesRed = [...boardMatrix.movesRed];
     }
@@ -73,67 +73,6 @@ export class BoardMatrix extends Board {
     return moves;
   }
 
-  generateMoves(dilation: number, color: Color): Move[] {
-    throw new Error('mark to remove');
-    const moveList: Move[] = [];
-    const moveIndexes: number[] = [];
-    const occupied = this.movesBlue.concat(this.movesRed);
-    occupied.map((value) => {
-      moveIndexes.push(...this.adjacentCells(value));
-    });
-
-    // this.olgGenerateMoves(moveList);
-    const unique = new Set(moveIndexes);
-    unique.forEach((v) => moveList.push(new Move(v)));
-    return moveList;
-  }
-
-  private olgGenerateMoves(moveList: Move[]) {
-    // Look for cells that has at least one stone in an adjacent cell.
-    for (let i = 0; i < this.size; i++) {
-      for (let j = 0; j < this.size; j++) {
-        //skip empty
-        if (this.board[i][j] > 0) continue;
-
-        if (i > 0) {
-          if (j > 0) {
-            if (this.board[i - 1][j - 1] > 0 || this.board[i][j - 1] > 0) {
-              moveList.push(new Move({row: i, col: j}));
-              continue;
-            }
-          }
-          if (j < this.size - 1) {
-            if (this.board[i - 1][j + 1] > 0 || this.board[i][j + 1] > 0) {
-              moveList.push(new Move({row: i, col: j}));
-              continue;
-            }
-          }
-          if (this.board[i - 1][j] > 0) {
-            moveList.push(new Move({row: i, col: j}));
-            continue;
-          }
-        }
-        if (i < this.size - 1) {
-          if (j > 0) {
-            if (this.board[i + 1][j - 1] > 0 || this.board[i][j - 1] > 0) {
-              moveList.push(new Move({row: i, col: j}));
-              continue;
-            }
-          }
-          if (j < this.size - 1) {
-            if (this.board[i + 1][j + 1] > 0 || this.board[i][j + 1] > 0) {
-              moveList.push(new Move({row: i, col: j}));
-              continue;
-            }
-          }
-          if (this.board[i + 1][j] > 0) {
-            moveList.push(new Move({row: i, col: j}));
-          }
-        }
-      }
-    }
-  }
-
   aiMove(posX: number, posY: number, color: EColor, findCaptures: boolean) {
     if (findCaptures) {
       this.capture(color);
@@ -156,7 +95,7 @@ export class BoardMatrix extends Board {
     }
   }
 
-  private findCaptures(side: EColor, delta: number = 3): number[] {
+  private findCaptures(side: EColor): number[] {
     const player: number[] = [];
     const enemy: number[] = [];
     this.board.map((x, xi) => {
@@ -187,13 +126,9 @@ export class BoardMatrix extends Board {
   }
 
   private createEmptyBoard() {
-    this.board = Array.from({ length: this.size }, (_) =>
-      Array.from({ length: this.size }, (_) => 0)
+    this.board = Array.from({ length: this.size }, () =>
+      Array.from({ length: this.size }, () => 0)
     );
-  }
-
-  generateBoards(dilation: number, side: Color): IBoard[] {
-    throw new Error('Not implemented');
   }
 
   moveList({ useRandomMoveOrder }: { useRandomMoveOrder: boolean }): Move[] {
@@ -208,13 +143,13 @@ export class BoardMatrix extends Board {
     if (useRandomMoveOrder) {
       moveList.sort(() => Math.random() - 0.5);
     }
-    return moveList.map(v => new Move(v));
+    return moveList.map((v) => new Move(v));
     // this.moves = moveList.map((i) => new Move(i));
     // return this.moves;
   }
 
   checkMoves() {
-    this.moveList({useRandomMoveOrder: true});
+    this.moveList({ useRandomMoveOrder: true });
     return this.moves.length > 0;
   }
 }

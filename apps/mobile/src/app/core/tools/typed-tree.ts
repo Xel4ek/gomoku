@@ -1,5 +1,5 @@
-import { Tree } from "ts-tree";
-import { Move } from "../services/board/move";
+import { Tree } from 'ts-tree';
+import { Move } from '../ai/board/move';
 
 export class TypedTree<T> extends Tree {
   selectedChild = NaN;
@@ -27,24 +27,23 @@ export class TypedTree<T> extends Tree {
 
   set moves(value: Move[]) {
     if (value.length === 0) {
-      console.error("empty")
+      console.error('empty');
     }
     this._moves = value;
   }
 
-  private _isTerminal: Boolean = true;
+  private _isTerminal = true;
 
-  get isTerminal(): Boolean {
-    this.value
+  get isTerminal(): boolean {
+    this.value;
     return this._isTerminal;
   }
 
-  set isTerminal(value: Boolean) {
+  set isTerminal(value: boolean) {
     this._isTerminal = value;
   }
 
   appendChild(newTree: this): this {
     return super.appendChild(newTree);
   }
-
 }

@@ -1,5 +1,4 @@
-import { Color } from '../color';
-import { Move } from '../services/board/move';
+import { Move } from '../ai/board/move';
 
 export interface IBoard {
   score: number;
@@ -7,9 +6,7 @@ export interface IBoard {
   scoreBlue: number;
   size: number;
 
-  generateBoards(dilation: number, side: Color): IBoard[];
-  generateMoves(dilation: number, side: Color): Move[];
   moveList(config: { useRandomMoveOrder: boolean }): Move[];
 
-  checkMoves(): Boolean | boolean;
+  checkMoves(): boolean;
 }

@@ -1,8 +1,8 @@
 import { IBoard } from '../interfaces/IBoard';
-import { Strategy } from '../services/ai/strategy';
+import { Strategy } from './strategy';
 import { TypedTree } from '../tools/typed-tree';
 import { EColor } from '../color';
-import { BoardMatrix } from '../services/board/board-matrix';
+import { BoardMatrix } from './board/board-matrix';
 import { GameBoard } from '../interfaces/gameBoard';
 import { MatrixScoring } from './matrix-scoring-service';
 
@@ -13,8 +13,8 @@ export interface WorkerReport {
   delta: number;
 }
 
-export class NegamaxGenericStrategy<T extends IBoard> implements Strategy {
-  private static instance: Record<number, NegamaxGenericStrategy<any>> = {};
+export class NegamaxGenericStrategy implements Strategy {
+  private static instance: Record<number, NegamaxGenericStrategy> = {};
   count = 0;
   treeCapacity = 0;
   depth: number;
@@ -28,14 +28,14 @@ export class NegamaxGenericStrategy<T extends IBoard> implements Strategy {
     this.depth = depth;
   }
 
-  static getStrategy<K extends IBoard>(depth: number) {
+  static getStrategy(depth: number) {
     if (!NegamaxGenericStrategy.instance[depth]) {
-      NegamaxGenericStrategy.instance[depth] = new NegamaxGenericStrategy<K>(
+      NegamaxGenericStrategy.instance[depth] = new NegamaxGenericStrategy(
         depth
       );
     }
 
-    return NegamaxGenericStrategy.instance[depth] as NegamaxGenericStrategy<K>;
+    return NegamaxGenericStrategy.instance[depth] as NegamaxGenericStrategy;
   }
 
   // negamaxShort(board: IBoard, depth: number, alpha: number, beta: number, color: number): IBoard {
@@ -63,7 +63,7 @@ export class NegamaxGenericStrategy<T extends IBoard> implements Strategy {
     beta: number,
     color: number
   ): void {
-    this.negamaxOld(node, depth,alpha, beta,color);
+    this.negamaxOld(node, depth, alpha, beta, color);
     // this.negamaxShort(node.value, depth, alpha, beta, color);
   }
 
@@ -106,12 +106,16 @@ export class NegamaxGenericStrategy<T extends IBoard> implements Strategy {
       tempBoard.lastMove = node.moves[i];
       const childNode = new TypedTree<IBoard>(tempBoard);
       node.appendChild(childNode);
-      if (this.scoringService.checkWin(childNode.value, color === 1 ? EColor.BLUE : EColor.RED)) {
+      if (
+        this.scoringService.checkWin(
+          childNode.value,
+          color === 1 ? EColor.BLUE : EColor.RED
+        )
+      ) {
         node.value.score = color * 10000000;
         node.selectedChild = Number(i);
         return node;
-      }
-      else {
+      } else {
         this.negamax(childNode, depth - 1, -beta, -alpha, -color);
       }
       if (-childNode.value.score > value) {
@@ -146,7 +150,7 @@ export class NegamaxGenericStrategy<T extends IBoard> implements Strategy {
     this.count = 0;
     this.treeCapacity = 0;
     if (!board.player.map.length && !board.enemy.map.length) {
-      return {turn: 180, count: this.count, capacity: this.treeCapacity};
+      return { turn: 180, count: this.count, capacity: this.treeCapacity };
     }
     const concreteBoard = this.createInstance(board, BoardMatrix);
     const node = new TypedTree(concreteBoard);
@@ -158,21 +162,11 @@ export class NegamaxGenericStrategy<T extends IBoard> implements Strategy {
       1
     );
     const selectedMove = node.children[node.selectedChild].value.lastMove;
-    // node.moves.sort((a: Move, b: Move) => (a.row < b.row ? -1 : 1));
-    const board1 = node.value;
-    
-    
+
     return {
       count: this.count,
       capacity: this.treeCapacity,
       turn: selectedMove ? selectedMove.index() : -1,
     };
   }
-
-  printMoves(level: number, node: TypedTree<IBoard>, color: EColor): number[][] {
-    const tempBoard = new BoardMatrix(undefined, node.value);
-    node.moves.map(m => tempBoard.board[m.row][m.col] = EColor.RED ? 3 : 8);
-    return tempBoard.board;
-  }
-
 }

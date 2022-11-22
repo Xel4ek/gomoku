@@ -9,7 +9,7 @@ import {
   TuiThemeNightModule,
 } from '@taiga-ui/core';
 import { NgModule } from '@angular/core';
-import { BrowserModule, HammerModule } from '@angular/platform-browser';
+import { BrowserModule } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
@@ -18,7 +18,6 @@ import { WelcomeModule } from './core/components/welcome/welcome.module';
 import { SettingsModule } from './core/components/settings/settings.module';
 import { GameModule } from './core/components/game/game.module';
 import { AboutModule } from './core/components/about/about.module';
-import { ScoringService } from './core/services/ai/scoring.service';
 
 @NgModule({
   declarations: [AppComponent],
