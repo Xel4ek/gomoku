@@ -106,6 +106,9 @@
             "passWithNoTests": true,
             "webWorkerTsConfig": "apps/mobile/tsconfig.worker.json"
           }
+        },
+        "deploy": {
+          "builder": "angular-cli-ghpages:deploy"
         }
       }
     },
