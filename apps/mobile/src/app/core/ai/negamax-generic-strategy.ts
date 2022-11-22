@@ -131,7 +131,7 @@ export class NegamaxGenericStrategy implements Strategy {
       node.moves[i].ch = node.children[node.selectedChild].moves;
       alpha = alpha >= value ? alpha : value;
       if (alpha >= beta) {
-        node.moves[node.selectedChild].prun = true;
+        node.moves[node.selectedChild].pruning = true;
         break;
       }
     }

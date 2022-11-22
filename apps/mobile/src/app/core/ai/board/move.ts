@@ -16,7 +16,7 @@ export class Move {
   blue = NaN;
   i = -1;
   ch: Move[] = [];
-  prun = false;
+  pruning = false;
   board?: IBoard;
   size = 19;
 
